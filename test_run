@@ -1,0 +1,174 @@
+#! /bin/bash
+
+dir="./bin"
+isPlot=0
+isFeh=0
+loop=1
+plot_width=800
+plot_height=800
+collision=1
+lattice_speed=1
+feh_speed=1
+D_max=0.5
+Ux_max=0.2
+Uy_max=0.2
+parallel_num=10
+skip_ts=100
+
+usage() {
+	echo "Usage: test_run [OPTION]"
+	echo -e "\nOption:"
+	echo -e "\t-i [ND_FILE], input ND file"
+	echo -e "\t-b [BC_FILE], input BC file"
+	echo -e "\t-o [DIR], output directory"
+	echo -e "\t-n #, loop number"
+	echo -e "\t-p #, plot png data"
+	echo -e "\t-v #, plot data to mp4 video"
+	echo -e "\t-t #, skip ts (default 100)"
+	echo -e "\t-c #, collision (default 1)"
+	echo -e "\t-l #, lattice speed (default 1)"
+	echo -e "\t-k #, pd file path"
+	echo -e "\t-h , Print this help page"
+}
+
+while getopts ":i:b:o:n:t:c:l:k:pvh" o;do
+	case $o in
+		i)
+			input=$OPTARG
+			;;
+		b)
+			bc="$OPTARG"
+			;;
+		o)
+			output=$OPTARG
+			;;
+		n)
+			loop=$OPTARG
+			;;
+		t)
+			skip_ts=$OPTARG
+			;;
+		k)
+			pd_file=$OPTARG
+			;;
+		p)
+			isPlot="1"
+			plotArg="-u"
+			;;
+		v)
+			isPlotMp4="-m"
+			;;
+		c)
+			collision=$OPTARG
+			;;
+		l)
+			lattice_speed=$OPTARG
+			;;
+		h)
+			usage
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+if [ -z "$input" ];then
+	echo "Missing ND file"
+	usage
+	exit
+fi
+if [ -z "$output" ];then
+	echo "Missing output directory"
+	usage
+	exit
+fi
+
+if [ -z "$pd_file" ];then
+	echo Missing PD file""
+	usage
+	exit
+fi
+
+mkdir $output 2> /dev/null
+rm -rf $output/* 2> /dev/null
+if [ "$isPlot" -eq 1 ];then
+	mkdir $output/plot
+	mkdir $output/plot/D
+	mkdir $output/plot/Ux
+	mkdir $output/plot/Uy
+	mkdir $output/plot/combine
+fi
+
+echo "Parameters:" > $output/log
+printf "\tBC input: " >> $output/log
+tail -n 1 $bc >> $output/log
+echo -e "\tCollision freq.: $collision" >> $output/log
+echo -e "\tLattice speed: $lattice_speed" >> $output/log
+echo -e "\tLoop: $loop" >> $output/log
+echo -e "\tSkip: $skip_ts" >> $output/log
+
+(time -p $dir/simulator -i $input -b $bc -c $collision -s $lattice_speed -f $skip_ts -o $output -n $loop -p $pd_file $isPlotMp4 $plotArg) |& tee -a $output/log
+if [ $? != 0 ];then
+	echo "Exit with error!!"
+	exit
+fi
+
+combine_ppm() {
+	x=`tail -n+2 $1 | head -n 1 | cut -d ' ' -f 1`
+	y=`tail -n+2 $1 | head -n 1 | cut -d ' ' -f 2`
+	echo P3
+	echo "$x $((y*3)) 255"
+	tail -n+3 $1
+	for ((j=0;j<$x;j++));do
+		echo "255 255 255"
+	done
+	tail -n+3 $2
+	for ((j=0;j<$x;j++));do
+		echo "255 255 255"
+	done
+	tail -n+3 $3
+}
+
+plot_ppm() {
+	width=`head -n 1 $output/$1 | cut -d ' ' -f 1`
+	height=`head -n 1 $output/$1 | cut -d ' ' -f 2`
+	if [ "$width" -lt "$plot_width" ];then
+		if [ "$width" -gt "$((height*3))" ];then
+			let zoom="$plot_width/$width"
+		else
+			let zoom="$plot_height/$((height*3))"
+		fi
+	else
+		zoom=1
+	fi
+	cat $output/$1 | $dir/nd2ppm  -m d -s $zoom -g $D_max > $output/plot/D/$1.ppm
+	cat $output/$1 | $dir/nd2ppm  -m x -s $zoom -g $Ux_max > $output/plot/Ux/$1.ppm
+	cat $output/$1 | $dir/nd2ppm  -m y -s $zoom -g $Uy_max > $output/plot/Uy/$1.ppm
+	combine_ppm $output/plot/D/$1.ppm $output/plot/Ux/$1.ppm $output/plot/Uy/$1.ppm > $output/plot/combine/$1.ppm
+}
+
+plot() {
+for (( i=$1; i < $loop; i=i+$2 ));do
+	name=`printf "%.4d" $i`
+	plot_ppm $name
+	printf "\rPlotting...$name"
+done
+}
+
+parallel_plot(){
+printf "Plotting..."
+for (( j=0; j < $parallel_num; j++ ));do
+	plot $j $parallel_num &
+	pid[$j]=$!
+done
+
+for (( j=0;j < $parallel_num; j++));do
+	wait ${pid[$j]};
+done
+
+printf "\rPlotting...completed!\n"
+}
+if [ "$isPlot" -eq "1" ];then
+	time parallel_plot
+fi

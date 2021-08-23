@@ -1,0 +1,85 @@
+#! /bin/bash
+
+dir="./bin"
+pd_dir="./pd_auto"
+collision=1
+lattice_speed=1
+skip_ts=200
+loop=1
+
+usage() {
+	echo "Usage: speed_test [OPTION]"
+	echo -e "\nOption:"
+	echo -e "\t-i [ND_FILE], input ND file"
+	echo -e "\t-b [BC_FILE], input BC file"
+	echo -e "\t-o [DIR], output directory"
+	echo -e "\t-n #, loop times (default 1)"
+	echo -e "\t-t #, skip ts (default 200)"
+	echo -e "\t-k #, pd file dir (default pd_auto)"
+	echo -e "\t-h , Print this help page"
+}
+
+while getopts ":i:b:o:n:t:k:h" o;do
+	case $o in
+		i)
+			input=$OPTARG
+			;;
+		b)
+			bc="$OPTARG"
+			;;
+		o)
+			output=$OPTARG
+			;;
+		n)
+			loop=$OPTARG
+			;;
+		t)
+			skip_ts=$OPTARG
+			;;
+		k)
+			pd_dir_read=$OPTARG
+			;;
+		h)
+			usage
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+if [ -z "$input" ] || [ -z "$output" ];then
+	usage
+	exit
+fi
+x=`head -n 1 $input | cut -d ' ' -f 1`
+y=`head -n 1 $input | cut -d ' ' -f 2`
+
+if [ -z "$pd_dir_read" ];then
+	mkdir -p $pd_dir 2> /dev/null
+	rm $pd_dir/* 2> /dev/null
+	./pd_gen_auto -x $x -y $y
+else
+	pd_dir=`echo $pd_dir_read`
+fi
+echo '#Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)'
+echo '#'
+printf "Working on..."
+printf '' > .speed_test_rst
+pdFileNum=`ls $pd_dir | wc -l`
+num=0
+ls $pd_dir | grep .pd | while read file;do
+	num=$((num+1))
+	printf "\rWorking on...($num/$pdFileNum)"
+	info=`cat $pd_dir/$file | sed 's/ /\//g'`
+	Time=`{ time -p $dir/simulator -i $input -b $bc -o $output -n $loop -f $skip_ts -p $pd_dir/$file; }  2>&1 > /dev/null`
+	if [ "$?" -eq "0" ];then
+		realTime=`echo $Time | cut -d ' ' -f 2`
+		printf "%-50s\t" "$file[$info]" >> .speed_test_rst
+		echo $realTime >> .speed_test_rst
+	fi
+done
+printf "\rWorking on...completed!\n"
+sort .speed_test_rst -nk 2,2
+rm .speed_test_rst
+

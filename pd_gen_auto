@@ -1,0 +1,51 @@
+#! /bin/bash
+
+dir="./bin"
+pd_dir="./pd_auto"
+usage() {
+	echo "Usage: pd_gen [OPTION]"
+	echo -e "\nOption:"
+	echo -e "\t-x #, Dimension 1 size"
+	echo -e "\t-y #, Dimension 2 size"
+	echo -e "\t-h , Print this help page"
+}
+
+while getopts ":x:y:m:h" o;do
+	case $o in
+		x)
+			x=$OPTARG
+			;;
+		y)
+			y="$OPTARG"
+			;;
+		h)
+			usage
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+if [ -z $x ] || [ -z $y ];then
+	usage
+	exit
+fi
+devCount=0
+platCount=0
+
+mkdir -p $pd_dir 2> /dev/null
+clinfo -l | grep Platform -n | while read -r name;do
+platLine=`echo $name | cut -d ':' -f 1`
+numDev=$((platLine-devCount))
+devCount=$((platLine+1))
+for((d=0;d<$numDev;d++));do
+for((i=1;i<=$y;i++));do
+	filename=`printf "p%dd%d_%d" $platCount $d  $i`
+	if [ $((x%i)) -eq 0 ] && [ $((y%i)) -eq 0 ];then
+		printf "%d %d %d %d\n" $platCount $d $((x/i)) $((y/i)) > $pd_dir/$filename.pd
+	fi
+done
+done
+let platCount=$((platCount+1))
+done
