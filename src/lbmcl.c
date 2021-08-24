@@ -30,7 +30,7 @@ double FC_MASS = 0.05;
 double FC_DT = 0.001;
 int FC_NQ = 2;
 char ND_FILE[80];
-char BC_FILE[80];
+char CY_FILE[80];
 char PD_FILE[80];
 char DIR_NAME[80];
 
@@ -71,8 +71,8 @@ void update_config(char* filename){
 				FC_NQ = atoi(val);
 			}else if(strcmp(par,"ND_FILE") == 0){
 				 memcpy(ND_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"BC_FILE") == 0){
-				 memcpy(BC_FILE,val,strlen(val)+1);
+			}else if(strcmp(par,"CY_FILE") == 0){
+				 memcpy(CY_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"PD_FILE") == 0){
 				 memcpy(PD_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"DIR_NAME") == 0){
@@ -85,7 +85,7 @@ void update_config(char* filename){
 	}
 }
 
-void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName) {
+void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* dirName) {
 
 	cl_device_id device;
 	cl_context context;
@@ -95,15 +95,15 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	cl_int err;
 	cl_mem nd_buffer, res_buffer, bc_buffer, bcv_buffer, force_buffer;
 
-	struct BC *bc = NULL;
+	struct CY *cy = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
 	FILE *input;
 	FILE *obj_file[OBJ_MAX];
 	char filename[80];
 	char obj_filename[OBJ_MAX][80];
-	if(input = fopen(bcFileName,"r")){
-		bc = BC_read(input);
+	if(input = fopen(cyFileName,"r")){
+		cy = CY_read(input);
 		fclose(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open bc file\n");
@@ -118,16 +118,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 
 	struct ND *res = ND_malloc();
-	struct FC *fc = FC_malloc();
-	FC_def(fc, OBJ_MAX, FC_NQ, FC_OFS,FC_RIST,FC_DAMP,FC_MASS,(double)FC_DT*SKP);
-	FC_init(fc);
 	ND_def_ND(res, nd);
-
-	for(int i=0;i<OBJ_MAX;i++){
-		sprintf(obj_filename[i],"%s/obj_%d",dirName,i);
-		obj_file[i] = fopen(obj_filename[i],"w");
-		fprintf(obj_file[i],"#[force] [acc] [vel] [dsp] [dspo]\n");
-	}
 
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
@@ -157,8 +148,6 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
-	bc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->nx * bc->ny*sizeof(char), &bc->m[0], &err);
-	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, nd->nq * sizeof(double), &bc->s[0], &err);
 	force_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, fc->no*fc->nq*sizeof(int32_t), &fc->force[0], &err);
 	check_err(err, "Couldn't create a buffer");
 

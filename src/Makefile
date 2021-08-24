@@ -60,7 +60,7 @@ endif
 
 
 TAR_TOOLS:=nd_gen
-TAR_OCL:=simulator launcher
+TAR_OCL:=launcher
 
 TARGETS=$(TAR_TOOLS) $(TAR_OCL)
 

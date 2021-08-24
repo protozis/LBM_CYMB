@@ -26,12 +26,12 @@ extern double FC_MASS;
 extern double FC_DT;
 extern int FC_NQ;
 extern char ND_FILE[80];
-extern char BC_FILE[80];
+extern char CY_FILE[80];
 extern char PD_FILE[80];
 extern char DIR_NAME[80];
 
 void update_config(char* filename);
-void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName);
+void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* dirName);
 void list_devices();
 void print_device_name(cl_device_id device);
 void print_kernel_info(cl_kernel kernel, cl_device_id device);

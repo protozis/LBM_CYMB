@@ -10,11 +10,7 @@ loop=1
 usage() {
 	echo "Usage: speed_test [OPTION]"
 	echo -e "\nOption:"
-	echo -e "\t-i [ND_FILE], input ND file"
-	echo -e "\t-b [BC_FILE], input BC file"
-	echo -e "\t-o [DIR], output directory"
-	echo -e "\t-n #, loop times (default 1)"
-	echo -e "\t-t #, skip ts (default 200)"
+	echo -e "\t-c [CONFIG_FILE], configuration file"
 	echo -e "\t-k #, pd file dir (default pd_auto)"
 	echo -e "\t-h , Print this help page"
 }
@@ -72,7 +68,7 @@ ls $pd_dir | grep .pd | while read file;do
 	num=$((num+1))
 	printf "\rWorking on...($num/$pdFileNum)"
 	info=`cat $pd_dir/$file | sed 's/ /\//g'`
-	Time=`{ time -p $dir/simulator -i $input -b $bc -o $output -n $loop -f $skip_ts -p $pd_dir/$file; }  2>&1 > /dev/null`
+	Time=`{ time -p $dir/launcher ; }  2>&1 > /dev/null`
 	if [ "$?" -eq "0" ];then
 		realTime=`echo $Time | cut -d ' ' -f 2`
 		printf "%-50s\t" "$file[$info]" >> .speed_test_rst
