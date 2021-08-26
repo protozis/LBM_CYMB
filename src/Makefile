@@ -60,7 +60,7 @@ endif
 
 
 TAR_TOOLS:=nd_gen
-TAR_OCL:=launcher
+TAR_OCL:=launcher test
 
 TARGETS=$(TAR_TOOLS) $(TAR_OCL)
 
