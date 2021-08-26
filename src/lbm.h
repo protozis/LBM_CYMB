@@ -17,7 +17,7 @@ struct ND {
 struct GP {
 	int no;
 	void **obj;
-}
+};
 struct CY {
 	int nq;
 	double rist;
@@ -29,11 +29,15 @@ struct CY {
 	double *dsp;
 	double *pos;
 };
+struct GP *GP_read(FILE *f);
 struct GP *GP_malloc();
+void GP_def(struct GP *gp,int no);
+void GP_free(struct GP *gp);
 
-void CY_def(struct CY *cy,int no,int nq):
+void CY_def(struct CY *cy,int nq);
 void CY_free(struct CY *cy);
 void CY_init(struct CY *cy, double force, double acc, double vel, double dsp);
+struct CY *CY_read(FILE *f);
 struct CY *CY_malloc();
 
 void ND_free(struct ND *nd);

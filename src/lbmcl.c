@@ -21,14 +21,6 @@ double SL = 1;
 int IS_MP4 = 0;
 int IS_SAVE_DATA = 0;
 int IS_FILE_OUTPUT = 0;
-int OBJ_MAX = 10;
-double PLOT_MAX = 0.5;
-double FC_OFS = 1000000;
-double FC_RIST = 0;
-double FC_DAMP = 0;
-double FC_MASS = 0.05;
-double FC_DT = 0.001;
-int FC_NQ = 2;
 char ND_FILE[80];
 char CY_FILE[80];
 char PD_FILE[80];
@@ -55,20 +47,6 @@ void update_config(char* filename){
 				IS_SAVE_DATA = atoi(val);
 			}else if(strcmp(par,"IS_FILE_OUTPUT") == 0){
 				IS_FILE_OUTPUT = atoi(val);
-			}else if(strcmp(par,"PLOT_MAX") == 0){
-				PLOT_MAX = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_OFS") == 0){
-				FC_OFS = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_RIST") == 0){
-				FC_RIST = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_DAMP") == 0){
-				FC_DAMP = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_MASS") == 0){
-				FC_MASS = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_DT") == 0){
-				FC_DT = strtod(val,&ptr);
-			}else if(strcmp(par,"FC_NQ") == 0){
-				FC_NQ = atoi(val);
 			}else if(strcmp(par,"ND_FILE") == 0){
 				 memcpy(ND_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"CY_FILE") == 0){
@@ -93,15 +71,13 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 	cl_kernel kernel;
 	cl_command_queue queue;
 	cl_int err;
-	cl_mem nd_buffer, res_buffer, bc_buffer, bcv_buffer, force_buffer;
+	cl_mem nd_buffer, res_buffer;
 
 	struct CY *cy = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
 	FILE *input;
-	FILE *obj_file[OBJ_MAX];
 	char filename[80];
-	char obj_filename[OBJ_MAX][80];
 	if(input = fopen(cyFileName,"r")){
 		cy = CY_read(input);
 		fclose(input);
@@ -148,7 +124,6 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
-	force_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, fc->no*fc->nq*sizeof(int32_t), &fc->force[0], &err);
 	check_err(err, "Couldn't create a buffer");
 
 	err = clSetKernelArg(kernel, 0, sizeof(cl_uint), &nd->nq);
@@ -156,38 +131,17 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_double), &CF);
 	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &nd_buffer);
 	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &res_buffer);
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &bc_buffer);
-	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bcv_buffer);
-	err |= clSetKernelArg(kernel, 7, sizeof(cl_uint), &fc->no);
-	err |= clSetKernelArg(kernel, 8, sizeof(cl_uint), &fc->nq);
-	err |= clSetKernelArg(kernel, 9, sizeof(cl_uint), &fc->ofs);
-	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &force_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
-
-
-	FILE *fp[FC_NQ];
-	double *out_m;
 	char mp4cmd[80];
 	if(IS_MP4){
-		for(int i=0;i<FC_NQ;i++){
-			sprintf(mp4cmd,"ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p %s/%d.mp4 2> /dev/null",dirName,i);
-			fp[i] = popen(mp4cmd,"w");
-		}
-		out_m = (double *)malloc(nd->size*sizeof(double));	
 	}
 
 	printf("[Parameters]:\n");
-	printf("\tResistor: %f\n",FC_RIST);
-	printf("\tDamper: %f\n",FC_DAMP);
-	printf("\tMass: %f\n",FC_MASS);
-	printf("\tDiscrete time: %f\n",FC_DT);
 
 	printf("Simulate......");
 	fflush(stdout);
 	for(int l=0;l<LOOP;l++){
-		force_init(fc);
-		err |= clEnqueueWriteBuffer(queue, force_buffer, CL_TRUE, 0, fc->no*fc->nq*sizeof(int32_t), &fc->force[0], 0, NULL, NULL);
 		check_err(err, "Couldn't write the buffer");
 
 		printf("\rSimulate......%d/%d",l+1,LOOP);
@@ -203,25 +157,11 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 
 		}
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
-		err |= clEnqueueReadBuffer(queue, force_buffer, CL_TRUE, 0, fc->no*fc->nq*sizeof(int32_t), &fc->force[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
-
-		FC_update(fc,SKP);
-		if(fc->ismove){
-			obj_move(nd,bc,fc);
-			fc->ismove = 0;
-			err = clEnqueueWriteBuffer(queue, nd_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
-			err |= clEnqueueWriteBuffer(queue, bc_buffer, CL_TRUE, 0, bc->nx*bc->ny*sizeof(char), &bc->m[0], 0, NULL, NULL);
-			check_err(err, "Couldn't write the buffer after obj_move");
-		}
 		if(IS_MP4){
-			get_ux(out_m,nd);
-			nd_ppm_write(out_m,nd->nx,nd->ny,PLOT_MAX,1,fp[0]);
-			get_uy(out_m,nd);
-			nd_ppm_write(out_m,nd->nx,nd->ny,PLOT_MAX,1,fp[1]);
 		}
 		if(IS_FILE_OUTPUT)
 		{
@@ -231,44 +171,24 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 			fclose(output);
 		}
 
-		for(int i=0;i<fc->no;i++){
-			fprintf(obj_file[i],"%d\t",l);
-			FC_write(fc,i,SKP,obj_file[i]);
-			fflush(obj_file[i]);
-		}
-
 	}
 	printf("\rSimulate......completed!! (x%d)\n",LOOP);
-	for(int i=0;i<OBJ_MAX;i++){
-		fclose(obj_file[i]);
-	}
 
 	if(IS_MP4){
-		for(int i=0;i<FC_NQ;i++){
-			pclose(fp[i]);
-		}
 	}
 	if(IS_SAVE_DATA){
 		sprintf(filename,"%s/fin.nd",dirName);
 		output = fopen(filename,"w");
 		ND_write(nd,output);
 		fclose(output);
-		sprintf(filename,"%s/fin.bc",dirName);
-		output = fopen(filename,"w");
-		BC_write(bc,output);
-		fclose(output);
 	}	
 
 	/* Deallocate resources */
 	if(IS_MP4){
-		free(out_m);
 	}
 
 	clReleaseMemObject(nd_buffer);
 	clReleaseMemObject(res_buffer);
-	clReleaseMemObject(bc_buffer);
-	clReleaseMemObject(bcv_buffer);
-	clReleaseMemObject(force_buffer);
 
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
@@ -277,8 +197,6 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 
 	ND_free(nd);
 	ND_free(res);
-	BC_free(bc);
-	FC_free(fc);
 }
 
 
@@ -476,9 +394,7 @@ cl_program build_program(cl_context ctx, cl_device_id dev, const char* filename)
 	if(err < 0) {
 
 		/* Find size of log and print to std output */
-		clGetProgramBuildInfo(program, dev, CL_PROGRAM_BUILD_LOG, 
-void bc_ppm_write(char *m, int nx, int ny, int scale, FILE *f);
-				0, NULL, &log_size);
+		clGetProgramBuildInfo(program, dev, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
 		program_log = (char*) malloc(log_size + 1);
 		program_log[log_size] = '\0';
 		clGetProgramBuildInfo(program, dev, CL_PROGRAM_BUILD_LOG, 

@@ -26,16 +26,23 @@ const double W[9] ={
 	0.111111,
 	0.027777
 };
-struct *GP_read(FILE *f){
+struct GP *GP_read(FILE *f){
 	struct GP *gp = GP_malloc();
 	fscanf(f,"no",&gp->no);
-	GP_def(gp->no);
+	GP_def(gp,gp->no);
+	for(int i=0;i<gp->no;i++){
+		gp->obj[i] = CY_read(f);
+	}
 }
 struct GP *GP_malloc(){
 	return (struct GP *)malloc(sizeof(struct GP));
 }
-void GP_def(int no){
-	GP->obj = (void **)malloc(no*sizeof(void *));
+void GP_def(struct GP *gp,int no){
+	gp->obj = (void **)malloc(no*sizeof(void *));
+}
+void GP_free(struct GP *gp){
+	free(gp->obj);
+	free(gp);
 }
 struct CY *CY_read(FILE *f){
 	struct CY *cy = CY_malloc();
@@ -50,11 +57,11 @@ struct CY *CY_read(FILE *f){
 	return cy;
 }
 void CY_init(struct CY *cy, double force, double acc, double vel, double dsp){
-	for(int i=0;i<no*nq;i++){
-		force[i] = force;
-		acc[i] = acc;
-		vel[i] = vel;
-		dsp[i] = dsp;
+	for(int i=0;i<cy->nq;i++){
+		cy->force[i] = force;
+		cy->acc[i] = acc;
+		cy->vel[i] = vel;
+		cy->dsp[i] = dsp;
 	}
 }
 void CY_def(struct CY *cy,int nq){
@@ -69,11 +76,11 @@ void CY_free(struct CY *cy){
 	free(cy->force);
 	free(cy->acc);
 	free(cy->vel);
-	free(cy->dep);
+	free(cy->dsp);
 	free(cy);
 }
 struct CY *CY_malloc(){
-	return (struct CY *)malloc(sizeof(struct Cy));
+	return (struct CY *)malloc(sizeof(struct CY));
 }
 
 void get_density(double *tmp, struct ND * nd){

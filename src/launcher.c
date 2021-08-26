@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 	sscanf(argv[1],"%s",confFileName);
 
 	update_config(confFileName);
-	simulate_ocl(ND_FILE,BC_FILE,PD_FILE,DIR_NAME);
+	simulate_ocl(ND_FILE,CY_FILE,PD_FILE,DIR_NAME);
 
 	return 0;
 }
