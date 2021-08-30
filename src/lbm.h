@@ -14,12 +14,11 @@ struct ND {
 	int size;
 	double *m;
 };
-struct GP {
+struct OBJ {
 	int no;
-	void **obj;
+	void **m;
 };
 struct CY {
-	int nq;
 	double rist;
 	double damp;
 	double mass;
@@ -29,12 +28,12 @@ struct CY {
 	double *dsp;
 	double *pos;
 };
-struct GP *GP_read(FILE *f);
-struct GP *GP_malloc();
-void GP_def(struct GP *gp,int no);
-void GP_free(struct GP *gp);
+struct OBJ *OBJ_read(FILE *f);
+struct OBJ *OBJ_malloc();
+void OBJ_def(struct OBJ *obj,int no);
+void OBJ_free(struct OBJ *obj);
 
-void CY_def(struct CY *cy,int nq);
+void CY_def(struct CY *cy);
 void CY_free(struct CY *cy);
 void CY_init(struct CY *cy, double force, double acc, double vel, double dsp);
 struct CY *CY_read(FILE *f);

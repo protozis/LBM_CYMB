@@ -26,28 +26,28 @@ const double W[9] ={
 	0.111111,
 	0.027777
 };
-struct GP *GP_read(FILE *f){
-	struct GP *gp = GP_malloc();
-	fscanf(f,"no",&gp->no);
-	GP_def(gp,gp->no);
-	for(int i=0;i<gp->no;i++){
-		gp->obj[i] = CY_read(f);
+struct OBJ *OBJ_read(FILE *f){
+	struct OBJ *obj = OBJ_malloc();
+	fscanf(f,"no",&obj->no);
+	OBJ_def(obj,obj->no);
+	for(int i=0;i<obj->no;i++){
+		obj->m[i] = CY_read(f);
 	}
+	return obj;
 }
-struct GP *GP_malloc(){
-	return (struct GP *)malloc(sizeof(struct GP));
+struct OBJ *OBJ_malloc(){
+	return (struct OBJ *)malloc(sizeof(struct OBJ));
 }
-void GP_def(struct GP *gp,int no){
-	gp->obj = (void **)malloc(no*sizeof(void *));
+void OBJ_def(struct OBJ *obj,int no){
+	obj->m = (void **)malloc(no*sizeof(void *));
 }
-void GP_free(struct GP *gp){
-	free(gp->obj);
-	free(gp);
+void OBJ_free(struct OBJ *obj){
+	free(obj->m);
+	free(obj);
 }
 struct CY *CY_read(FILE *f){
 	struct CY *cy = CY_malloc();
-	fscanf(f,"%d",&cy->nq);
-	CY_def(cy,cy->nq);
+	CY_def(cy);
 	fscanf(f,"%lf %lf %lf\n",&cy->rist,&cy->damp,&cy->mass);
 	fscanf(f,"%lf %lf\n",&cy->force[0],&cy->force[1]);
 	fscanf(f,"%lf %lf\n",&cy->acc[0],&cy->acc[1]);
@@ -57,19 +57,19 @@ struct CY *CY_read(FILE *f){
 	return cy;
 }
 void CY_init(struct CY *cy, double force, double acc, double vel, double dsp){
-	for(int i=0;i<cy->nq;i++){
+	for(int i=0;i<2;i++){
 		cy->force[i] = force;
 		cy->acc[i] = acc;
 		cy->vel[i] = vel;
 		cy->dsp[i] = dsp;
 	}
 }
-void CY_def(struct CY *cy,int nq){
-	cy->force = (int32_t *)malloc(nq*sizeof(int32_t));
-	cy->acc = (double *)malloc(nq*sizeof(double));
-	cy->vel = (double *)malloc(nq*sizeof(double));
-	cy->dsp = (double *)malloc(nq*sizeof(double));
-	cy->pos = (double *)malloc(nq*sizeof(double));
+void CY_def(struct CY *cy){
+	cy->force = (int32_t *)malloc(2*sizeof(int32_t));
+	cy->acc = (double *)malloc(2*sizeof(double));
+	cy->vel = (double *)malloc(2*sizeof(double));
+	cy->dsp = (double *)malloc(2*sizeof(double));
+	cy->pos = (double *)malloc(2*sizeof(double));
 }
 void CY_free(struct CY *cy){
 	free(cy->pos);

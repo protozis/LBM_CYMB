@@ -22,7 +22,7 @@ int IS_MP4 = 0;
 int IS_SAVE_DATA = 0;
 int IS_FILE_OUTPUT = 0;
 char ND_FILE[80];
-char CY_FILE[80];
+char OBJ_FILE[80];
 char PD_FILE[80];
 char DIR_NAME[80];
 
@@ -49,8 +49,8 @@ void update_config(char* filename){
 				IS_FILE_OUTPUT = atoi(val);
 			}else if(strcmp(par,"ND_FILE") == 0){
 				 memcpy(ND_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"CY_FILE") == 0){
-				 memcpy(CY_FILE,val,strlen(val)+1);
+			}else if(strcmp(par,"OBJ_FILE") == 0){
+				 memcpy(OBJ_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"PD_FILE") == 0){
 				 memcpy(PD_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"DIR_NAME") == 0){
@@ -63,7 +63,7 @@ void update_config(char* filename){
 	}
 }
 
-void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* dirName) {
+void simulate_ocl(char* ndFileName, char* objFileName, char* pdFileName, char* dirName) {
 
 	cl_device_id device;
 	cl_context context;
@@ -73,13 +73,13 @@ void simulate_ocl(char* ndFileName, char* cyFileName, char* pdFileName, char* di
 	cl_int err;
 	cl_mem nd_buffer, res_buffer;
 
-	struct CY *cy = NULL;
+	struct OBJ *obj = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
 	FILE *input;
 	char filename[80];
-	if(input = fopen(cyFileName,"r")){
-		cy = CY_read(input);
+	if(input = fopen(objFileName,"r")){
+		obj = OBJ_read(input);
 		fclose(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open bc file\n");

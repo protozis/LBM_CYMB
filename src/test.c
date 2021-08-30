@@ -20,7 +20,21 @@ int main(int argc, char *argv[]) {
 
 	update_config(confFileName);
 	printf("testing\n");
-	printf("ND_FILE: %s\n",ND_FILE);
+	printf("open file %s\n",OBJ_FILE);
+	FILE *f;
+	struct CY *cy = NULL;
+	struct OBJ *obj = OBJ_malloc();
+	int tmp;
+	if(f = fopen(OBJ_FILE,"r")){
+		fscanf(f,"%d\n",&tmp);
+		OBJ_def(obj,tmp);
+		cy = CY_read(f);
+		fclose(f);
+
+		printf("%lf\n",cy->pos[0]);
+	}else{
+		printf("can't open file\n");
+	}
 
 	return 0;
 }
