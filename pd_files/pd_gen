@@ -1,0 +1,52 @@
+#! /bin/bash
+
+dir="./bin"
+plat=0
+dev=0
+usage() {
+	echo "Usage: pd_gen [OPTION]"
+	echo -e "\nOption:"
+	echo -e "\t-x #, Dimension 1 size"
+	echo -e "\t-y #, Dimension 2 size"
+	echo -e "\t-p #, Platform number (default: 0)"
+	echo -e "\t-d #, Device number (default: 1)"
+	echo -e "\t-n [Name], Name pattern"
+	echo -e "\t-m #, Max devision"
+	echo -e "\t-h , Print this help page"
+}
+
+while getopts ":x:y:p:d:n:m:h" o;do
+	case $o in
+		x)
+			x=$OPTARG
+			;;
+		y)
+			y="$OPTARG"
+			;;
+		p)
+			plat=$OPTARG
+			;;
+		d)
+			dev=$OPTARG
+			;;
+		n)
+			name=$OPTARG
+			;;
+		m)
+			max=$OPTARG
+			;;
+		h)
+			usage
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
+for ((i=1;i<=$max;i++));do
+	filename=`printf "%s_%d" $name $i`
+	if [ $((x%i)) -eq 0 ] && [ $((y%i)) -eq 0 ];then
+		printf "%d %d %d %d\n" $plat $dev $((x/i)) $((y/i)) > $filename.pd
+	fi
+done
