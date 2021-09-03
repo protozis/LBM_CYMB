@@ -22,16 +22,12 @@ int main(int argc, char *argv[]) {
 	printf("testing\n");
 	printf("open file %s\n",OBJ_FILE);
 	FILE *f;
-	struct CY *cy = NULL;
-	struct OBJ *obj = OBJ_malloc();
-	int tmp;
+	struct OBJ *obj = NULL;
+	struct CY *tmp = NULL;
 	if(f = fopen(OBJ_FILE,"r")){
-		fscanf(f,"%d\n",&tmp);
-		OBJ_def(obj,tmp);
-		cy = CY_read(f);
+		obj = OBJ_read(f);
 		fclose(f);
-
-		printf("%lf\n",cy->pos[0]);
+		printf("%lf\n",obj->m[0]->rist);
 	}else{
 		printf("can't open file\n");
 	}

@@ -16,7 +16,7 @@ struct ND {
 };
 struct OBJ {
 	int no;
-	void **m;
+	struct CY **m;
 };
 struct CY {
 	double rist;

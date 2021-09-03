@@ -28,10 +28,12 @@ const double W[9] ={
 };
 struct OBJ *OBJ_read(FILE *f){
 	struct OBJ *obj = OBJ_malloc();
+	struct CY *cy;
 	fscanf(f,"no",&obj->no);
 	OBJ_def(obj,obj->no);
 	for(int i=0;i<obj->no;i++){
-		obj->m[i] = CY_read(f);
+		cy = CY_read(f);
+		obj->m = cy;
 	}
 	return obj;
 }
@@ -39,7 +41,7 @@ struct OBJ *OBJ_malloc(){
 	return (struct OBJ *)malloc(sizeof(struct OBJ));
 }
 void OBJ_def(struct OBJ *obj,int no){
-	obj->m = (void **)malloc(no*sizeof(void *));
+	obj->m = (struct CY **)malloc(no*sizeof(struct CY *));
 }
 void OBJ_free(struct OBJ *obj){
 	free(obj->m);
