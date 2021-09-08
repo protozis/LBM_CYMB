@@ -18,12 +18,12 @@ extern int IS_MP4;
 extern int IS_SAVE_DATA;
 extern int IS_FILE_OUTPUT;
 extern char ND_FILE[80];
-extern char OBJ_FILE[80];
+extern char BC_FILE[80];
 extern char PD_FILE[80];
 extern char DIR_NAME[80];
 
 void update_config(char* filename);
-void simulate_ocl(char* ndFileName, char* objFileName, char* pdFileName, char* dirName);
+void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName);
 void list_devices();
 void print_device_name(cl_device_id device);
 void print_kernel_info(cl_kernel kernel, cl_device_id device);

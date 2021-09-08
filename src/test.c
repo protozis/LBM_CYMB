@@ -20,14 +20,13 @@ int main(int argc, char *argv[]) {
 
 	update_config(confFileName);
 	printf("testing\n");
-	printf("open file %s\n",OBJ_FILE);
+	printf("open file %s\n",BC_FILE);
 	FILE *f;
-	struct OBJ *obj = NULL;
-	struct CY *tmp = NULL;
-	if(f = fopen(OBJ_FILE,"r")){
-		obj = OBJ_read(f);
+	struct BC *bc = NULL;
+	if(f = fopen(BC_FILE,"r")){
+		bc = BC_read(f);
+		printf("%lf %lf\n",((struct CY *)bc->m[0])->pos[0],((struct CY *)bc->m[0])->pos[1]);
 		fclose(f);
-		printf("%lf\n",obj->m[0]->rist);
 	}else{
 		printf("can't open file\n");
 	}

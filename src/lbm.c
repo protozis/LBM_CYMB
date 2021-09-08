@@ -1,5 +1,6 @@
 #include<stdlib.h>
 #include<stdint.h>
+#include<string.h>
 #include<regex.h>
 #include "lbm.h"
 
@@ -26,36 +27,44 @@ const double W[9] ={
 	0.111111,
 	0.027777
 };
-struct OBJ *OBJ_read(FILE *f){
-	struct OBJ *obj = OBJ_malloc();
+struct BC *BC_read(FILE *f){
+	struct BC *bc = BC_malloc();
 	struct CY *cy;
-	fscanf(f,"no",&obj->no);
-	OBJ_def(obj,obj->no);
-	for(int i=0;i<obj->no;i++){
-		cy = CY_read(f);
-		obj->m = cy;
+	char flag[80];
+	fscanf(f,"bc_num %d",&bc->no);
+	BC_def(bc,bc->no);
+	for(int i=0;i<bc->no;i++){
+		fscanf(f,"%s {\n",flag);
+		if(strcmp(flag,"CY") == 0){
+			cy = CY_read(f);
+			bc->m[i] = cy;
+		}
+		fscanf(f,"}\n");
 	}
-	return obj;
+	return bc;
 }
-struct OBJ *OBJ_malloc(){
-	return (struct OBJ *)malloc(sizeof(struct OBJ));
+struct BC *BC_malloc(){
+	return (struct BC *)malloc(sizeof(struct BC));
 }
-void OBJ_def(struct OBJ *obj,int no){
-	obj->m = (struct CY **)malloc(no*sizeof(struct CY *));
+void BC_def(struct BC *bc,int no){
+	bc->m = (void **)malloc(no*sizeof(void *));
 }
-void OBJ_free(struct OBJ *obj){
-	free(obj->m);
-	free(obj);
+void BC_free(struct BC *bc){
+	free(bc->m);
+	free(bc);
 }
 struct CY *CY_read(FILE *f){
 	struct CY *cy = CY_malloc();
 	CY_def(cy);
-	fscanf(f,"%lf %lf %lf\n",&cy->rist,&cy->damp,&cy->mass);
-	fscanf(f,"%lf %lf\n",&cy->force[0],&cy->force[1]);
-	fscanf(f,"%lf %lf\n",&cy->acc[0],&cy->acc[1]);
-	fscanf(f,"%lf %lf\n",&cy->vel[0],&cy->vel[1]);
-	fscanf(f,"%lf %lf\n",&cy->dsp[0],&cy->dsp[1]);
-	fscanf(f,"%lf %lf\n",&cy->pos[0],&cy->pos[1]);
+	fscanf(f,"rist %lf\n",&cy->rist);
+	fscanf(f,"damp %lf\n",&cy->damp);
+	fscanf(f,"mass %lf\n",&cy->mass);
+	fscanf(f,"rad %lf\n",&cy->rad);
+	fscanf(f,"force %lf %lf\n",&cy->force[0],&cy->force[1]);
+	fscanf(f,"acc %lf %lf\n",&cy->acc[0],&cy->acc[1]);
+	fscanf(f,"vel %lf %lf\n",&cy->vel[0],&cy->vel[1]);
+	fscanf(f,"dsp %lf %lf\n",&cy->dsp[0],&cy->dsp[1]);
+	fscanf(f,"pos %lf %lf\n",&cy->pos[0],&cy->pos[1]);
 	return cy;
 }
 void CY_init(struct CY *cy, double force, double acc, double vel, double dsp){
@@ -67,7 +76,7 @@ void CY_init(struct CY *cy, double force, double acc, double vel, double dsp){
 	}
 }
 void CY_def(struct CY *cy){
-	cy->force = (int32_t *)malloc(2*sizeof(int32_t));
+	cy->force = (double *)malloc(2*sizeof(double));
 	cy->acc = (double *)malloc(2*sizeof(double));
 	cy->vel = (double *)malloc(2*sizeof(double));
 	cy->dsp = (double *)malloc(2*sizeof(double));

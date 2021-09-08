@@ -14,24 +14,25 @@ struct ND {
 	int size;
 	double *m;
 };
-struct OBJ {
+struct BC {
 	int no;
-	struct CY **m;
+	void **m;
 };
 struct CY {
 	double rist;
 	double damp;
 	double mass;
-	int32_t *force;
+	double rad;
+	double *force;
 	double *acc;
 	double *vel;
 	double *dsp;
 	double *pos;
 };
-struct OBJ *OBJ_read(FILE *f);
-struct OBJ *OBJ_malloc();
-void OBJ_def(struct OBJ *obj,int no);
-void OBJ_free(struct OBJ *obj);
+struct BC *BC_read(FILE *f);
+struct BC *BC_malloc();
+void BC_def(struct BC *bc,int no);
+void BC_free(struct BC *bc);
 
 void CY_def(struct CY *cy);
 void CY_free(struct CY *cy);
