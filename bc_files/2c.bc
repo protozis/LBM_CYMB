@@ -1,0 +1,12 @@
+bc_num 1
+CY {
+	rist 0
+	damp 0
+	mass 0
+	rad 10
+	force 0 0
+	acc 0 0
+	vel 0 0
+	dsp 0 0
+	pos 512 256
+}
