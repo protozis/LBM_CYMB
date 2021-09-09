@@ -24,6 +24,10 @@ extern char DIR_NAME[80];
 
 void update_config(char* filename);
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName);
+double *BCK_malloc(struct BC *bc);
+double *BCP_malloc(struct BC *bc);
+void BCKP_def(struct BC *bc, double *bcp, double *bck);
+void BCKP_update(struct BC *bc, double *bcp, double *bck);
 void list_devices();
 void print_device_name(cl_device_id device);
 void print_kernel_info(cl_kernel kernel, cl_device_id device);

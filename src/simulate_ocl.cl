@@ -81,6 +81,6 @@ void get_eq(__private double *eq, int nq, double sl, double d, double ux, double
 }
 
 
-__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res){
+__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res, __global *bcp, __global *bck){
 
 }	

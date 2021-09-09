@@ -1,6 +1,8 @@
 #define PROGRAM_FILE "bin/simulate_ocl.cl"
 #define KERNEL_FUNC "propagate"
 #define CL_TARGET_OPENCL_VERSION 300
+#define CY_PAR_NUM 4
+#define CY_KIE_NUM 5
 
 #ifdef MAC
 #include<OpenCL/cl.h>
@@ -71,7 +73,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	cl_kernel kernel;
 	cl_command_queue queue;
 	cl_int err;
-	cl_mem nd_buffer, res_buffer;
+	cl_mem nd_buffer;
+	cl_mem res_buffer;
+	cl_mem bcp_buffer;
+	cl_mem bck_buffer;
 
 	struct BC *bc = NULL;
 	struct ND *nd = NULL;
@@ -95,6 +100,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
+
+	double *bcp = BCP_malloc(bc);
+	double *bck = BCK_malloc(bc);
+	BCKP_def(bc,bcp,bck);
 
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
@@ -124,6 +133,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
+	bcp_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*CY_PAR_NUM*sizeof(double), &bcp[0], &err);
+	bck_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*CY_KIE_NUM*sizeof(double), &bck[0], &err);
 	check_err(err, "Couldn't create a buffer");
 
 	err = clSetKernelArg(kernel, 0, sizeof(cl_uint), &nd->nq);
@@ -131,6 +142,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_double), &CF);
 	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &nd_buffer);
 	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &res_buffer);
+	err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &bcp_buffer);
+	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bck_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
 	char mp4cmd[80];
@@ -157,6 +170,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 		}
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
+		err = clEnqueueReadBuffer(queue, bck_buffer, CL_TRUE, 0, bc->no*bc->nq*CY_KIE_NUM*sizeof(double), &bck[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 
 		err = clFinish(queue);
@@ -174,8 +188,6 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	}
 	printf("\rSimulate......completed!! (x%d)\n",LOOP);
 
-	if(IS_MP4){
-	}
 	if(IS_SAVE_DATA){
 		sprintf(filename,"%s/fin.nd",dirName);
 		output = fopen(filename,"w");
@@ -183,12 +195,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		fclose(output);
 	}	
 
-	/* Deallocate resources */
-	if(IS_MP4){
-	}
-
 	clReleaseMemObject(nd_buffer);
 	clReleaseMemObject(res_buffer);
+	clReleaseMemObject(bcp_buffer);
+	clReleaseMemObject(bck_buffer);
 
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
@@ -197,8 +207,51 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	ND_free(nd);
 	ND_free(res);
+	BC_free(bc);
+	free(bcp);
+	free(bck);
 }
 
+double *BCK_malloc(struct BC *bc){
+	return (double *)malloc(bc->no*bc->nq*CY_KIE_NUM*sizeof(double));
+}
+double *BCP_malloc(struct BC *bc){
+	return (double *)malloc(bc->no*CY_PAR_NUM*sizeof(double));
+}
+void BCKP_def(struct BC *bc, double *bcp, double *bck){
+	int pn = CY_PAR_NUM;
+	int kn = CY_KIE_NUM*bc->nq;
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		bcp[pn*i+0] = tmp->rist;
+		bcp[pn*i+1] = tmp->damp;
+		bcp[pn*i+2] = tmp->mass;
+		bcp[pn*i+3] = tmp->rad;
+		for(int j=0;j<bc->nq;j++){
+			bck[kn*i+0*bc->nq+j] = tmp->force[j];
+			bck[kn*i+1*bc->nq+j] = tmp->acc[j];
+			bck[kn*i+2*bc->nq+j] = tmp->vel[j];
+			bck[kn*i+3*bc->nq+j] = tmp->dsp[j];
+			bck[kn*i+4*bc->nq+j] = tmp->pos[j];
+		}
+	}
+}
+void BCKP_update(struct BC *bc, double *bcp, double *bck){
+	int pn = CY_PAR_NUM;
+	int kn = CY_KIE_NUM*bc->nq;
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		for(int j=0;j<bc->nq;j++){
+			tmp->force[j] = bck[kn*i+0*bc->nq+j];
+			tmp->acc[j] = bck[kn*i+1*bc->nq+j];
+			tmp->vel[j] = bck[kn*i+2*bc->nq+j];
+			tmp->dsp[j] = bck[kn*i+3*bc->nq+j];
+			tmp->pos[j] = bck[kn*i+4*bc->nq+j];
+		}
+	}
+}
 
 void print_device_name( cl_device_id device){
 	char* value;
