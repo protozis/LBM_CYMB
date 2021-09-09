@@ -31,8 +31,8 @@ struct BC *BC_read(FILE *f){
 	struct BC *bc = BC_malloc();
 	struct CY *cy;
 	char flag[80];
-	fscanf(f,"bc_no %d",&bc->no);
-	fscanf(f,"bc_nq %d",&bc->nq);
+	fscanf(f,"bc_no %d\n",&bc->no);
+	fscanf(f,"bc_nq %d\n",&bc->nq);
 	BC_def(bc,bc->no);
 	for(int i=0;i<bc->no;i++){
 		fscanf(f,"%s {\n",flag);

@@ -1,4 +1,3 @@
-#define PROGRAM_FILE "bin/simulate_ocl.cl"
 #define KERNEL_FUNC "propagate"
 #define CL_TARGET_OPENCL_VERSION 300
 #define CY_PAR_NUM 4
@@ -27,6 +26,7 @@ char ND_FILE[80];
 char BC_FILE[80];
 char PD_FILE[80];
 char DIR_NAME[80];
+char PROGRAM_FILE[80];
 
 void update_config(char* filename){
 	FILE *file;
@@ -57,6 +57,8 @@ void update_config(char* filename){
 				 memcpy(PD_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"DIR_NAME") == 0){
 				 memcpy(DIR_NAME,val,strlen(val)+1);
+			}else if(strcmp(par,"PROGRAM_FILE") == 0){
+				 memcpy(PROGRAM_FILE,val,strlen(val)+1);
 			}
 		}
 
@@ -65,7 +67,7 @@ void update_config(char* filename){
 	}
 }
 
-void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName) {
+void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName) {
 
 	cl_device_id device;
 	cl_context context;
@@ -100,7 +102,6 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
-
 	double *bcp = BCP_malloc(bc);
 	double *bck = BCK_malloc(bc);
 	BCKP_def(bc,bcp,bck);
@@ -121,7 +122,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
 	check_err(err, "Couldn't create a context");
-	program = build_program(context, device, PROGRAM_FILE);
+	program = build_program(context, device, programFileName);
 
 	queue = clCreateCommandQueueWithProperties(context, device, 0, &err);
 	check_err(err, "Couldn't create a command queue");

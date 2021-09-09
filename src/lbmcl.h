@@ -21,9 +21,10 @@ extern char ND_FILE[80];
 extern char BC_FILE[80];
 extern char PD_FILE[80];
 extern char DIR_NAME[80];
+extern char PROGRAM_FILE[80];
 
 void update_config(char* filename);
-void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName);
+void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName);
 double *BCK_malloc(struct BC *bc);
 double *BCP_malloc(struct BC *bc);
 void BCKP_def(struct BC *bc, double *bcp, double *bck);
