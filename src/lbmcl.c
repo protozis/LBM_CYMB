@@ -77,6 +77,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	cl_int err;
 	cl_mem nd_buffer;
 	cl_mem res_buffer;
+	cl_mem bcv_buffer;
 	cl_mem bcp_buffer;
 	cl_mem bck_buffer;
 
@@ -102,9 +103,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
+	double *bcv = BCV_malloc();
 	double *bcp = BCP_malloc(bc);
 	double *bck = BCK_malloc(bc);
 	BCKP_def(bc,bcp,bck);
+	BCV_def(bc,bcv);
 
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
@@ -134,6 +137,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
+	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
 	bcp_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*CY_PAR_NUM*sizeof(double), &bcp[0], &err);
 	bck_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*CY_KIE_NUM*sizeof(double), &bck[0], &err);
 	check_err(err, "Couldn't create a buffer");
@@ -143,8 +147,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_double), &CF);
 	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &nd_buffer);
 	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &res_buffer);
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &bcp_buffer);
-	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bck_buffer);
+	err |= clSetKernelArg(kernel, 5, sizeof(cl_uint), &bc->no);
+	err |= clSetKernelArg(kernel, 6, sizeof(cl_uint), &bc->nq);
+	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcv_buffer);
+	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcp_buffer);
+	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bck_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
 	char mp4cmd[80];
@@ -212,12 +219,24 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	free(bcp);
 	free(bck);
 }
-
+double *BCV_malloc(){
+	return (double *)malloc(9*sizeof(double));
+}
 double *BCK_malloc(struct BC *bc){
 	return (double *)malloc(bc->no*bc->nq*CY_KIE_NUM*sizeof(double));
 }
 double *BCP_malloc(struct BC *bc){
 	return (double *)malloc(bc->no*CY_PAR_NUM*sizeof(double));
+}
+void BCV_def(struct BC *bc,double *bcv){
+	double v1, v2;
+	double cs2 = SL*SL/3;
+	for (int vc=0;vc<9;vc++){
+		v1 = bc->ux*LC[0+2*vc] + bc->uy*LC[1+2*vc];
+		v2 = bc->ux*bc->ux + bc->uy*bc->uy;
+		bcv[vc] = W[vc]*bc->dnt*(1 + v1/(cs2) + (v1*v1)/(cs2*cs2*2) - v2/(2*cs2));
+	}
+	
 }
 void BCKP_def(struct BC *bc, double *bcp, double *bck){
 	int pn = CY_PAR_NUM;

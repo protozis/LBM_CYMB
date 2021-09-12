@@ -17,6 +17,9 @@ struct ND {
 struct BC {
 	int no;
 	int nq;
+	double dnt;
+	double ux;
+	double uy;
 	void **m;
 };
 struct CY {

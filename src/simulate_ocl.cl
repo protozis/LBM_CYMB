@@ -1,3 +1,6 @@
+#define CY_PAR_NUM 4
+#define CY_KIE_NUM 5
+
 __constant double LC[18] = {
 	-1,-1,
 	0,-1,
@@ -79,7 +82,28 @@ void get_eq(__private double *eq, int nq, double sl, double d, double ux, double
 		eq[vc] = W[vc]*d*(1 + v1/(cs2) + (v1*v1)/(cs2*cs2*2) - v2/(2*cs2));
 	}
 }
+__private double get_dist(__private double *a, __private double *b, uint nq){
+	__private double tmp = 0;
+	for(int i=0;i<nq;i++){
+		tmp += pow(b[i] - a[i],2);
+	}
+	return sqrt(tmp);
+}
+__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res, uint bc_no, uint bc_nq, __global double *bcv, __global double *bcp, __global double *bck){
+	uint addr[] = {get_global_id(0),get_global_id(1)};
+	uint nx = get_global_size(0);
+	uint ny = get_global_size(1);
+	uint idx_bck;
 
-
-__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res, __global double *bcp, __global double *bck){
+	double *bck_force, *bck_acc, *bck_vel, *bck_dsp, *bck_pos;
+	for(int i=0;i<bc_no;i++){
+		idx_bck = i*bc_nq*CY_KIE_NUM;
+		bck_force = &bck[idx_bck+0*bc_nq];
+		bck_acc = &bck[idx_bck+1*bc_nq];
+		bck_vel = &bck[idx_bck+2*bc_nq];
+		bck_dsp = &bck[idx_bck+3*bc_nq];
+		bck_pos = &bck[idx_bck+4*bc_nq];
+		printf("%lf %lf\n",bck_pos[0],bck_pos[1]);
+	}
+	
 }	

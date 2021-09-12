@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	if(f = fopen(BC_FILE,"r")){
 		bc = BC_read(f);
 		printf("%lf %lf\n",((struct CY *)bc->m[0])->pos[0],((struct CY *)bc->m[0])->pos[1]);
+		printf("%lf %lf %lf\n",bc->dnt,bc->ux,bc->uy);
 		fclose(f);
 	}else{
 		printf("can't open file\n");

@@ -25,8 +25,10 @@ extern char PROGRAM_FILE[80];
 
 void update_config(char* filename);
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName);
+double *BCV_malloc();
 double *BCK_malloc(struct BC *bc);
 double *BCP_malloc(struct BC *bc);
+void BCV_def(struct BC *bc,double *bcv);
 void BCKP_def(struct BC *bc, double *bcp, double *bck);
 void BCKP_update(struct BC *bc, double *bcp, double *bck);
 void list_devices();
