@@ -103,11 +103,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
-	double *bcv = BCV_malloc();
+	double *bcv = BCV_malloc(nd->nq);
 	double *bcp = BCP_malloc(bc);
 	double *bck = BCK_malloc(bc);
 	BCKP_def(bc,bcp,bck);
-	BCV_def(bc,bcv);
+	BCV_def(bc,nd->nq,bcv);
 
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
@@ -219,8 +219,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	free(bcp);
 	free(bck);
 }
-double *BCV_malloc(){
-	return (double *)malloc(9*sizeof(double));
+double *BCV_malloc(uint nq){
+	return (double *)malloc(nq*sizeof(double));
 }
 double *BCK_malloc(struct BC *bc){
 	return (double *)malloc(bc->no*bc->nq*CY_KIE_NUM*sizeof(double));
@@ -228,10 +228,10 @@ double *BCK_malloc(struct BC *bc){
 double *BCP_malloc(struct BC *bc){
 	return (double *)malloc(bc->no*CY_PAR_NUM*sizeof(double));
 }
-void BCV_def(struct BC *bc,double *bcv){
+void BCV_def(struct BC *bc,uint nq,double *bcv){
 	double v1, v2;
 	double cs2 = SL*SL/3;
-	for (int vc=0;vc<9;vc++){
+	for (int vc=0;vc<nq;vc++){
 		v1 = bc->ux*LC[0+2*vc] + bc->uy*LC[1+2*vc];
 		v2 = bc->ux*bc->ux + bc->uy*bc->uy;
 		bcv[vc] = W[vc]*bc->dnt*(1 + v1/(cs2) + (v1*v1)/(cs2*cs2*2) - v2/(2*cs2));
