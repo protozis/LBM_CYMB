@@ -31,7 +31,6 @@ struct BC *BC_read(FILE *f){
 	struct BC *bc = BC_malloc();
 	char flag[80];
 	uint cnt = 0;
-	int c;
 	fscanf(f,"bc_no %d\n",&bc->no);
 	fscanf(f,"bc_nq %d\n",&bc->nq);
 	BC_def(bc,bc->no);
@@ -197,7 +196,6 @@ struct ND *ND_read(FILE *f){
 	for(int i=0;i < (ndf->size*ndf->nq);i++){
 		fscanf(f,"%lf",&ndf->m[i]);
 	}
-	fclose(f);
 	return ndf;
 }
 

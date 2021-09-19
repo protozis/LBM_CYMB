@@ -9,6 +9,8 @@
 #include<CL/cl.h>
 #endif
 
+#define INFO
+
 #include"lbm.h"
 #include"lbmcl.h"
 #include<stdio.h>
@@ -88,18 +90,18 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	char filename[80];
 	if(input = fopen(bcFileName,"r")){
 		bc = BC_read(input);
-		fclose(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open bc file\n");
 		exit(0);
 	}
+	fclose(input);
 	if(input = fopen(ndFileName,"r")){
 		nd = ND_read(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open bc file\n");
 		exit(0);
 	}
-
+	fclose(input);
 
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
@@ -117,10 +119,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	
 //	list_devices();
 
+#ifndef INFO
 	printf("\n[Selected device]: ");
 	print_device_name(device);
 	printf("\n");
-
+#endif
 	check_workgroup(global_size,local_size);
 
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -132,9 +135,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	kernel = clCreateKernel(program, KERNEL_FUNC, &err);
 	check_err(err, "Couldn't create a kernel");
-
+#ifndef INFO
 	print_kernel_info(kernel, device);
-
+#endif
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
 	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
@@ -157,17 +160,18 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	char mp4cmd[80];
 	if(IS_MP4){
 	}
-
+#ifndef INFO
 	printf("[Parameters]:\n");
 
 	printf("Simulate......");
+#endif
 	fflush(stdout);
 	for(int l=0;l<LOOP;l++){
 		check_err(err, "Couldn't write the buffer");
-
+#ifndef INFO
 		printf("\rSimulate......%d/%d",l+1,LOOP);
 		fflush(stdout);
-
+#endif
 		for(int s=0;s<SKP;s++){
 
 			err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, &global_size[0], &local_size[0], 0, NULL,NULL);
@@ -194,8 +198,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 
 	}
+#ifndef INFO
 	printf("\rSimulate......completed!! (x%d)\n",LOOP);
-
+#endif
 	if(IS_SAVE_DATA){
 		sprintf(filename,"%s/fin.nd",dirName);
 		output = fopen(filename,"w");
@@ -341,9 +346,11 @@ void list_devices(){
 }
 
 void check_workgroup(const size_t *gs,const size_t *ls){
+#ifndef INFO
 	printf("[Workgroup info]\n");
 	printf("\tglobal_size: %d/%d (total: %d)\n",gs[0],gs[1],gs[0]*gs[1]);
 	printf("\tlocal_size: %d/%d (total: %d)\n",ls[0],ls[1],ls[0]*ls[1]);
+#endif
 	if(gs[0] % ls[0] != 0){
 		fprintf(stderr,"D 1 GS not divided perfectly by LS\n");
 		exit(1);
@@ -352,7 +359,9 @@ void check_workgroup(const size_t *gs,const size_t *ls){
 		fprintf(stderr,"D 2 GS not divided perfectly by LS\n");
 		exit(1);
 	}
+#ifndef INFO
 	printf("\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
+#endif
 }
 
 cl_device_id create_device_from_file(size_t *ls, char* file){
