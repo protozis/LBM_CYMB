@@ -1,5 +1,6 @@
 #define CY_PAR_NUM 4
 #define CY_KIE_NUM 5
+#define FC_OFFSET 1000000
 
 __constant double LC[18] = {
 	-1,-1,
@@ -56,11 +57,11 @@ __private double get_dist_uint(uint *addr, double *b, uint nq){
 uint is_border(uint *addr, uint nx, uint ny){
 	return addr[0] == 0 || addr[0] == nx-1 || addr[1] == 0 || addr[1] == ny-1;
 }
-uint is_inside(uint *addr, uint bc_no, uint bc_nq, __global double *bcp,__global double *bck){
+uint is_inside(uint *addr, uint bc_no, uint bc_nq, __global double *bcpos,__global double *bcrad){
 	double dist;
 	uint res = NULL;
 	for(int i=0;i<bc_no;i++){
-		dist = get_dist_uint(addr,&bck[i*bc_nq*CY_KIE_NUM+4*bc_nq],bc_nq) - bcp[i*CY_PAR_NUM+3];
+		dist = get_dist_uint(addr,&bcpos[i*bc_nq],bc_nq) - bcrad[i];
 		if(dist <= 0){
 			res = i+1;
 			break;
@@ -89,13 +90,13 @@ void solver(double a, double b, double c, double *res){
 	res[0] = (-1*b + sqrt(b*b - 4*a*c))/(2*a);
 	res[1] = (-1*b - sqrt(b*b - 4*a*c))/(2*a);
 }
-double border_dist(uint *addr,uint vc,uint obj,uint bc_nq, __global double *bcp, __global double *bck){
-	double r = bcp[obj*CY_PAR_NUM+3];
+double border_dist(uint *addr,uint vc,uint obj,uint bc_nq, __global double *bcpos, __global double *bcrad){
+	double r = bcrad[obj];
 	double addrd[2] = {
 		(double)addr[0],
 		(double)addr[1]
 	};
-	double *cir = &bck[obj*bc_nq*CY_KIE_NUM+4*bc_nq];
+	double *cir = &bcpos[obj*bc_nq];
 	double res[2];
 	double icp[2];
 	double a,b,c,d;
@@ -188,7 +189,7 @@ void get_eq(__private double *eq, int nq, double sl, double *mo){
 		eq[vc] = W[vc]*mo[0]*(1 + v1/(cs2) + (v1*v1)/(cs2*cs2*2) - v2/(2*cs2));
 	}
 }
-__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res, uint bc_no, uint bc_nq, __global double *bcv, __global double *bcp, __global double *bck){
+__kernel void propagate(uint nq, double sl, double cf, __global double *nd, __global double *res, uint bc_no, uint bc_nq, __global double *bcv, __global double *bcpos, __global double *bcvel, __global double *bcrad, __global int *bcfc){
 	uint addr[] = {get_global_id(0),get_global_id(1)};
 	uint addr_p[2];
 	uint nx = get_global_size(0);
@@ -196,7 +197,7 @@ __kernel void propagate(uint nq, double sl, double cf, __global double *nd, __gl
 	uint idx_nd,idx_nd_p,idx_nd_f,idx_nd_ff;
 	uint objp = NULL;
 	double dq;
-	double macro[3];
+	__private double macro[3];
 	double eq[9];
 	idx_nd = (addr[0] + addr[1]*nx)*nq;
 	if(is_border(addr,nx,ny)){
@@ -204,24 +205,28 @@ __kernel void propagate(uint nq, double sl, double cf, __global double *nd, __gl
 			res[vc+idx_nd] = bcv[vc];
 		}
 	} else {
-		if(is_inside(addr,bc_no,bc_nq,bcp,bck)){
+		if(is_inside(addr,bc_no,bc_nq,bcpos,bcrad)){
 			for(int vc=0;vc<nq;vc++){
 				res[vc+idx_nd] = 0;
 			}
 		}else{
 			for(int vc=0;vc<nq;vc++){
-				addr_p[0] = addr[0] - LC[0+vc*2]; 
-				addr_p[1] = addr[1] - LC[1+vc*2];
-				objp = is_inside(addr_p,bc_no,bc_nq,bcp,bck);
+				addr_p[0] = addr[0] - (int)LC[0+vc*2]; 
+				addr_p[1] = addr[1] - (int)LC[1+vc*2];
+				objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
 				if(objp != 0){
+					//printf("%d %d %lf %lf\n",addr[0],addr[1],LC[0+vc*2],LC[1+vc*2]);
 					if(vc != 4){
-						dq = border_dist(addr,8-vc,objp-1,bc_nq,bcp,bck);
+						dq = border_dist(addr,8-vc,objp-1,bc_nq,bcpos,bcrad);
 						idx_nd_f = ((addr[0] + LC[0+vc*2]) + (addr[1]+LC[1+vc*2])*nx)*nq;
 						idx_nd_ff = ((addr[0] + 2*LC[0+vc*2]) + (addr[1]+2*LC[1+vc*2])*nx)*nq;
 						if(dq < 0.5){
-							res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[8-vc*2],&bck[(objp-1)*bc_nq*CY_KIE_NUM+2*bc_nq],bc_nq);
+							res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[(objp-1)*bc_nq],bc_nq);
 						}else{
-							res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[8-vc+idx_nd_f]/dq - (2*dq-1)*nd[8-vc+idx_nd_ff]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[8-vc*2],&bck[(objp-1)*bc_nq*CY_KIE_NUM+2*bc_nq],bc_nq)/(dq*(2*dq+1));
+							res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[vc+idx_nd]/dq - (2*dq-1)*nd[vc+idx_nd_f]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[(objp-1)*bc_nq],bc_nq)/(dq*(2*dq+1));
+						}
+						for(int i=0;i<bc_nq;i++){
+							atom_add(&bcfc[i+(objp-1)*bc_no],(int)(nd[8-vc+idx_nd]*LC[i+(8-vc)*2]*FC_OFFSET));
 						}
 					}
 				} else {

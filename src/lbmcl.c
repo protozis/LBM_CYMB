@@ -2,6 +2,7 @@
 #define CL_TARGET_OPENCL_VERSION 300
 #define CY_PAR_NUM 4
 #define CY_KIE_NUM 5
+#define FC_OFFSET 1000000
 
 #ifdef MAC
 #include<OpenCL/cl.h>
@@ -9,7 +10,8 @@
 #include<CL/cl.h>
 #endif
 
-#define INFO
+//#define NO_INFO
+#define LOG "data"
 
 #include"lbm.h"
 #include"lbmcl.h"
@@ -80,12 +82,16 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	cl_mem nd_buffer;
 	cl_mem res_buffer;
 	cl_mem bcv_buffer;
-	cl_mem bcp_buffer;
-	cl_mem bck_buffer;
+	cl_mem bcpos_buffer;
+	cl_mem bcvel_buffer;
+	cl_mem bcrad_buffer;
+	cl_mem bcfc_buffer;
 
 	struct BC *bc = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
+	FILE *test_out;
+	test_out = fopen(LOG,"w");
 	FILE *input;
 	char filename[80];
 	if(input = fopen(bcFileName,"r")){
@@ -106,20 +112,25 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
 	double *bcv = BCV_malloc(nd->nq);
-	double *bcp = BCP_malloc(bc);
-	double *bck = BCK_malloc(bc);
-	BCKP_def(bc,bcp,bck);
+	double *bcpos = BCPOS_malloc(bc);
+	double *bcvel = BCVEL_malloc(bc);
+	double *bcrad = BCRAD_malloc(bc);
+	int *bcfc = BCFC_malloc(bc);
 	BCV_def(bc,nd->nq,bcv);
+	BCPOS_push(bc,bcpos);
+	BCVEL_push(bc,bcvel);
+	BCRAD_push(bc,bcrad);
+	BCFC_push(bc,bcfc);
 
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
 
 	const size_t global_size[2] = {nd->nx,nd->ny};
 	const size_t local_size[2] = {ls_item[0],ls_item[1]};
-	
+
 //	list_devices();
 
-#ifndef INFO
+#ifndef NO_INFO
 	printf("\n[Selected device]: ");
 	print_device_name(device);
 	printf("\n");
@@ -135,14 +146,16 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	kernel = clCreateKernel(program, KERNEL_FUNC, &err);
 	check_err(err, "Couldn't create a kernel");
-#ifndef INFO
+#ifndef NO_INFO
 	print_kernel_info(kernel, device);
 #endif
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
 	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
-	bcp_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*CY_PAR_NUM*sizeof(double), &bcp[0], &err);
-	bck_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*CY_KIE_NUM*sizeof(double), &bck[0], &err);
+	bcpos_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcpos[0], &err);
+	bcvel_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcvel[0], &err);
+	bcrad_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*sizeof(double), &bcrad[0], &err);
+	bcfc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(int), &bcfc[0], &err);
 	check_err(err, "Couldn't create a buffer");
 
 	err = clSetKernelArg(kernel, 0, sizeof(cl_uint), &nd->nq);
@@ -153,14 +166,16 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 5, sizeof(cl_uint), &bc->no);
 	err |= clSetKernelArg(kernel, 6, sizeof(cl_uint), &bc->nq);
 	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcv_buffer);
-	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcp_buffer);
-	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bck_buffer);
+	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcpos_buffer);
+	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bcvel_buffer);
+	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcrad_buffer);
+	err |= clSetKernelArg(kernel, 11, sizeof(cl_mem), &bcfc_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
 	char mp4cmd[80];
 	if(IS_MP4){
 	}
-#ifndef INFO
+#ifndef NO_INFO
 	printf("[Parameters]:\n");
 
 	printf("Simulate......");
@@ -168,7 +183,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	fflush(stdout);
 	for(int l=0;l<LOOP;l++){
 		check_err(err, "Couldn't write the buffer");
-#ifndef INFO
+#ifndef NO_INFO
 		printf("\rSimulate......%d/%d",l+1,LOOP);
 		fflush(stdout);
 #endif
@@ -176,14 +191,23 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 			err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, &global_size[0], &local_size[0], 0, NULL,NULL);
 			check_err(err, "Couldn't enqueue the kernel");
-
 			err = clFinish(queue);
 			check_err(err, "Queue not finish");
 
 		}
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
-		err = clEnqueueReadBuffer(queue, bck_buffer, CL_TRUE, 0, bc->no*bc->nq*CY_KIE_NUM*sizeof(double), &bck[0], 0, NULL, NULL);
+		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
+		
+		BCFC_pull(bc,bcfc,(double)SKP);
+		BC_move(bc,SKP);
+		BC_print(test_out,bc,0);
+		BCPOS_push(bc,bcpos);
+		BCVEL_push(bc,bcvel);
+		
+		err = clEnqueueWriteBuffer(queue, bcpos_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcpos[0], 0, NULL, NULL);
+		err = clEnqueueWriteBuffer(queue, bcvel_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcvel[0], 0, NULL, NULL);
+		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
 
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
@@ -198,7 +222,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 
 	}
-#ifndef INFO
+#ifndef NO_INFO
 	printf("\rSimulate......completed!! (x%d)\n",LOOP);
 #endif
 	if(IS_SAVE_DATA){
@@ -210,28 +234,50 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	clReleaseMemObject(nd_buffer);
 	clReleaseMemObject(res_buffer);
-	clReleaseMemObject(bcp_buffer);
-	clReleaseMemObject(bck_buffer);
+	clReleaseMemObject(bcpos_buffer);
+	clReleaseMemObject(bcvel_buffer);
+	clReleaseMemObject(bcrad_buffer);
+	clReleaseMemObject(bcfc_buffer);
 
 	clReleaseKernel(kernel);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
 	clReleaseContext(context);
 
+	fclose(test_out);
+
 	ND_free(nd);
 	ND_free(res);
 	BC_free(bc);
-	free(bcp);
-	free(bck);
+	free(bcpos);
+	free(bcvel);
+	free(bcrad);
+	free(bcfc);
+	free(bcv);
+}
+void BC_move(struct BC *bc,double dt){
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		for(int j=0;j<bc->nq;j++){
+			tmp->dsp[j] += tmp->vel[j]*dt;
+			tmp->pos[j] += tmp->vel[j]*dt;
+			tmp->vel[j] += tmp->acc[j]*dt;
+			tmp->acc[j] = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->rist*tmp->dsp[j])/tmp->mass;
+		}
+	}
+}
+void BC_print(FILE *f,struct BC *bc,uint obj){
+	struct CY *tmp;
+	tmp = (struct CY *)bc->m[obj];
+	fprintf(f,"%lf %lf ",tmp->force[0],tmp->force[1]);
+	fprintf(f,"%lf %lf ",tmp->acc[0],tmp->acc[1]);
+	fprintf(f,"%lf %lf ",tmp->vel[0],tmp->vel[1]);
+	fprintf(f,"%lf %lf ",tmp->dsp[0],tmp->dsp[1]);
+	fprintf(f,"%lf %lf\n",tmp->pos[0],tmp->pos[1]);
 }
 double *BCV_malloc(uint nq){
 	return (double *)malloc(nq*sizeof(double));
-}
-double *BCK_malloc(struct BC *bc){
-	return (double *)malloc(bc->no*bc->nq*CY_KIE_NUM*sizeof(double));
-}
-double *BCP_malloc(struct BC *bc){
-	return (double *)malloc(bc->no*CY_PAR_NUM*sizeof(double));
 }
 void BCV_def(struct BC *bc,uint nq,double *bcv){
 	double v1, v2;
@@ -243,38 +289,61 @@ void BCV_def(struct BC *bc,uint nq,double *bcv){
 	}
 	
 }
-void BCKP_def(struct BC *bc, double *bcp, double *bck){
-	int pn = CY_PAR_NUM;
-	int kn = CY_KIE_NUM*bc->nq;
+double *BCVEL_malloc(struct BC *bc){
+	return (double *)malloc(bc->no*bc->nq*sizeof(double));
+}
+void BCVEL_push(struct BC *bc, double *bcvel){
 	struct CY *tmp = NULL;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
-		bcp[pn*i+0] = tmp->rist;
-		bcp[pn*i+1] = tmp->damp;
-		bcp[pn*i+2] = tmp->mass;
-		bcp[pn*i+3] = tmp->rad;
 		for(int j=0;j<bc->nq;j++){
-			bck[kn*i+0*bc->nq+j] = tmp->force[j];
-			bck[kn*i+1*bc->nq+j] = tmp->acc[j];
-			bck[kn*i+2*bc->nq+j] = tmp->vel[j];
-			bck[kn*i+3*bc->nq+j] = tmp->dsp[j];
-			bck[kn*i+4*bc->nq+j] = tmp->pos[j];
+			bcvel[j+i*bc->no] = tmp->vel[j];
 		}
 	}
 }
-void BCKP_update(struct BC *bc, double *bcp, double *bck){
-	int pn = CY_PAR_NUM;
-	int kn = CY_KIE_NUM*bc->nq;
+
+double *BCPOS_malloc(struct BC *bc){
+	return (double *)malloc(bc->no*bc->nq*sizeof(double));
+}
+void BCPOS_push(struct BC *bc, double *bcpos){
 	struct CY *tmp = NULL;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			tmp->force[j] = bck[kn*i+0*bc->nq+j];
-			tmp->acc[j] = bck[kn*i+1*bc->nq+j];
-			tmp->vel[j] = bck[kn*i+2*bc->nq+j];
-			tmp->dsp[j] = bck[kn*i+3*bc->nq+j];
-			tmp->pos[j] = bck[kn*i+4*bc->nq+j];
+			bcpos[j+i*bc->no] = tmp->pos[j];
 		}
+	}
+}
+int *BCFC_malloc(struct BC *bc){
+	return (int *)malloc(bc->no*bc->nq*sizeof(int));
+}
+void BCFC_push(struct BC *bc, int *bcfc){
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		for(int j=0;j<bc->nq;j++){
+			bcfc[j+i*bc->no] = (int)(tmp->force[j]*(double)FC_OFFSET);
+		}
+	}
+}
+void BCFC_pull(struct BC *bc,int *bcfc, double dt){
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		for(int j=0;j<bc->nq;j++){
+			tmp->force[j] = (double)(bcfc[j+i*bc->no])/(dt*(double)FC_OFFSET);
+			bcfc[j] = 0;
+		}
+	}
+}
+double *BCRAD_malloc(struct BC *bc){
+	return (double *)malloc(bc->no*sizeof(double));
+}
+double *BCRAD_push(struct BC *bc,double *bcrad){
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		bcrad[i] = tmp->rad;
 	}
 }
 
@@ -346,7 +415,7 @@ void list_devices(){
 }
 
 void check_workgroup(const size_t *gs,const size_t *ls){
-#ifndef INFO
+#ifndef NO_INFO
 	printf("[Workgroup info]\n");
 	printf("\tglobal_size: %d/%d (total: %d)\n",gs[0],gs[1],gs[0]*gs[1]);
 	printf("\tlocal_size: %d/%d (total: %d)\n",ls[0],ls[1],ls[0]*ls[1]);
@@ -359,7 +428,7 @@ void check_workgroup(const size_t *gs,const size_t *ls){
 		fprintf(stderr,"D 2 GS not divided perfectly by LS\n");
 		exit(1);
 	}
-#ifndef INFO
+#ifndef NO_INFO
 	printf("\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
 #endif
 }
