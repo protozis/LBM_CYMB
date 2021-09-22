@@ -3,6 +3,7 @@
 #define CY_PAR_NUM 4
 #define CY_KIE_NUM 5
 #define FC_OFFSET 1000000
+#define CS_LTTC 0.57735
 
 #ifdef MAC
 #include<OpenCL/cl.h>
@@ -17,12 +18,17 @@
 #include"lbmcl.h"
 #include<stdio.h>
 #include<string.h>
+#include<math.h>
 
 //Default
 size_t LOOP = 1;
 size_t SKP = 1;
 double CF = 1;
-double SL = 1;
+double CS = 340;
+double CL = 1;
+double CT = 1;
+double CD = 1;
+double MA = 0.1;
 int IS_MP4 = 0;
 int IS_SAVE_DATA = 0;
 int IS_FILE_OUTPUT = 0;
@@ -45,8 +51,18 @@ void update_config(char* filename){
 				SKP = atoi(val);
 			}else if(strcmp(par,"CF") == 0){
 				CF = strtod(val,&ptr);
-			}else if(strcmp(par,"SL") == 0){
-				SL = strtod(val,&ptr);
+			}else if(strcmp(par,"CS") == 0){
+				CS = strtod(val,&ptr);
+			}else if(strcmp(par,"CL") == 0){
+				CL = strtod(val,&ptr);
+			/*
+			}else if(strcmp(par,"CT") == 0){
+				CT = strtod(val,&ptr);
+			*/
+			}else if(strcmp(par,"CD") == 0){
+				CD = strtod(val,&ptr);
+			}else if(strcmp(par,"MA") == 0){
+				MA = strtod(val,&ptr);
 			}else if(strcmp(par,"IS_MP4") == 0){
 				IS_MP4 = atoi(val);
 			}else if(strcmp(par,"IS_SAVE_DATA") == 0){
@@ -68,6 +84,45 @@ void update_config(char* filename){
 
 	}else{
 		fprintf(stderr,"read_config: can't open conf file\n");
+	}
+}
+void set_parameters(struct BC *bc,struct ND *nd){
+	CT = CL*CS_LTTC/CS;
+}
+void parameters_print(struct BC *bc,struct ND *nd){
+	printf("[Parameters]: (* config value)\n");
+	printf("\t<Stratage>\n");
+	printf("\t\t1. Similarity for the Reynolds number\n");
+	printf("\t\t2. Spectify CL for CT\n");
+	
+	printf("\t<Dimensionless>\n");
+	printf("\t*\tMach number(MA): %lf\n",MA);
+	printf("\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*(CF-0.5)));
+	printf("\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*(CF-0.5)));
+	
+	printf("\t<Lattice unit>\n");
+	printf("\t*\tCollision frequency(CF): %lf\n",CF);
+	printf("\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
+	printf("\t*\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
+	printf("\t*\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
+
+	printf("\t<Dimensional value>\n");
+	printf("\t*\tLength(CL): %lf (m/lattice space)\n",CL);
+	printf("\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
+	printf("\t*\tDensity(CD): %lfkg/m^3\n",CD);
+	printf("\t\tForce: %lf\n",CD*pow(CL,4)/pow(CT,2));
+
+	printf("\t<SI unit>\n");
+	printf("\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
+	printf("\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
+	printf("\t*\tSpeed of sound(CS): %lfm/s\n",CS);
+	
+	printf("\t<Objects>\n");
+	printf("\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
+	struct CY *tmp = NULL;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		printf("\t*\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring,tmp->damp,tmp->mass,sqrt(tmp->spring/tmp->mass),1/sqrt(tmp->spring/tmp->mass));
 	}
 }
 
@@ -97,14 +152,14 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	if(input = fopen(bcFileName,"r")){
 		bc = BC_read(input);
 	} else {
-		fprintf(stderr,"simulate_ocl: can't open bc file\n");
+		fprintf(stderr,"simulate_ocl: can't open bc file %s\n",bcFileName);
 		exit(0);
 	}
 	fclose(input);
 	if(input = fopen(ndFileName,"r")){
 		nd = ND_read(input);
 	} else {
-		fprintf(stderr,"simulate_ocl: can't open bc file\n");
+		fprintf(stderr,"simulate_ocl: can't open nd file %s\n",ndFileName);
 		exit(0);
 	}
 	fclose(input);
@@ -122,6 +177,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	BCRAD_push(bc,bcrad);
 	BCFC_push(bc,bcfc);
 
+	set_parameters(bc,nd);
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
 	device = create_device_from_file(ls_item, pdFileName); 
 
@@ -159,25 +215,23 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	check_err(err, "Couldn't create a buffer");
 
 	err = clSetKernelArg(kernel, 0, sizeof(cl_uint), &nd->nq);
-	err |= clSetKernelArg(kernel, 1, sizeof(cl_double), &SL);
-	err |= clSetKernelArg(kernel, 2, sizeof(cl_double), &CF);
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &nd_buffer);
-	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &res_buffer);
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_uint), &bc->no);
-	err |= clSetKernelArg(kernel, 6, sizeof(cl_uint), &bc->nq);
-	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcv_buffer);
-	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcpos_buffer);
-	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bcvel_buffer);
-	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcrad_buffer);
-	err |= clSetKernelArg(kernel, 11, sizeof(cl_mem), &bcfc_buffer);
+	err |= clSetKernelArg(kernel, 1, sizeof(cl_double), &CF);
+	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &nd_buffer);
+	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &res_buffer);
+	err |= clSetKernelArg(kernel, 4, sizeof(cl_uint), &bc->no);
+	err |= clSetKernelArg(kernel, 5, sizeof(cl_uint), &bc->nq);
+	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bcv_buffer);
+	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcpos_buffer);
+	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcvel_buffer);
+	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bcrad_buffer);
+	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcfc_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
 	char mp4cmd[80];
 	if(IS_MP4){
 	}
 #ifndef NO_INFO
-	printf("[Parameters]:\n");
-
+	parameters_print(bc,nd);
 	printf("Simulate......");
 #endif
 	fflush(stdout);
@@ -223,7 +277,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	}
 #ifndef NO_INFO
-	printf("\rSimulate......completed!! (x%d)\n",LOOP);
+	printf("\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
 #endif
 	if(IS_SAVE_DATA){
 		sprintf(filename,"%s/fin.nd",dirName);
@@ -263,7 +317,7 @@ void BC_move(struct BC *bc,double dt){
 			tmp->dsp[j] += tmp->vel[j]*dt;
 			tmp->pos[j] += tmp->vel[j]*dt;
 			tmp->vel[j] += tmp->acc[j]*dt;
-			tmp->acc[j] = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->rist*tmp->dsp[j])/tmp->mass;
+			tmp->acc[j] = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->spring*tmp->dsp[j])/tmp->mass;
 		}
 	}
 }
@@ -281,7 +335,7 @@ double *BCV_malloc(uint nq){
 }
 void BCV_def(struct BC *bc,uint nq,double *bcv){
 	double v1, v2;
-	double cs2 = SL*SL/3;
+	double cs2 = pow(CS_LTTC,2);
 	for (int vc=0;vc<nq;vc++){
 		v1 = bc->ux*LC[0+2*vc] + bc->uy*LC[1+2*vc];
 		v2 = bc->ux*bc->ux + bc->uy*bc->uy;
@@ -444,7 +498,7 @@ cl_device_id create_device_from_file(size_t *ls, char* file){
 		ls[1] = l2;
 		device = create_device(p,d);
 	}else{
-		printf("can't open pdFile\n");
+		printf("can't open pdFile %s\n",file);
 		exit(1);
 	}
 	fclose(f);

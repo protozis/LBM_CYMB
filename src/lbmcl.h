@@ -13,7 +13,11 @@
 extern size_t LOOP;
 extern size_t SKP;
 extern double CF;
-extern double SL;
+extern double CS;
+extern double CL;
+extern double CT;
+extern double CD;
+extern double MA;
 extern int IS_MP4;
 extern int IS_SAVE_DATA;
 extern int IS_FILE_OUTPUT;
@@ -24,6 +28,8 @@ extern char DIR_NAME[80];
 extern char PROGRAM_FILE[80];
 
 void update_config(char* filename);
+void set_parameters(struct BC *bc, struct ND *nd);
+void parameters_print(struct BC *bc,struct ND *nd);
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName);
 void BC_move(struct BC *bc,double dt);
 void BC_print(FILE *f,struct BC *bc,uint obj);

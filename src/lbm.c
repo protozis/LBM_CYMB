@@ -3,6 +3,7 @@
 #include<string.h>
 #include<regex.h>
 #include "lbm.h"
+#define CS_LTTC_2 0.333333
 
 const double LC[18] = {
 	-1,-1,
@@ -60,7 +61,7 @@ void BC_free(struct BC *bc){
 struct CY *CY_read(FILE *f){
 	struct CY *cy = CY_malloc();
 	CY_def(cy);
-	fscanf(f,"rist %lf\n",&cy->rist);
+	fscanf(f,"spring %lf\n",&cy->spring);
 	fscanf(f,"damp %lf\n",&cy->damp);
 	fscanf(f,"mass %lf\n",&cy->mass);
 	fscanf(f,"rad %lf\n",&cy->rad);

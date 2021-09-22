@@ -23,7 +23,7 @@ struct BC {
 	void **m;
 };
 struct CY {
-	double rist;
+	double spring;
 	double damp;
 	double mass;
 	double rad;
