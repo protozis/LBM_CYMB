@@ -41,6 +41,7 @@ double *BCPOS_malloc(struct BC *bc);
 void BCPOS_push(struct BC *bc, double *bcpos);
 int *BCFC_malloc(struct BC *bc);
 void BCFC_push(struct BC *bc, int *bcfc);
+void BCFC_init(int *bcfc,uint nq,uint no);
 void BCFC_pull(struct BC *bc,int *bcfc,double dt);
 double *BCRAD_malloc(struct BC *bc);
 double *BCRAD_push(struct BC *bc,double *bcrad);
