@@ -1,9 +1,11 @@
 #define KERNEL_FUNC "propagate"
 #define CL_TARGET_OPENCL_VERSION 300
-#define CY_PAR_NUM 4
-#define CY_KIE_NUM 5
 #define FC_OFFSET 1000000
 #define CS_LTTC 0.57735
+
+#define PL_MAX_D 1.3
+#define PL_MAX_UX 0.3
+#define PL_MAX_UY 0.3
 
 #ifdef MAC
 #include<OpenCL/cl.h>
@@ -135,6 +137,53 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	}
 }
 
+void jet_colormap(double val, double max, double min,int *c){
+	double dv;
+	double ppmax = 255;
+	dv = max - min;
+	if(val < min){
+		val = min;
+	}
+	if(val > max){
+		val = max;
+	}
+	if (val < (min + 0.23*dv)){
+		c[0] = 0;
+		c[1] = (int)(ppmax*4*(val-min)/dv);
+		c[2] = ppmax;
+	}else if(val < (min + 0.5*dv)){
+		c[0] = 0;
+		c[1] = (int)(ppmax*(1+4*(min+0.25*dv-val)/dv));
+		c[2] = ppmax;
+	}else if(val < (min+0.75*dv)){
+		c[0] = (int)(ppmax*4*(val-min-0.5*dv)/dv);
+		c[1] = ppmax;
+		c[2] = 0;
+	} else {
+		c[0] = ppmax;
+		c[1] = (int)(ppmax*(1+4*(min+0.75*dv-val)/dv));
+		c[2] = 0;
+	}
+}
+
+void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f){
+	fprintf(f,"P3\n");
+	fprintf(f,"%d %d 255\n",nx*scale,ny*scale);
+	int *v;
+	for(int j=0;j<ny;j++){
+		for(int sy=0;sy<scale;sy++){
+			for(int i=0;i<nx;i++){
+				for(int sx=0;sx<scale;sx++){
+					v=(int *)malloc(3*sizeof(int));
+					jet_colormap(m[i+j*nx],pmax,-1*pmax,v);
+					fprintf(f,"%d %d %d\n",v[0],v[1],v[2]);
+					free(v);
+				}
+				int nx,ny;
+			}
+		}
+	}
+}
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName) {
 
 	cl_device_id device;
@@ -236,8 +285,14 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcfc_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
+	FILE *fp[3];
+	double *out_m = (double *)malloc(nd->size*sizeof(double));	
 	char mp4cmd[80];
 	if(IS_MP4){
+		for(int i=0;i<3;i++){
+			sprintf(mp4cmd,"ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p %s/%d.mp4 2> /dev/null",dirName,i);
+			fp[i] = popen(mp4cmd,"w");
+		}
 	}
 #ifndef NO_INFO
 	parameters_print(bc,nd);
@@ -258,33 +313,52 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 			check_err(err, "Couldn't enqueue the kernel");
 			err = clFinish(queue);
 			check_err(err, "Queue not finish");
+			err = clEnqueueCopyBuffer(queue,res_buffer,nd_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
+			check_err(err, "Couldn't copy buffers");
+			err = clFinish(queue);
+			check_err(err, "Queue not finish");
 
 		}
-		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
+		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
 		
 		BCFC_pull(bc,bcfc,SKP);
+		//BC_print(test_out,bc,0);
+		ND_probe(test_out,nd,255,135);
 		BC_move(bc,SKP);
-		BC_print(test_out,bc,0);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
-		
+
 		err = clEnqueueWriteBuffer(queue, bcpos_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcpos[0], 0, NULL, NULL);
 		err = clEnqueueWriteBuffer(queue, bcvel_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcvel[0], 0, NULL, NULL);
 		check_err(err, "Couldn't write the buffer");
+		
 
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
 		if(IS_MP4){
+			get_density(out_m,nd);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_D,1,fp[0]);
+			get_ux(out_m,nd);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UX,1,fp[1]);
+			get_uy(out_m,nd);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UY,1,fp[2]);
 		}
 		if(IS_FILE_OUTPUT)
 		{
+			/*
 			sprintf(filename,"%s/%.4d",dirName,l);
 			output = fopen(filename,"w");
 			ND_write(nd,output);
+			fclose(output);
+			*/
+			get_ux(out_m,nd);
+			sprintf(filename,"%s/%.4d.ppm",dirName,l);
+			output = fopen(filename,"w");
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UX,1,output);
 			fclose(output);
 		}
 
@@ -324,16 +398,13 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 }
 void BC_move(struct BC *bc,double dt){
 	struct CY *tmp = NULL;
-	double new_acc,new_vel;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			new_acc = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->spring*tmp->dsp[j])/tmp->mass;
-			new_vel = new_acc*dt;
-			tmp->dsp[j] += (tmp->vel[j]+new_vel)*dt/2;
-			tmp->pos[j] += (tmp->vel[j]+new_vel)*dt/2;
-			tmp->vel[j] += new_vel;
-			tmp->acc[j] += new_acc;
+			tmp->acc[j] = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->spring*tmp->dsp[j])/tmp->mass;
+			tmp->vel[j] += tmp->acc[j]*dt;
+			tmp->dsp[j] += tmp->vel[j]*dt;
+			tmp->pos[j] += tmp->vel[j]*dt;
 		}
 	}
 }
@@ -345,6 +416,19 @@ void BC_print(FILE *f,struct BC *bc,uint obj){
 	fprintf(f,"%lf %lf ",tmp->vel[0],tmp->vel[1]);
 	fprintf(f,"%lf %lf ",tmp->dsp[0],tmp->dsp[1]);
 	fprintf(f,"%lf %lf\n",tmp->pos[0],tmp->pos[1]);
+}
+void ND_probe(FILE *f,struct ND *nd, uint x, uint y){
+	double d,ux,uy;
+	uint idx = x + y*nd->nx;
+	for(int vc=0;vc<nd->nq;vc++){
+		d += nd->m[vc+idx];
+		ux += nd->m[vc+idx]*LC[0+vc*2];
+		uy += nd->m[vc+idx]*LC[1+vc*2];
+	}
+	ux = ux/d;
+	uy = uy/d;
+	fprintf(f,"%d %d %lf %lf %lf\n",x,y,d,ux,uy);
+	fflush(f);
 }
 double *BCV_malloc(uint nq){
 	return (double *)malloc(nq*sizeof(double));

@@ -103,7 +103,7 @@ void get_density(double *tmp, struct ND * nd){
 	for(int i=0;i<nd->size;i++){
 		tmp[i] = 0;
 		for(int j=0;j<nd->nq;j++){
-			tmp[i] = tmp[i] + nd->m[j+i*nd->nq];
+			tmp[i] += nd->m[j+i*nd->nq];
 		}
 	}
 }
