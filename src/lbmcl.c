@@ -2,6 +2,7 @@
 #define CL_TARGET_OPENCL_VERSION 300
 #define FC_OFFSET 1000000
 #define CS_LTTC 0.57735
+#define PPMAX 255
 
 #define PL_MAX_D 1.3
 #define PL_MAX_UX 0.3
@@ -137,32 +138,41 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	}
 }
 
-void jet_colormap(double val, double max, double min,int *c){
-	double dv;
-	double ppmax = 255;
-	dv = max - min;
+void jet_colormap(double val, double min, double max,int *c){
+	double dv = max - min;
+	double dc[3];
+	double sv;
 	if(val < min){
-		val = min;
-	}
-	if(val > max){
-		val = max;
-	}
-	if (val < (min + 0.23*dv)){
-		c[0] = 0;
-		c[1] = (int)(ppmax*4*(val-min)/dv);
-		c[2] = ppmax;
-	}else if(val < (min + 0.5*dv)){
-		c[0] = 0;
-		c[1] = (int)(ppmax*(1+4*(min+0.25*dv-val)/dv));
-		c[2] = ppmax;
-	}else if(val < (min+0.75*dv)){
-		c[0] = (int)(ppmax*4*(val-min-0.5*dv)/dv);
-		c[1] = ppmax;
-		c[2] = 0;
+		sv = -1;
+	} else if (val > max){
+		sv = 1;
 	} else {
-		c[0] = ppmax;
-		c[1] = (int)(ppmax*(1+4*(min+0.75*dv-val)/dv));
-		c[2] = 0;
+		sv = -1 + 2*(val - min)/dv;
+	}
+
+	if(sv < -0.75){
+		dc[0] = 0;
+		dc[1] = 0;
+		dc[2] = 2*sv +2.5;
+	} else if (sv < -0.25) {
+		dc[0] = 0;
+		dc[1] = 2*sv + 1.5;
+		dc[2] = 1;
+	} else if (sv < 0.25) {
+		dc[0] = 2*sv + 0.5;
+		dc[1] = 1;
+		dc[2] = -2*sv + 0.5;
+	} else if (sv < 0.75) {
+		dc[0] = 1;
+		dc[1] = -2*sv + 1.5;
+		dc[2] = 0;
+	} else {
+		dc[0] = -2*sv + 2.5;
+		dc[1] = 0;
+		dc[2] = 0;
+	}
+	for(int i=0;i<3;i++){
+		c[i] = (int)(PPMAX*dc[i]);
 	}
 }
 
@@ -175,7 +185,7 @@ void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f){
 			for(int i=0;i<nx;i++){
 				for(int sx=0;sx<scale;sx++){
 					v=(int *)malloc(3*sizeof(int));
-					jet_colormap(m[i+j*nx],pmax,-1*pmax,v);
+					jet_colormap(m[i+j*nx],-1*pmax,pmax,v);
 					fprintf(f,"%d %d %d\n",v[0],v[1],v[2]);
 					free(v);
 				}
@@ -327,7 +337,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		
 		BCFC_pull(bc,bcfc,SKP);
 		//BC_print(test_out,bc,0);
-		ND_probe(test_out,nd,255,135);
+		ND_probe(test_out,nd,243,135);
 		BC_move(bc,SKP);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);

@@ -9,6 +9,9 @@ void print_usage(){
 	printf("\tlauncher a.conf\n");
 }
 int main(int argc, char *argv[]) {
+	int c[3];
+	jet_colormap(-25,-50,50,&c[0]);
+	/*
 
 	char confFileName[80];
 	if(argc < 2){
@@ -31,7 +34,7 @@ int main(int argc, char *argv[]) {
 	}else{
 		printf("can't open file\n");
 	}
-
+	*/
 	return 0;
 }
 
