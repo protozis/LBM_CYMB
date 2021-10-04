@@ -49,14 +49,14 @@ __constant double WA[9] = {
 __private double get_dist_uint(uint *addr, double *b, uint nq){
 	__private double tmp = 0;
 	for(int i=0;i<nq;i++){
-		tmp += pow(((double)b[i] - (double)addr[i]),2);
+		tmp += pow((b[i] - (double)addr[i]),2);
 	}
 	return sqrt(tmp);
 }
 __private double get_dist_uint_global(uint *addr, __global double *b, uint nq){
 	__private double tmp = 0;
 	for(int i=0;i<nq;i++){
-		tmp += pow(((double)b[i] - (double)addr[i]),2);
+		tmp += pow((b[i] - (double)addr[i]),2);
 	}
 	return sqrt(tmp);
 }
