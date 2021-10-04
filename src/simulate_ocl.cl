@@ -53,6 +53,13 @@ __private double get_dist_uint(uint *addr, double *b, uint nq){
 	}
 	return sqrt(tmp);
 }
+__private double get_dist_uint_global(uint *addr, __global double *b, uint nq){
+	__private double tmp = 0;
+	for(int i=0;i<nq;i++){
+		tmp += pow(((double)b[i] - (double)addr[i]),2);
+	}
+	return sqrt(tmp);
+}
 uint is_border(uint *addr, uint nx, uint ny){
 	return addr[0] == 0 || addr[0] == nx-1 || addr[1] == 0 || addr[1] == ny-1;
 }
@@ -60,7 +67,7 @@ uint is_inside(uint *addr, uint bc_no, uint bc_nq, __global double *bcpos,__glob
 	double dist;
 	uint res = NULL;
 	for(int i=0;i<bc_no;i++){
-		dist = get_dist_uint(addr,&bcpos[i*bc_nq],bc_nq) - bcrad[i];
+		dist = get_dist_uint_global(addr,&bcpos[i*bc_nq],bc_nq) - bcrad[i];
 		if(dist <= 0){
 			res = i+1;
 			break;
@@ -95,7 +102,9 @@ double border_dist(uint *addr,uint vc,uint obj,uint bc_nq, __global double *bcpo
 		(double)addr[0],
 		(double)addr[1]
 	};
-	double *cir = &bcpos[obj*bc_nq];
+	double cir[2];
+	cir[0] = bcpos[obj*bc_nq];
+	cir[1] = bcpos[1+obj*bc_nq];
 	double res[2];
 	double icp[2];
 	double a,b,c,d;
