@@ -181,7 +181,7 @@ double border_dist(uint *addr,uint vc,uint obj,uint bc_nq, __global double *bcpo
 	//printf("%lf %lf\n",icp[0],icp[1]);
 	return get_dist_uint(addr,icp,bc_nq)/LE[vc];
 }
-double dot_product(__constant double *a,double *b,uint nq){
+double dot_product(__constant double *a,__global double *b,uint nq){
 	double tmp;
 	for(int i=0;i<nq;i++){
 		tmp += a[i]*b[i];
@@ -238,9 +238,14 @@ __kernel void propagate(uint nq, double cf, __global double *nd, __global double
 					objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
 					if(objp != 0){
 						res[vc+idx_nd] = nd[8-vc+idx_nd];
+						/*
+						for(int i=0;i<bc_nq;i++){
+							atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(2*(nd[8-vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
+						}
+						*/
 
 						//printf("%d %d %lf %lf %d %d %d %d\n",addr[0],addr[1],LC[0+vc*2],LC[1+vc*2],addr_f[0],addr_f[1],addr_ff[0],addr_ff[1]);
-						/*	
+						/*
 						dq = border_dist(addr,8-vc,objp-1,bc_nq,bcpos,bcrad);
 						addr_vec(addr,addr_f,vc,1);
 						addr_vec(addr,addr_ff,vc,2);
@@ -249,12 +254,12 @@ __kernel void propagate(uint nq, double cf, __global double *nd, __global double
 						if(dq < 0.5){
 							res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq);
 							for(int i=0;i<bc_nq;i++){
-								//atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
+								atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
 							}
 						}else{
 							res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[vc+idx_nd]/dq - (2*dq-1)*nd[vc+idx_nd_f]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq)/(dq*(2*dq+1));
 							for(int i=0;i<bc_nq;i++){
-								//atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
+								atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
 							}
 						}
 						*/

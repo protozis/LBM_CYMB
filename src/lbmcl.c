@@ -4,9 +4,9 @@
 #define CS_LTTC 0.57735
 #define PPMAX 255
 
-#define PL_MAX_D 1.3
-#define PL_MAX_UX 0.3
-#define PL_MAX_UY 0.3
+#define PL_MAX_D 0.5
+#define PL_MAX_UX 0.2
+#define PL_MAX_UY 0.2
 
 #ifdef MAC
 #include<OpenCL/cl.h>
