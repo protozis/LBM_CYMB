@@ -15,7 +15,7 @@
 #endif
 
 //#define NO_INFO
-#define LOG "data"
+#define DEBUG_LOG "debug"
 
 #include"lbm.h"
 #include"lbmcl.h"
@@ -38,7 +38,7 @@ int IS_FILE_OUTPUT = 0;
 char ND_FILE[80];
 char BC_FILE[80];
 char PD_FILE[80];
-char DIR_NAME[80];
+char OUTPUT_DIR[80];
 char PROGRAM_FILE[80];
 
 double Cspring;
@@ -82,8 +82,8 @@ void update_config(char* filename){
 				 memcpy(BC_FILE,val,strlen(val)+1);
 			}else if(strcmp(par,"PD_FILE") == 0){
 				 memcpy(PD_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"DIR_NAME") == 0){
-				 memcpy(DIR_NAME,val,strlen(val)+1);
+			}else if(strcmp(par,"OUTPUT_DIR") == 0){
+				 memcpy(OUTPUT_DIR,val,strlen(val)+1);
 			}else if(strcmp(par,"PROGRAM_FILE") == 0){
 				 memcpy(PROGRAM_FILE,val,strlen(val)+1);
 			}
@@ -95,9 +95,9 @@ void update_config(char* filename){
 }
 void set_parameters(struct BC *bc,struct ND *nd){
 	CT = CL*CS_LTTC/CS;
-	Cspring = CD/(pow(CL,3)*pow(CS_LTTC,2));
-	Cdamp = CD/(pow(CL,3)*CS_LTTC);
 	Cmass = CD/(pow(CL,3));
+	Cspring = Cmass/pow(CT,2);
+	Cdamp = Cmass/CT;
 }
 void parameters_print(struct BC *bc,struct ND *nd){
 	printf("[Parameters]: (* config value)\n");
@@ -122,7 +122,7 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	printf("\t*\tDensity(CD): %lfkg/m^3\n",CD);
 	printf("\t\tMass: %lfkg\n",Cmass);
 	printf("\t\tSpring constant: %lfkg/s^2\n",Cspring);
-	printf("\t\tDamping ratio: %lfkg/s\n",Cdamp);
+	printf("\t\tDamping constant: %lfkg/s\n",Cdamp);
 
 	printf("\t<SI unit>\n");
 	printf("\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
@@ -132,9 +132,11 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	printf("\t<Objects>\n");
 	printf("\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
 	struct CY *tmp = NULL;
+	double nf; 
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
-		printf("\t\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring*Cspring,tmp->damp*Cdamp,tmp->mass*Cmass,sqrt((Cspring/Cmass)*tmp->spring/tmp->mass),1/sqrt((Cspring/Cmass)*tmp->spring/tmp->mass));
+		nf = sqrt(tmp->spring/tmp->mass)/CT;
+		printf("\t\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring*Cspring,tmp->damp*Cdamp,tmp->mass*Cmass,nf,1/nf);
 	}
 }
 
@@ -214,7 +216,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	struct ND *nd = NULL;
 	FILE *output;
 	FILE *test_out;
-	test_out = fopen(LOG,"w");
+	test_out = fopen(DEBUG_LOG,"w");
 	FILE *input;
 	char filename[80];
 	if(input = fopen(bcFileName,"r")){
@@ -336,8 +338,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		check_err(err, "Queue not finish");
 		
 		BCFC_pull(bc,bcfc,SKP);
-		//BC_print(test_out,bc,0);
-		ND_probe(test_out,nd,243,135);
+		BC_print(test_out,bc,0);
+		//ND_probe(test_out,nd,243,135);
 		BC_move(bc,SKP);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
@@ -406,21 +408,41 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	free(bcfc);
 	free(bcv);
 }
-void BC_move(struct BC *bc,double dt){
+double msp_get_acc(double dsp,double vel, double ext,double k, double c, double m){
+	return (ext - k*dsp - c*vel)/m;
+}
+void BC_move_rk4(struct BC *bc,double dt){
+	struct CY *tmp = NULL;
+	double dx,k1,k2,k3,k4;
+	for(int i=0;i<bc->no;i++){
+		tmp = ((struct CY *)bc->m[i]);
+		for(int j=0;j<bc->nq;j++){
+			dx = tmp->vel[j] * dt;
+			k1 = dt*msp_get_acc(tmp->dsp[j],tmp->vel[j],tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+			k2 = dt*msp_get_acc(tmp->dsp[j]+dx/2,tmp->vel[j] + k1/2,tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+			k3 = dt*msp_get_acc(tmp->dsp[j]+dx/2,tmp->vel[j] + k2/2,tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+			k4 = dt*msp_get_acc(tmp->dsp[j]+dx,tmp->vel[j]+k3,tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+			tmp->dsp[j] += dx;
+			tmp->vel[j] += (k1+2*k2+2*k3+k4)/6;
+			tmp->acc[j] = msp_get_acc(tmp->dsp[j],tmp->vel[j],tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+		}
+	}
+}
+void BC_move_euler(struct BC *bc,double dt){
 	struct CY *tmp = NULL;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			tmp->acc[j] = (tmp->force[j] - tmp->damp*tmp->vel[j] - tmp->spring*tmp->dsp[j])/tmp->mass;
-			tmp->vel[j] += tmp->acc[j]*dt;
-			tmp->dsp[j] += tmp->vel[j]*dt;
-			tmp->pos[j] += tmp->vel[j]*dt;
+			tmp->acc[j] = msp_get_acc(tmp->dsp[j],tmp->vel[j],tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
+			tmp->vel[j] += tmp->acc[j] * dt;
+			tmp->dsp[j] += tmp->vel[j] * dt;
 		}
 	}
 }
-void BC_print(FILE *f,struct BC *bc,uint obj){
+void BC_print(FILE *f,struct BC *bc,uint obj,int step){
 	struct CY *tmp;
 	tmp = (struct CY *)bc->m[obj];
+	fprintf(f,"%d %lf ",obj,step*CT);
 	fprintf(f,"%lf %lf ",tmp->force[0],tmp->force[1]);
 	fprintf(f,"%lf %lf ",tmp->acc[0],tmp->acc[1]);
 	fprintf(f,"%lf %lf ",tmp->vel[0],tmp->vel[1]);
