@@ -3,6 +3,7 @@
 #define FC_OFFSET 1000000
 #define CS_LTTC 0.57735
 #define PPMAX 255
+#define PI 3.1415926
 
 #define PL_MAX_D 0.5
 #define PL_MAX_UX 0.2
@@ -14,7 +15,7 @@
 #include<CL/cl.h>
 #endif
 
-//#define NO_INFO
+#define NO_INFO
 #define DEBUG_LOG "debug"
 
 #include"lbm.h"
@@ -44,6 +45,9 @@ char PROGRAM_FILE[80];
 double Cspring;
 double Cdamp;
 double Cmass;
+double Cforce;
+double Cacc;
+double Cvel;
 
 void update_config(char* filename){
 	FILE *file;
@@ -98,6 +102,9 @@ void set_parameters(struct BC *bc,struct ND *nd){
 	Cmass = CD/(pow(CL,3));
 	Cspring = Cmass/pow(CT,2);
 	Cdamp = Cmass/CT;
+	Cacc = CL/pow(CT,2);
+	Cforce = Cmass*Cacc;
+	Cvel = CL/CT;
 }
 void parameters_print(struct BC *bc,struct ND *nd){
 	printf("[Parameters]: (* config value)\n");
@@ -121,6 +128,7 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	printf("\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
 	printf("\t*\tDensity(CD): %lfkg/m^3\n",CD);
 	printf("\t\tMass: %lfkg\n",Cmass);
+	printf("\t\tForce: %lfkg*m/s^2\n",Cforce);
 	printf("\t\tSpring constant: %lfkg/s^2\n",Cspring);
 	printf("\t\tDamping constant: %lfkg/s\n",Cdamp);
 
@@ -135,7 +143,7 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	double nf; 
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
-		nf = sqrt(tmp->spring/tmp->mass)/CT;
+		nf = sqrt(tmp->spring/tmp->mass)/(2*PI*CT);
 		printf("\t\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring*Cspring,tmp->damp*Cdamp,tmp->mass*Cmass,nf,1/nf);
 	}
 }
@@ -332,15 +340,14 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 		}
 		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
-		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
 		
 		BCFC_pull(bc,bcfc,SKP);
-		BC_print(test_out,bc,0);
 		//ND_probe(test_out,nd,243,135);
-		BC_move(bc,SKP);
+		//BC_move_rk4(bc,SKP);
+		BC_print(test_out,bc,0,l);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
 
@@ -351,6 +358,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 		err = clFinish(queue);
 		check_err(err, "Queue not finish");
+		if(IS_MP4 || IS_FILE_OUTPUT){
+			err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
+			check_err(err, "Couldn't read the buffer");
+		}
 		if(IS_MP4){
 			get_density(out_m,nd);
 			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_D,1,fp[0]);
@@ -379,6 +390,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	printf("\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
 #endif
 	if(IS_SAVE_DATA){
+		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
+		check_err(err, "Couldn't read the buffer");
 		sprintf(filename,"%s/fin.nd",dirName);
 		output = fopen(filename,"w");
 		ND_write(nd,output);
@@ -409,7 +422,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	free(bcv);
 }
 double msp_get_acc(double dsp,double vel, double ext,double k, double c, double m){
-	return (ext - k*dsp - c*vel)/m;
+	//return (ext - k*dsp - c*vel)/m;
+	return ( -1*k*dsp - c*vel)/m;
 }
 void BC_move_rk4(struct BC *bc,double dt){
 	struct CY *tmp = NULL;
@@ -423,6 +437,7 @@ void BC_move_rk4(struct BC *bc,double dt){
 			k3 = dt*msp_get_acc(tmp->dsp[j]+dx/2,tmp->vel[j] + k2/2,tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
 			k4 = dt*msp_get_acc(tmp->dsp[j]+dx,tmp->vel[j]+k3,tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
 			tmp->dsp[j] += dx;
+			tmp->pos[j] += dx;
 			tmp->vel[j] += (k1+2*k2+2*k3+k4)/6;
 			tmp->acc[j] = msp_get_acc(tmp->dsp[j],tmp->vel[j],tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
 		}
@@ -436,6 +451,7 @@ void BC_move_euler(struct BC *bc,double dt){
 			tmp->acc[j] = msp_get_acc(tmp->dsp[j],tmp->vel[j],tmp->force[j],tmp->spring,tmp->damp,tmp->mass);
 			tmp->vel[j] += tmp->acc[j] * dt;
 			tmp->dsp[j] += tmp->vel[j] * dt;
+			tmp->pos[j] += tmp->vel[j] * dt;
 		}
 	}
 }
@@ -443,11 +459,11 @@ void BC_print(FILE *f,struct BC *bc,uint obj,int step){
 	struct CY *tmp;
 	tmp = (struct CY *)bc->m[obj];
 	fprintf(f,"%d %lf ",obj,step*CT);
-	fprintf(f,"%lf %lf ",tmp->force[0],tmp->force[1]);
-	fprintf(f,"%lf %lf ",tmp->acc[0],tmp->acc[1]);
-	fprintf(f,"%lf %lf ",tmp->vel[0],tmp->vel[1]);
-	fprintf(f,"%lf %lf ",tmp->dsp[0],tmp->dsp[1]);
-	fprintf(f,"%lf %lf\n",tmp->pos[0],tmp->pos[1]);
+	fprintf(f,"%lf %lf ",Cforce*tmp->force[0],Cforce*tmp->force[1]);
+	fprintf(f,"%lf %lf ",Cacc*tmp->acc[0],Cacc*tmp->acc[1]);
+	fprintf(f,"%lf %lf ",Cvel*tmp->vel[0],Cvel*tmp->vel[1]);
+	fprintf(f,"%lf %lf ",CL*tmp->dsp[0],CL*tmp->dsp[1]);
+	fprintf(f,"%lf %lf\n",CL*tmp->pos[0],CL*tmp->pos[1]);
 }
 void ND_probe(FILE *f,struct ND *nd, uint x, uint y){
 	double d,ux,uy;
@@ -522,7 +538,7 @@ void BCFC_pull(struct BC *bc,int *bcfc, double dt){
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			tmp->force[j] = (double)bcfc[j+i*bc->no]/(dt*FC_OFFSET);
+			tmp->force[j] = (double)(bcfc[j+i*bc->no])/(dt*FC_OFFSET);
 		}
 	}
 }

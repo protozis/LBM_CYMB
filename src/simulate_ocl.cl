@@ -1,5 +1,6 @@
 #define FC_OFFSET 1000000
 #define CS_LTTC_2 0.333333
+#define CS_LTTC 0.57735
 
 __constant double LC[18] = {
 	-1,-1,
@@ -223,51 +224,48 @@ __kernel void propagate(uint nq, double cf, __global double *nd, __global double
 		}
 	} else {
 		if(is_inside(addr,bc_no,bc_nq,bcpos,bcrad)){
+			/*
 			for(int vc=0;vc<nq;vc++){
 				res[vc+idx_nd] = 0;
 			}
+			*/
 		}else{
 			get_macro(&nd[idx_nd],nq,macro);
 			get_eq(eq,nq,macro);
 			for(int vc=0;vc<nq;vc++){
 				nd[vc+idx_nd] = nd[vc+idx_nd]*(1-cf) + eq[vc]*cf;
-				if(vc == 4){
-					res[vc+idx_nd] = nd[vc+idx_nd];
-				} else {
-					addr_vec(addr,addr_p,8-vc,1);
-					objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
-					if(objp != 0){
-						res[vc+idx_nd] = nd[8-vc+idx_nd];
-						/*
-						for(int i=0;i<bc_nq;i++){
-							atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(2*(nd[8-vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
-						}
-						*/
+				addr_vec(addr,addr_p,8-vc,1);
+				objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
+				if(objp != 0){
+					//printf("%d %d %d %d\n",addr[0],addr[1],addr_p[0],addr_p[1]);
+					res[vc+idx_nd] = nd[8-vc+idx_nd];
 
-						//printf("%d %d %lf %lf %d %d %d %d\n",addr[0],addr[1],LC[0+vc*2],LC[1+vc*2],addr_f[0],addr_f[1],addr_ff[0],addr_ff[1]);
-						/*
-						dq = border_dist(addr,8-vc,objp-1,bc_nq,bcpos,bcrad);
-						addr_vec(addr,addr_f,vc,1);
-						addr_vec(addr,addr_ff,vc,2);
-						idx_nd_f = addr_idx(addr_f,nx,nq);
-						idx_nd_ff = addr_idx(addr_ff,nx,nq);
-						if(dq < 0.5){
-							res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq);
-							for(int i=0;i<bc_nq;i++){
-								atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
-							}
-						}else{
-							res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[vc+idx_nd]/dq - (2*dq-1)*nd[vc+idx_nd_f]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq)/(dq*(2*dq+1));
-							for(int i=0;i<bc_nq;i++){
-								atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
-							}
-						}
-						*/
-					} else {
-						addr_vec(addr,addr_p,8-vc,1);
-						idx_nd_p = addr_idx(addr_p,nx,nq);
-						res[vc+idx_nd] = nd[vc+idx_nd_p];
+					for(int i=0;i<bc_nq;i++){
+						atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(2*(nd[8-vc+idx_nd])*LC[i+(8-vc)*2]*LE[8-vc]*CS_LTTC*FC_OFFSET));
 					}
+
+					//printf("%d %d %lf %lf %d %d %d %d\n",addr[0],addr[1],LC[0+vc*2],LC[1+vc*2],addr_f[0],addr_f[1],addr_ff[0],addr_ff[1]);
+					/*
+					   dq = border_dist(addr,8-vc,objp-1,bc_nq,bcpos,bcrad);
+					   addr_vec(addr,addr_f,vc,1);
+					   addr_vec(addr,addr_ff,vc,2);
+					   idx_nd_f = addr_idx(addr_f,nx,nq);
+					   idx_nd_ff = addr_idx(addr_ff,nx,nq);
+					   if(dq < 0.5){
+					   res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq);
+					   for(int i=0;i<bc_nq;i++){
+					   atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
+					   }
+					   }else{
+					   res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[vc+idx_nd]/dq - (2*dq-1)*nd[vc+idx_nd_f]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq)/(dq*(2*dq+1));
+					   for(int i=0;i<bc_nq;i++){
+					   atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
+					   }
+					   }
+					   */
+				} else {
+					idx_nd_p = addr_idx(addr_p,nx,nq);
+					res[vc+idx_nd] = nd[vc+idx_nd_p];
 				}
 			}
 		}

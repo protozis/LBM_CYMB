@@ -35,7 +35,7 @@ void ND_probe(FILE *f,struct ND *nd, uint x, uint y);
 double msp_get_acc(double dsp,double vel, double ext,double k, double c, double m);
 void BC_move_rk4(struct BC *bc,double dt);
 void BC_move_euler(struct BC *bc,double dt);
-void BC_print(FILE *f,struct BC *bc,uint obj);
+void BC_print(FILE *f,struct BC *bc,uint obj,int step);
 double *BCV_malloc(uint nq);
 void BCV_def(struct BC *bc, uint nq, double *bcv);
 double *BCVEL_malloc(struct BC *bc);
