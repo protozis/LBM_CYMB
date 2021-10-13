@@ -45,7 +45,7 @@ struct CY *CY_read(FILE *f);
 struct CY *CY_malloc();
 
 void ND_free(struct ND *nd);
-void ND_init(double *tmp, double D, double ux, double uy, double sl);
+void ND_init(double *tmp, double D, double ux, double uy);
 void ND_def_ND(struct ND *nd, struct ND *ndp);
 void ND_copy(struct ND *nd,struct ND *ref);
 void ND_def(struct ND *nd, int nx, int ny, int nq);

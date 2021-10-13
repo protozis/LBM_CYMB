@@ -6,7 +6,7 @@ BCV {
 	uy 0.0
 }
 CY {
-	spring 0.01
+	spring 0.001
 	damp 0
 	mass 1000
 	rad 25

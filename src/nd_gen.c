@@ -10,7 +10,6 @@ void print_usage(){
 	printf("\t-d #, Density (Default: 0.3)\n");
 	printf("\t-i #, Ux (Default: 0.12)\n");
 	printf("\t-j #, Uy (Default: 0)\n");
-	printf("\t-k #, speed of lattice (Default: 1)\n");
 	printf("\t-h , Print this help page\n");
 
 	printf("Example:\n");
@@ -26,7 +25,6 @@ void main(int argc, char *argv[]) {
 	double D =0.3;
 	double ux=0.12;
 	double uy=0;
-	double sl=1;
 	double *p;
 	FILE *pat;
 	if (argc < 2){
@@ -62,11 +60,6 @@ void main(int argc, char *argv[]) {
 					(++argv)[0];
 					--argc;
 					break;
-				case 'k':
-					sscanf(argv[1],"%lf",&sl);
-					(++argv)[0];
-					--argc;
-					break;
 				case 'h':
 					print_usage();
 					exit(0);
@@ -82,7 +75,7 @@ void main(int argc, char *argv[]) {
 			break;
 		}
 	}
-	ND_init(p,D,ux,uy,sl);
+	ND_init(p,D,ux,uy);
 	printf("%d %d 9\n",x,y);
 	for(int j=0;j<x*y;j++){
 		for(int i=0;i<9;i++){

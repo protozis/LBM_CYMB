@@ -31,7 +31,7 @@ const double W[9] ={
 struct BC *BC_read(FILE *f){
 	struct BC *bc = BC_malloc();
 	char flag[80];
-	uint cnt = 0;
+	int cnt = 0;
 	fscanf(f,"bc_no %d\n",&bc->no);
 	fscanf(f,"bc_nq %d\n",&bc->nq);
 	BC_def(bc,bc->no);
@@ -142,13 +142,12 @@ void get_uy(double *tmp, struct ND * nd){
 	free(D);
 }
 
-void ND_init(double *tmp, double D, double ux, double uy, double sl){
+void ND_init(double *tmp, double D, double ux, double uy){
 	double d1,d2;
-	double cs2 = sl*sl/3;
 	d2 = ux*ux + uy*uy;
 	for(int i=0;i<9;i++){
 		d1 = ux*LC[0+2*i]+uy*LC[1+2*i];
-		tmp[i]=W[i]*D*(1+d1/(cs2)+(d1*d1)/(cs2*cs2*2)-d2/(2*cs2));
+		tmp[i]=W[i]*D*(1+d1/(CS_LTTC_2)+(d1*d1)/(CS_LTTC_2*CS_LTTC_2*2)-d2/(2*CS_LTTC_2));
 	}
 }
 

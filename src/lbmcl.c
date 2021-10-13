@@ -9,13 +9,15 @@
 #define PL_MAX_UX 0.2
 #define PL_MAX_UY 0.2
 
+#define MP4_NUM 3
+
 #ifdef MAC
 #include<OpenCL/cl.h>
 #else
 #include<CL/cl.h>
 #endif
 
-#define NO_INFO
+//#define NO_INFO
 #define DEBUG_LOG "debug"
 
 #include"lbm.h"
@@ -292,12 +294,12 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	bcfc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(int), &bcfc[0], &err);
 	check_err(err, "Couldn't create a buffer");
 
-	err = clSetKernelArg(kernel, 0, sizeof(cl_uint), &nd->nq);
+	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &nd->nq);
 	err |= clSetKernelArg(kernel, 1, sizeof(cl_double), &CF);
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &nd_buffer);
 	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &res_buffer);
-	err |= clSetKernelArg(kernel, 4, sizeof(cl_uint), &bc->no);
-	err |= clSetKernelArg(kernel, 5, sizeof(cl_uint), &bc->nq);
+	err |= clSetKernelArg(kernel, 4, sizeof(cl_int), &bc->no);
+	err |= clSetKernelArg(kernel, 5, sizeof(cl_int), &bc->nq);
 	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bcv_buffer);
 	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcpos_buffer);
 	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcvel_buffer);
@@ -305,15 +307,18 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcfc_buffer);
 
 	check_err(err, "Couldn;t create a kernel argument");
-	FILE *fp[3];
-	double *out_m = (double *)malloc(nd->size*sizeof(double));	
+	FILE *fp[MP4_NUM];
 	char mp4cmd[80];
+	double *out_m = (double *)malloc(nd->size*sizeof(double));	
 	if(IS_MP4){
-		for(int i=0;i<3;i++){
+		for(int i=0;i<MP4_NUM;i++){
 			sprintf(mp4cmd,"ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p %s/%d.mp4 2> /dev/null",dirName,i);
 			fp[i] = popen(mp4cmd,"w");
 		}
 	}
+	err = clEnqueueCopyBuffer(queue,nd_buffer,res_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
+	check_err(err, "Couldn't copy buffers");
+	
 #ifndef NO_INFO
 	parameters_print(bc,nd);
 	printf("Simulate......");
@@ -326,27 +331,23 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 #endif
 		BCFC_init(bcfc,bc->no,bc->nq);
 		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
+		err = clFinish(queue);
 		check_err(err, "Couldn't write the buffer");
 		for(int s=0;s<SKP;s++){
-
 			err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, &global_size[0], &local_size[0], 0, NULL,NULL);
 			check_err(err, "Couldn't enqueue the kernel");
 			err = clFinish(queue);
-			check_err(err, "Queue not finish");
 			err = clEnqueueCopyBuffer(queue,res_buffer,nd_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
 			check_err(err, "Couldn't copy buffers");
 			err = clFinish(queue);
-			check_err(err, "Queue not finish");
-
 		}
 		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
-		check_err(err, "Queue not finish");
 		
 		BCFC_pull(bc,bcfc,SKP);
-		//ND_probe(test_out,nd,243,135);
-		//BC_move_rk4(bc,SKP);
+		//ND_probe(test_out,nd,240,200);
+		BC_move_rk4(bc,SKP);
 		BC_print(test_out,bc,0,l);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
@@ -354,13 +355,12 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		err = clEnqueueWriteBuffer(queue, bcpos_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcpos[0], 0, NULL, NULL);
 		err = clEnqueueWriteBuffer(queue, bcvel_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcvel[0], 0, NULL, NULL);
 		check_err(err, "Couldn't write the buffer");
-		
-
 		err = clFinish(queue);
-		check_err(err, "Queue not finish");
+
 		if(IS_MP4 || IS_FILE_OUTPUT){
 			err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 			check_err(err, "Couldn't read the buffer");
+			err = clFinish(queue);
 		}
 		if(IS_MP4){
 			get_density(out_m,nd);
@@ -392,6 +392,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	if(IS_SAVE_DATA){
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
+		err = clFinish(queue);
 		sprintf(filename,"%s/fin.nd",dirName);
 		output = fopen(filename,"w");
 		ND_write(nd,output);
@@ -455,7 +456,7 @@ void BC_move_euler(struct BC *bc,double dt){
 		}
 	}
 }
-void BC_print(FILE *f,struct BC *bc,uint obj,int step){
+void BC_print(FILE *f,struct BC *bc,int obj,int step){
 	struct CY *tmp;
 	tmp = (struct CY *)bc->m[obj];
 	fprintf(f,"%d %lf ",obj,step*CT);
@@ -465,9 +466,9 @@ void BC_print(FILE *f,struct BC *bc,uint obj,int step){
 	fprintf(f,"%lf %lf ",CL*tmp->dsp[0],CL*tmp->dsp[1]);
 	fprintf(f,"%lf %lf\n",CL*tmp->pos[0],CL*tmp->pos[1]);
 }
-void ND_probe(FILE *f,struct ND *nd, uint x, uint y){
+void ND_probe(FILE *f,struct ND *nd, int x, int y){
 	double d,ux,uy;
-	uint idx = x + y*nd->nx;
+	int idx = x + y*nd->nx;
 	for(int vc=0;vc<nd->nq;vc++){
 		d += nd->m[vc+idx];
 		ux += nd->m[vc+idx]*LC[0+vc*2];
@@ -478,10 +479,10 @@ void ND_probe(FILE *f,struct ND *nd, uint x, uint y){
 	fprintf(f,"%d %d %lf %lf %lf\n",x,y,d,ux,uy);
 	fflush(f);
 }
-double *BCV_malloc(uint nq){
+double *BCV_malloc(int nq){
 	return (double *)malloc(nq*sizeof(double));
 }
-void BCV_def(struct BC *bc,uint nq,double *bcv){
+void BCV_def(struct BC *bc,int nq,double *bcv){
 	double v1, v2;
 	double cs2 = pow(CS_LTTC,2);
 	for (int vc=0;vc<nq;vc++){
@@ -528,7 +529,7 @@ void BCFC_push(struct BC *bc, int *bcfc){
 		}
 	}
 }
-void BCFC_init(int *bcfc,uint nq,uint no){
+void BCFC_init(int *bcfc,int nq,int no){
 	for(int i=0;i<no*nq;i++){
 			bcfc[i] = 0;
 	}
@@ -575,12 +576,12 @@ void list_devices(){
 
 	char* value;
 	size_t valueSize;
-	cl_uint platform_count;
+	cl_int platform_count;
 	cl_platform_id* platforms;
-	cl_uint device_count;
+	cl_int device_count;
 	cl_device_id *devices;
 	cl_device_id res_dev;
-	cl_uint max_compute_units;
+	cl_int max_compute_units;
 	int err;
 	size_t *val;
 
@@ -661,12 +662,12 @@ cl_device_id create_device(int sel_plat, int sel_dev) {
 
 	char* value;
 	size_t valueSize;
-	cl_uint platform_count;
+	cl_int platform_count;
 	cl_platform_id* platforms;
-	cl_uint device_count;
+	cl_int device_count;
 	cl_device_id *devices;
 	cl_device_id res_dev;
-	cl_uint max_compute_units;
+	cl_int max_compute_units;
 	int err;
 	size_t *val;
 
