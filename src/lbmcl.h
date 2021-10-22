@@ -26,6 +26,8 @@ extern char BC_FILE[80];
 extern char PD_FILE[80];
 extern char OUTPUT_DIR[80];
 extern char PROGRAM_FILE[80];
+extern double REFUEL_RTO;
+extern double EAT_RTO;
 
 void update_config(char* filename);
 void set_parameters(struct BC *bc, struct ND *nd);

@@ -1,11 +1,11 @@
 #define KERNEL_FUNC "propagate"
 #define CL_TARGET_OPENCL_VERSION 300
-#define FC_OFFSET 1000000
+#define FC_OFFSET 10000
 #define CS_LTTC 0.57735
 #define PPMAX 255
 #define PI 3.1415926
 
-#define PL_MAX_D 0.5
+#define PL_MAX_D 1
 #define PL_MAX_UX 0.2
 #define PL_MAX_UY 0.2
 
@@ -43,6 +43,8 @@ char BC_FILE[80];
 char PD_FILE[80];
 char OUTPUT_DIR[80];
 char PROGRAM_FILE[80];
+double REFUEL_RTO = 0.8;
+double EAT_RTO = 0.01;
 
 double Cspring;
 double Cdamp;
@@ -50,6 +52,7 @@ double Cmass;
 double Cforce;
 double Cacc;
 double Cvel;
+
 
 void update_config(char* filename){
 	FILE *file;
@@ -92,6 +95,10 @@ void update_config(char* filename){
 				 memcpy(OUTPUT_DIR,val,strlen(val)+1);
 			}else if(strcmp(par,"PROGRAM_FILE") == 0){
 				 memcpy(PROGRAM_FILE,val,strlen(val)+1);
+			}else if(strcmp(par,"REFUEL_RTO") == 0){
+				REFUEL_RTO = strtod(val,&ptr);
+			}else if(strcmp(par,"EAT_RTO") == 0){
+				EAT_RTO = strtod(val,&ptr);
 			}
 		}
 
@@ -115,29 +122,34 @@ void parameters_print(struct BC *bc,struct ND *nd){
 	printf("\t\t2. Spectify CL for CT\n");
 	
 	printf("\t<Dimensionless>\n");
-	printf("\t*\tMach number(MA): %lf\n",MA);
+	printf("\t *\tMach number(MA): %lf\n",MA);
 	printf("\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*(CF-0.5)));
 	printf("\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*(CF-0.5)));
 	
 	printf("\t<Lattice unit>\n");
-	printf("\t*\tCollision frequency(CF): %lf\n",CF);
+	printf("\t *\tCollision frequency(CF): %lf\n",CF);
 	printf("\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
-	printf("\t*\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
-	printf("\t*\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
+	printf("\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
+	printf("\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
 
 	printf("\t<Dimensional value>\n");
-	printf("\t*\tLength(CL): %lf (m/lattice space)\n",CL);
+	printf("\t *\tLength(CL): %lf (m/lattice space)\n",CL);
 	printf("\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
-	printf("\t*\tDensity(CD): %lfkg/m^3\n",CD);
+	printf("\t *\tDensity(CD): %lfkg/m^3\n",CD);
 	printf("\t\tMass: %lfkg\n",Cmass);
 	printf("\t\tForce: %lfkg*m/s^2\n",Cforce);
 	printf("\t\tSpring constant: %lfkg/s^2\n",Cspring);
 	printf("\t\tDamping constant: %lfkg/s\n",Cdamp);
+	printf("\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
 
 	printf("\t<SI unit>\n");
 	printf("\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
 	printf("\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
-	printf("\t*\tSpeed of sound(CS): %lfm/s\n",CS);
+	printf("\t *\tSpeed of sound(CS): %lfm/s\n",CS);
+
+	printf("\t<Dirty tricks>\n");
+	printf("\t *\tREFUEL_RTO: %lf\n",REFUEL_RTO);
+	printf("\t *\tEAT_RTO: %lf\n",EAT_RTO);
 	
 	printf("\t<Objects>\n");
 	printf("\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
@@ -218,6 +230,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	cl_mem res_buffer;
 	cl_mem bcv_buffer;
 	cl_mem bcpos_buffer;
+	cl_mem bcpos_p_buffer;
 	cl_mem bcvel_buffer;
 	cl_mem bcrad_buffer;
 	cl_mem bcfc_buffer;
@@ -289,6 +302,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
 	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
 	bcpos_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcpos[0], &err);
+	bcpos_p_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcpos[0], &err);
 	bcvel_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcvel[0], &err);
 	bcrad_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*sizeof(double), &bcrad[0], &err);
 	bcfc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(int), &bcfc[0], &err);
@@ -302,9 +316,12 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 5, sizeof(cl_int), &bc->nq);
 	err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &bcv_buffer);
 	err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &bcpos_buffer);
-	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcvel_buffer);
-	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bcrad_buffer);
-	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcfc_buffer);
+	err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &bcpos_p_buffer);
+	err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &bcvel_buffer);
+	err |= clSetKernelArg(kernel, 10, sizeof(cl_mem), &bcrad_buffer);
+	err |= clSetKernelArg(kernel, 11, sizeof(cl_mem), &bcfc_buffer);
+	err |= clSetKernelArg(kernel, 12, sizeof(cl_double), &REFUEL_RTO);
+	err |= clSetKernelArg(kernel, 13, sizeof(cl_double), &EAT_RTO);
 
 	check_err(err, "Couldn;t create a kernel argument");
 	FILE *fp[MP4_NUM];
@@ -344,6 +361,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
+		
+		err = clEnqueueCopyBuffer(queue,bcpos_buffer,bcpos_p_buffer,0,0,bc->no*bc->nq*sizeof(double),0,NULL,NULL);
+		check_err(err, "Couldn't copy buffers");
 		
 		BCFC_pull(bc,bcfc,SKP);
 		//ND_probe(test_out,nd,240,200);
@@ -423,8 +443,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	free(bcv);
 }
 double msp_get_acc(double dsp,double vel, double ext,double k, double c, double m){
-	//return (ext - k*dsp - c*vel)/m;
-	return ( -1*k*dsp - c*vel)/m;
+	return (ext - k*dsp - c*vel)/m;
 }
 void BC_move_rk4(struct BC *bc,double dt){
 	struct CY *tmp = NULL;

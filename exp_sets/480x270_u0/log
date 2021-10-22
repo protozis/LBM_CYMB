@@ -13,11 +13,11 @@
 		2. Spectify CL for CT
 	<Dimensionless>
 	*	Mach number(MA): 0.300000
-		Reynolds number: 467.653936
-		Grid Reynolds number: 0.000000
+		Reynolds number: inf
+		Grid Reynolds number: -nan
 	<Lattice unit>
-	*	Collision frequency(CF): 0.800000
-		Kinematic viscosity: 34680.000000
+	*	Collision frequency(CF): 0.500000
+		Kinematic viscosity: 0.000000
 	*	BCV D: 1.000000 Ux: 0.000000 Uy: 0.000000
 	*	Size nx: 480 ny: 270
 	<Dimensional value>
@@ -28,11 +28,12 @@
 		Force: 424830.396154kg*m/s^2
 		Spring constant: 424830.396154kg/s^2
 		Damping constant: 721.399498kg/s
+		BCV D: 1.225000kg/m^3 Ux: 0.000000m/s Uy: 0.000000m/s
 	<SI unit>
-		Kinematic viscosity: 20422967.004417m^2/s
+		Kinematic viscosity: 0.000000m^2/s
 		Size width: 480.000000m height: 270.000000m
 	*	Speed of sound(CS): 340.000000m/s
 	<Objects>
 		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
-		0: 424.830396kg/s^2 0.000000kg/s 1225.000000kg 0.093726Hz 10.669403s
+		0: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
 Simulate......Simulate......1/200Simulate......2/200Simulate......3/200Simulate......4/200Simulate......5/200Simulate......6/200Simulate......7/200Simulate......8/200Simulate......9/200Simulate......10/200Simulate......11/200Simulate......12/200Simulate......13/200Simulate......14/200Simulate......15/200Simulate......16/200Simulate......17/200Simulate......18/200Simulate......19/200Simulate......20/200Simulate......21/200Simulate......22/200Simulate......23/200Simulate......24/200Simulate......25/200Simulate......26/200Simulate......27/200Simulate......28/200Simulate......29/200Simulate......30/200Simulate......31/200Simulate......32/200Simulate......33/200Simulate......34/200Simulate......35/200Simulate......36/200Simulate......37/200Simulate......38/200Simulate......39/200Simulate......40/200Simulate......41/200Simulate......42/200Simulate......43/200Simulate......44/200Simulate......45/200Simulate......46/200Simulate......47/200Simulate......48/200Simulate......49/200Simulate......50/200Simulate......51/200Simulate......52/200Simulate......53/200Simulate......54/200Simulate......55/200Simulate......56/200Simulate......57/200Simulate......58/200Simulate......59/200Simulate......60/200Simulate......61/200Simulate......62/200Simulate......63/200Simulate......64/200Simulate......65/200Simulate......66/200Simulate......67/200Simulate......68/200Simulate......69/200Simulate......70/200Simulate......71/200Simulate......72/200Simulate......73/200Simulate......74/200Simulate......75/200Simulate......76/200Simulate......77/200Simulate......78/200Simulate......79/200Simulate......80/200Simulate......81/200Simulate......82/200Simulate......83/200Simulate......84/200Simulate......85/200Simulate......86/200Simulate......87/200Simulate......88/200Simulate......89/200Simulate......90/200Simulate......91/200Simulate......92/200Simulate......93/200Simulate......94/200Simulate......95/200Simulate......96/200Simulate......97/200Simulate......98/200Simulate......99/200Simulate......100/200Simulate......101/200Simulate......102/200Simulate......103/200Simulate......104/200Simulate......105/200Simulate......106/200Simulate......107/200Simulate......108/200Simulate......109/200Simulate......110/200Simulate......111/200Simulate......112/200Simulate......113/200Simulate......114/200Simulate......115/200Simulate......116/200Simulate......117/200Simulate......118/200Simulate......119/200Simulate......120/200Simulate......121/200Simulate......122/200Simulate......123/200Simulate......124/200Simulate......125/200Simulate......126/200Simulate......127/200Simulate......128/200Simulate......129/200Simulate......130/200Simulate......131/200Simulate......132/200Simulate......133/200Simulate......134/200Simulate......135/200Simulate......136/200Simulate......137/200Simulate......138/200Simulate......139/200Simulate......140/200Simulate......141/200Simulate......142/200Simulate......143/200Simulate......144/200Simulate......145/200Simulate......146/200Simulate......147/200Simulate......148/200Simulate......149/200Simulate......150/200Simulate......151/200Simulate......152/200Simulate......153/200Simulate......154/200Simulate......155/200Simulate......156/200Simulate......157/200Simulate......158/200Simulate......159/200Simulate......160/200Simulate......161/200Simulate......162/200Simulate......163/200Simulate......164/200Simulate......165/200Simulate......166/200Simulate......167/200Simulate......168/200Simulate......169/200Simulate......170/200Simulate......171/200Simulate......172/200Simulate......173/200Simulate......174/200Simulate......175/200Simulate......176/200Simulate......177/200Simulate......178/200Simulate......179/200Simulate......180/200Simulate......181/200Simulate......182/200Simulate......183/200Simulate......184/200Simulate......185/200Simulate......186/200Simulate......187/200Simulate......188/200Simulate......189/200Simulate......190/200Simulate......191/200Simulate......192/200Simulate......193/200Simulate......194/200Simulate......195/200Simulate......196/200Simulate......197/200Simulate......198/200Simulate......199/200Simulate......200/200Simulate......completed!! (200x10 --> 3.396176s)

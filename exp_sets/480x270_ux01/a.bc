@@ -6,13 +6,13 @@ BCV {
 	uy 0.0
 }
 CY {
-	spring 0.01
+	spring 0
 	damp 0
-	mass 1000
+	mass 20000
 	rad 25
 	force 0 0
 	acc 0 0
 	vel 0 0
 	dsp 0 0
-	pos 240 135
+	pos 150 135
 }

@@ -1,6 +1,7 @@
-#define FC_OFFSET 1000000
+#define FC_OFFSET 10000
 #define CS_LTTC_2 0.333333
 #define CS_LTTC 0.57735
+#define FCCS 5773.5
 
 __constant double LC[18] = {
 	-1,-1,
@@ -216,15 +217,16 @@ void addr_vec(int *ori, int *dst, int vc, int q){
 int addr_idx(int *addr,int nx, int nq){
 	return (addr[0] + addr[1]*nx)*nq;
 }
-__kernel void propagate(int nq, double cf, __global double *nd, __global double *res, int bc_no, int bc_nq, __global double *bcv, __global double *bcpos, __global double *bcvel, __global double *bcrad, __global int *bcfc){
+__kernel void propagate(int nq, double cf, __global double *nd, __global double *res, int bc_no, int bc_nq, __global double *bcv, __global double *bcpos,__global double *bcpos_p, __global double *bcvel, __global double *bcrad, __global int *bcfc, double refuel_rto, double eat_rto){
 	int addr[] = {get_global_id(0),get_global_id(1)};
 	int addr_p[2];
 	int addr_f[2];
-	int addr_ff[2];
+	int addr_eat[2];
 	int nx = get_global_size(0);
 	int ny = get_global_size(1);
-	int idx_nd,idx_nd_p,idx_nd_f,idx_nd_ff;
-	int objp = NULL;
+	int idx_nd,idx_nd_p, idx_nd_f,idx_nd_eat;
+	int objp;
+	int objp_eat;
 	double dq;
 	__private double macro[3];
 	double eq[9];
@@ -239,42 +241,43 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 				res[vc+idx_nd] = 0;
 			}
 		}else{
-			get_macro(&nd[idx_nd],nq,macro);
-			get_eq(eq,nq,macro);
 			for(int vc=0;vc<nq;vc++){
 				addr_vec(addr,addr_p,8-vc,1);
+				addr_vec(addr,addr_f,vc,1);
 				objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
+				idx_nd_p = addr_idx(addr_p,nx,nq);
+				idx_nd_f = addr_idx(addr_f,nx,nq);
+				objp_eat= is_inside(addr_p,bc_no,bc_nq,bcpos_p,bcrad);
 				if(objp != 0){
-					//printf("%d %d %d %d\n",addr[0],addr[1],addr_p[0],addr_p[1]);
-					//printf("%d %d %lf %lf\n",addr[0],addr[1],LC[vc*2],LC[1+vc*2]);
-					res[vc+idx_nd] = nd[8-vc+idx_nd];
-					for(int i=0;i<bc_nq;i++){
-						atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*CS_LTTC*FC_OFFSET));
+					if(nd[8-vc+idx_nd] == 0){
+						if(vc == 4){
+							res[vc+idx_nd] = bcv[vc]*refuel_rto;
+						}else{
+							res[vc+idx_nd] = nd[vc+idx_nd_f]*refuel_rto;
+						}
+					}else{
+						if(objp_eat == NULL){
+							addr_vec(addr,addr_eat,vc,1);
+							idx_nd_eat = addr_idx(addr_eat,nx,nq);
+							res[vc+idx_nd] = nd[8-vc+idx_nd] + nd[vc+idx_nd_eat]*eat_rto;
+						}else{
+							res[vc+idx_nd] = nd[8-vc+idx_nd];
+						}
 					}
-
-					//printf("%d %d %lf %lf %d %d %d %d\n",addr[0],addr[1],LC[0+vc*2],LC[1+vc*2],addr_f[0],addr_f[1],addr_ff[0],addr_ff[1]);
-					/*
-					   dq = border_dist(addr,8-vc,objp-1,bc_nq,bcpos,bcrad);
-					   addr_vec(addr,addr_f,vc,1);
-					   addr_vec(addr,addr_ff,vc,2);
-					   idx_nd_f = addr_idx(addr_f,nx,nq);
-					   idx_nd_ff = addr_idx(addr_ff,nx,nq);
-					   if(dq < 0.5){
-					   res[vc+idx_nd] = dq*(1+2*dq)*nd[8-vc+idx_nd] + (1 - 4*dq*dq)*nd[8-vc+idx_nd_f] - dq*(1-2*dq)*nd[8-vc+idx_nd_ff] + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq);
-					   for(int i=0;i<bc_nq;i++){
-					   atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
-					   }
-					   }else{
-					   res[vc+idx_nd] = nd[8-vc+idx_nd]/(dq*(1+2*dq)) + (2*dq-1)*nd[vc+idx_nd]/dq - (2*dq-1)*nd[vc+idx_nd_f]/(2*dq+1) + 3*WA[8-vc]*dot_product(&LC[(8-vc)*2],&bcvel[8-vc+(objp-1)*bc_nq],bc_nq)/(dq*(2*dq+1));
-					   for(int i=0;i<bc_nq;i++){
-					   atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-1*(nd[8-vc+idx_nd]+res[vc+idx_nd])*LC[i+(8-vc)*2]*FC_OFFSET));
-					   }
-					   }
-					   */
+					for(int i=0;i<bc_nq;i++){
+						atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
+					}
 				} else {
-					idx_nd_p = addr_idx(addr_p,nx,nq);
-					res[vc+idx_nd] = nd[vc+idx_nd_p];
+					if(nd[vc+idx_nd_p] == 0){
+						res[vc+idx_nd] = nd[8-vc+idx_nd]*refuel_rto;
+					}else{
+						res[vc+idx_nd] = nd[vc+idx_nd_p];
+					}
 				}
+			}
+			get_macro(&res[idx_nd],nq,macro);
+			get_eq(eq,nq,macro);
+			for(int vc=0;vc<nq;vc++){
 				res[vc+idx_nd] = res[vc+idx_nd]*(1-cf) + eq[vc]*cf;
 			}
 		}
