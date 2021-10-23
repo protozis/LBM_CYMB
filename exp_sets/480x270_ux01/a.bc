@@ -8,7 +8,7 @@ BCV {
 CY {
 	spring 0
 	damp 0
-	mass 20000
+	mass 30000
 	rad 25
 	force 0 0
 	acc 0 0

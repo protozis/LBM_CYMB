@@ -224,10 +224,10 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 	int addr_eat[2];
 	int nx = get_global_size(0);
 	int ny = get_global_size(1);
-	int idx_nd,idx_nd_p, idx_nd_f,idx_nd_eat;
-	int objp;
-	int objp_eat;
+	int idx_nd,idx_nd_p,idx_nd_f;
+	int obj_vc_p;
 	double dq;
+	int spc[9];
 	__private double macro[3];
 	double eq[9];
 	idx_nd = addr_idx(addr,nx,nq);
@@ -243,36 +243,29 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 		}else{
 			for(int vc=0;vc<nq;vc++){
 				addr_vec(addr,addr_p,8-vc,1);
-				addr_vec(addr,addr_f,vc,1);
-				objp = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
+				obj_vc_p = is_inside(addr_p,bc_no,bc_nq,bcpos,bcrad);
 				idx_nd_p = addr_idx(addr_p,nx,nq);
-				idx_nd_f = addr_idx(addr_f,nx,nq);
-				objp_eat= is_inside(addr_p,bc_no,bc_nq,bcpos_p,bcrad);
-				if(objp != 0){
-					if(nd[8-vc+idx_nd] == 0){
-						if(vc == 4){
-							res[vc+idx_nd] = bcv[vc]*refuel_rto;
+				if(obj_vc_p != 0){
+					if(!is_inside(addr_p,bc_no,bc_nq,bcpos_p,bcrad)){
+						//eat
+						res[vc+idx_nd] = nd[8-vc+idx_nd]+nd[vc+idx_nd_p]*eat_rto;
+					}else if(is_inside(addr,bc_no,bc_nq,bcpos_p,bcrad)){
+						//refuel
+						addr_vec(addr,addr_f,vc,1);
+						idx_nd_f = addr_idx(addr_f,nx,nq);
+						if(is_inside(addr_p,bc_no,bc_nq,bcpos_p,bcrad)){
+							res[vc+idx_nd] = (nd[8-vc+idx_nd_f]+nd[vc+idx_nd_f])*refuel_rto;
 						}else{
-							res[vc+idx_nd] = nd[vc+idx_nd_f]*refuel_rto;
+							res[vc+idx_nd] = nd[vc+idx_nd_p]*refuel_rto;
 						}
 					}else{
-						if(objp_eat == NULL){
-							addr_vec(addr,addr_eat,vc,1);
-							idx_nd_eat = addr_idx(addr_eat,nx,nq);
-							res[vc+idx_nd] = nd[8-vc+idx_nd] + nd[vc+idx_nd_eat]*eat_rto;
-						}else{
-							res[vc+idx_nd] = nd[8-vc+idx_nd];
-						}
+						res[vc+idx_nd] = nd[8-vc+idx_nd];
 					}
 					for(int i=0;i<bc_nq;i++){
-						atomic_add(&bcfc[i+(objp-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
+						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
 					}
 				} else {
-					if(nd[vc+idx_nd_p] == 0){
-						res[vc+idx_nd] = nd[8-vc+idx_nd]*refuel_rto;
-					}else{
-						res[vc+idx_nd] = nd[vc+idx_nd_p];
-					}
+					res[vc+idx_nd] = nd[vc+idx_nd_p];
 				}
 			}
 			get_macro(&res[idx_nd],nq,macro);
