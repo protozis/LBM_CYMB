@@ -17,9 +17,6 @@
 #include<CL/cl.h>
 #endif
 
-//#define NO_INFO
-#define DEBUG_LOG "debug"
-
 #include"lbm.h"
 #include"lbmcl.h"
 #include<stdio.h>
@@ -45,6 +42,10 @@ char OUTPUT_DIR[80];
 char PROGRAM_FILE[80];
 double REFUEL_RTO = 0.8;
 double EAT_RTO = 0.01;
+char LOG_FILE[80];
+char DEBUG_FILE[80];
+int IS_LOG_PRINT = 1;
+int IS_PROGRESS_PRINT = 1;
 
 double Cspring;
 double Cdamp;
@@ -99,6 +100,14 @@ void update_config(char* filename){
 				REFUEL_RTO = strtod(val,&ptr);
 			}else if(strcmp(par,"EAT_RTO") == 0){
 				EAT_RTO = strtod(val,&ptr);
+			}else if(strcmp(par,"LOG_FILE") == 0){
+				 memcpy(LOG_FILE,val,strlen(val)+1);
+			}else if(strcmp(par,"DEBUG_FILE") == 0){
+				 memcpy(DEBUG_FILE,val,strlen(val)+1);
+			}else if(strcmp(par,"IS_LOG_PRINT") == 0){
+				IS_LOG_PRINT= atoi(val);
+			}else if(strcmp(par,"IS_PROGRESS_PRINT") == 0){
+				IS_PROGRESS_PRINT = atoi(val);
 			}
 		}
 
@@ -115,50 +124,50 @@ void set_parameters(struct BC *bc,struct ND *nd){
 	Cforce = Cmass*Cacc;
 	Cvel = CL/CT;
 }
-void parameters_print(struct BC *bc,struct ND *nd){
-	printf("[Parameters]: (* config value)\n");
-	printf("\t<Stratage>\n");
-	printf("\t\t1. Similarity for the Reynolds number\n");
-	printf("\t\t2. Spectify CL for CT\n");
+void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
+	fprintf(f,"[Parameters]: (* config value)\n");
+	fprintf(f,"\t<Stratage>\n");
+	fprintf(f,"\t\t1. Similarity for the Reynolds number\n");
+	fprintf(f,"\t\t2. Spectify CL for CT\n");
 	
-	printf("\t<Dimensionless>\n");
-	printf("\t *\tMach number(MA): %lf\n",MA);
-	printf("\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*(CF-0.5)));
-	printf("\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*(CF-0.5)));
+	fprintf(f,"\t<Dimensionless>\n");
+	fprintf(f,"\t *\tMach number(MA): %lf\n",MA);
+	fprintf(f,"\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*(CF-0.5)));
+	fprintf(f,"\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*(CF-0.5)));
 	
-	printf("\t<Lattice unit>\n");
-	printf("\t *\tCollision frequency(CF): %lf\n",CF);
-	printf("\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
-	printf("\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
-	printf("\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
+	fprintf(f,"\t<Lattice unit>\n");
+	fprintf(f,"\t *\tCollision frequency(CF): %lf\n",CF);
+	fprintf(f,"\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
+	fprintf(f,"\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
+	fprintf(f,"\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
 
-	printf("\t<Dimensional value>\n");
-	printf("\t *\tLength(CL): %lf (m/lattice space)\n",CL);
-	printf("\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
-	printf("\t *\tDensity(CD): %lfkg/m^3\n",CD);
-	printf("\t\tMass: %lfkg\n",Cmass);
-	printf("\t\tForce: %lfkg*m/s^2\n",Cforce);
-	printf("\t\tSpring constant: %lfkg/s^2\n",Cspring);
-	printf("\t\tDamping constant: %lfkg/s\n",Cdamp);
-	printf("\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
+	fprintf(f,"\t<Dimensional value>\n");
+	fprintf(f,"\t *\tLength(CL): %lf (m/lattice space)\n",CL);
+	fprintf(f,"\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
+	fprintf(f,"\t *\tDensity(CD): %lfkg/m^3\n",CD);
+	fprintf(f,"\t\tMass: %lfkg\n",Cmass);
+	fprintf(f,"\t\tForce: %lfkg*m/s^2\n",Cforce);
+	fprintf(f,"\t\tSpring constant: %lfkg/s^2\n",Cspring);
+	fprintf(f,"\t\tDamping constant: %lfkg/s\n",Cdamp);
+	fprintf(f,"\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
 
-	printf("\t<SI unit>\n");
-	printf("\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
-	printf("\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
-	printf("\t *\tSpeed of sound(CS): %lfm/s\n",CS);
+	fprintf(f,"\t<SI unit>\n");
+	fprintf(f,"\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
+	fprintf(f,"\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
+	fprintf(f,"\t *\tSpeed of sound(CS): %lfm/s\n",CS);
 
-	printf("\t<Dirty tricks>\n");
-	printf("\t *\tREFUEL_RTO: %lf\n",REFUEL_RTO);
-	printf("\t *\tEAT_RTO: %lf\n",EAT_RTO);
+	fprintf(f,"\t<Dirty tricks>\n");
+	fprintf(f,"\t *\tREFUEL_RTO: %lf\n",REFUEL_RTO);
+	fprintf(f,"\t *\tEAT_RTO: %lf\n",EAT_RTO);
 	
-	printf("\t<Objects>\n");
-	printf("\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
+	fprintf(f,"\t<Objects>\n");
+	fprintf(f,"\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
 	struct CY *tmp = NULL;
 	double nf; 
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		nf = sqrt(tmp->spring/tmp->mass)/(2*PI*CT);
-		printf("\t\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring*Cspring,tmp->damp*Cdamp,tmp->mass*Cmass,nf,1/nf);
+		fprintf(f,"\t\t%d: %lfkg/s^2 %lfkg/s %lfkg %lfHz %lfs\n",i,tmp->spring*Cspring,tmp->damp*Cdamp,tmp->mass*Cmass,nf,1/nf);
 	}
 }
 
@@ -238,8 +247,18 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	struct BC *bc = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
-	FILE *test_out;
-	test_out = fopen(DEBUG_LOG,"w");
+	FILE *debug_out;
+	FILE *log_out;
+	char *log_line;
+	size_t log_len;
+	if(!(debug_out = fopen(DEBUG_FILE,"w"))){
+		fprintf(stderr,"simulate_ocl: can't open debug file %s\n",DEBUG_FILE);
+		exit(0);
+	}
+	if(!(log_out = fopen(LOG_FILE,"w"))){
+		fprintf(stderr,"simulate_ocl: can't open log file %s\n",LOG_FILE);
+		exit(0);
+	}
 	FILE *input;
 	char filename[80];
 	if(input = fopen(bcFileName,"r")){
@@ -279,12 +298,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 //	list_devices();
 
-#ifndef NO_INFO
-	printf("\n[Selected device]: ");
-	print_device_name(device);
-	printf("\n");
-#endif
-	check_workgroup(global_size,local_size);
+	fprintf(log_out,"\n[Selected device]: ");
+	print_device_name(log_out,device);
+	fprintf(log_out,"\n");
+
+	check_workgroup(log_out,global_size,local_size);
 
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
 	check_err(err, "Couldn't create a context");
@@ -295,9 +313,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	kernel = clCreateKernel(program, KERNEL_FUNC, &err);
 	check_err(err, "Couldn't create a kernel");
-#ifndef NO_INFO
-	print_kernel_info(kernel, device);
-#endif
+
+	print_kernel_info(log_out,kernel, device);
+	
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
 	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
@@ -336,16 +354,23 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err = clEnqueueCopyBuffer(queue,nd_buffer,res_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
 	check_err(err, "Couldn't copy buffers");
 	
-#ifndef NO_INFO
-	parameters_print(bc,nd);
-	printf("Simulate......");
-#endif
+	print_parameters(log_out,bc,nd);
+	fclose(log_out);
+	log_out = fopen(LOG_FILE,"rw");
+	if(IS_LOG_PRINT){
+		while(getline(&log_line,&log_len,log_out) != EOF){
+			printf("%s",log_line);
+		}
+	}
+	if(IS_PROGRESS_PRINT){
+		printf("Simulate......");
+	}
 	fflush(stdout);
 	for(int l=0;l<LOOP;l++){
-#ifndef NO_INFO
-		printf("\rSimulate......%d/%d",l+1,LOOP);
-		fflush(stdout);
-#endif
+		if(IS_PROGRESS_PRINT){
+			printf("\rSimulate......%d/%d",l+1,LOOP);
+			fflush(stdout);
+		}
 		BCFC_init(bcfc,bc->no,bc->nq);
 		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
 		err = clFinish(queue);
@@ -366,9 +391,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		check_err(err, "Couldn't copy buffers");
 		
 		BCFC_pull(bc,bcfc,SKP);
-		//ND_probe(test_out,nd,240,200);
+		//ND_probe(debug_out,nd,240,200);
 		BC_move_rk4(bc,SKP);
-		BC_print(test_out,bc,0,l);
+		BC_print(debug_out,bc,0,l*SKP);
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
 
@@ -406,9 +431,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 
 	}
-#ifndef NO_INFO
-	printf("\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
-#endif
+	fprintf(log_out,"\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
+	if(IS_PROGRESS_PRINT){
+		printf("\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
+	}
 	if(IS_SAVE_DATA){
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
@@ -431,7 +457,8 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	clReleaseProgram(program);
 	clReleaseContext(context);
 
-	fclose(test_out);
+	fclose(log_out);
+	fclose(debug_out);
 
 	ND_free(nd);
 	ND_free(res);
@@ -573,22 +600,22 @@ double *BCRAD_push(struct BC *bc,double *bcrad){
 	}
 }
 
-void print_device_name( cl_device_id device){
+void print_device_name(FILE *f, cl_device_id device){
 	char* value;
 	size_t valueSize;
 	// print device name
 	clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &valueSize);
 	value = (char*) malloc(valueSize);
 	clGetDeviceInfo(device, CL_DEVICE_NAME, valueSize, value, NULL);
-	printf("%s", value);
+	fprintf(f,"%s", value);
 	free(value);
 }
-void print_kernel_info(cl_kernel kernel, cl_device_id device){
+void print_kernel_info(FILE *f,cl_kernel kernel, cl_device_id device){
 	size_t kernel_value, err;
-	printf("[Kernel info]:\n");
+	fprintf(f,"[Kernel info]:\n");
 	err = clGetKernelWorkGroupInfo(kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), NULL, &kernel_value);
 	check_err(err, "Couldn't check kernel value");
-	printf("\tCL_KERNEL_WORK_GROUP_SIZE: %d\n",kernel_value);
+	fprintf(f,"\tCL_KERNEL_WORK_GROUP_SIZE: %d\n",kernel_value);
 }
 
 void list_devices(){
@@ -617,7 +644,7 @@ void list_devices(){
 		clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, device_count, devices, NULL);
 		for(int j=0;j<device_count;j++){
 			printf("\t");
-			print_device_name(devices[j]);
+			print_device_name(stdout,devices[j]);
 			printf("\n");
 			// print device CL_DEVICE_MAX_WORK_ITEM_SIZES
 			clGetDeviceInfo(devices[j], CL_DEVICE_MAX_WORK_ITEM_SIZES, 0, NULL, &valueSize);
@@ -640,12 +667,10 @@ void list_devices(){
 	}
 }
 
-void check_workgroup(const size_t *gs,const size_t *ls){
-#ifndef NO_INFO
-	printf("[Workgroup info]\n");
-	printf("\tglobal_size: %d/%d (total: %d)\n",gs[0],gs[1],gs[0]*gs[1]);
-	printf("\tlocal_size: %d/%d (total: %d)\n",ls[0],ls[1],ls[0]*ls[1]);
-#endif
+void check_workgroup(FILE *f,const size_t *gs,const size_t *ls){
+	fprintf(f,"[Workgroup info]\n");
+	fprintf(f,"\tglobal_size: %d/%d (total: %d)\n",gs[0],gs[1],gs[0]*gs[1]);
+	fprintf(f,"\tlocal_size: %d/%d (total: %d)\n",ls[0],ls[1],ls[0]*ls[1]);
 	if(gs[0] % ls[0] != 0){
 		fprintf(stderr,"D 1 GS not divided perfectly by LS\n");
 		exit(1);
@@ -654,9 +679,7 @@ void check_workgroup(const size_t *gs,const size_t *ls){
 		fprintf(stderr,"D 2 GS not divided perfectly by LS\n");
 		exit(1);
 	}
-#ifndef NO_INFO
-	printf("\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
-#endif
+	fprintf(f,"\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
 }
 
 cl_device_id create_device_from_file(size_t *ls, char* file){

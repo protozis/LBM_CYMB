@@ -1,42 +1,0 @@
-
-
-[Selected device]: NVIDIA GeForce MX150
-[Workgroup info]
-	global_size: 480/270 (total: 129600)
-	local_size: 16/9 (total: 144)
-	workgroups: 30/30 (total: 900)
-[Kernel info]:
-	CL_KERNEL_WORK_GROUP_SIZE: 8
-[Parameters]: (* config value)
-	<Stratage>
-		1. Similarity for the Reynolds number
-		2. Spectify CL for CT
-	<Dimensionless>
-	 *	Mach number(MA): 0.300000
-		Reynolds number: 2805.923617
-		Grid Reynolds number: 3.464103
-	<Lattice unit>
-	 *	Collision frequency(CF): 0.550000
-		Kinematic viscosity: 5780.000000
-	 *	BCV D: 1.000000 Ux: 0.100000 Uy: 0.000000
-	 *	Size nx: 480 ny: 270
-	<Dimensional value>
-	 *	Length(CL): 1.000000 (m/lattice space)
-		Time(CT): 0.001698 (secs/time step)
-	 *	Density(CD): 1.225000kg/m^3
-		Mass: 1.225000kg
-		Force: 424830.396154kg*m/s^2
-		Spring constant: 424830.396154kg/s^2
-		Damping constant: 721.399498kg/s
-		BCV D: 1.225000kg/m^3 Ux: 58.889755m/s Uy: 0.000000m/s
-	<SI unit>
-		Kinematic viscosity: 3403827.834069m^2/s
-		Size width: 480.000000m height: 270.000000m
-	 *	Speed of sound(CS): 340.000000m/s
-	<Dirty tricks>
-	 *	REFUEL_RTO: 0.500000
-	 *	EAT_RTO: 0.050000
-	<Objects>
-		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
-		0: 0.000000kg/s^2 0.000000kg/s 36750.000000kg 0.000000Hz infs
-Simulate......Simulate......1/100Simulate......2/100Simulate......3/100Simulate......4/100Simulate......5/100Simulate......6/100Simulate......7/100Simulate......8/100Simulate......9/100Simulate......10/100Simulate......11/100Simulate......12/100Simulate......13/100Simulate......14/100Simulate......15/100Simulate......16/100Simulate......17/100Simulate......18/100Simulate......19/100Simulate......20/100Simulate......21/100Simulate......22/100Simulate......23/100Simulate......24/100Simulate......25/100Simulate......26/100Simulate......27/100Simulate......28/100Simulate......29/100Simulate......30/100Simulate......31/100Simulate......32/100Simulate......33/100Simulate......34/100Simulate......35/100Simulate......36/100Simulate......37/100Simulate......38/100Simulate......39/100Simulate......40/100Simulate......41/100Simulate......42/100Simulate......43/100Simulate......44/100Simulate......45/100Simulate......46/100Simulate......47/100Simulate......48/100Simulate......49/100Simulate......50/100Simulate......51/100Simulate......52/100Simulate......53/100Simulate......54/100Simulate......55/100Simulate......56/100Simulate......57/100Simulate......58/100Simulate......59/100Simulate......60/100Simulate......61/100Simulate......62/100Simulate......63/100Simulate......64/100Simulate......65/100Simulate......66/100Simulate......67/100Simulate......68/100Simulate......69/100Simulate......70/100Simulate......71/100Simulate......72/100Simulate......73/100Simulate......74/100Simulate......75/100Simulate......76/100Simulate......77/100Simulate......78/100Simulate......79/100Simulate......80/100Simulate......81/100Simulate......82/100Simulate......83/100Simulate......84/100Simulate......85/100Simulate......86/100Simulate......87/100Simulate......88/100Simulate......89/100Simulate......90/100Simulate......91/100Simulate......92/100Simulate......93/100Simulate......94/100Simulate......95/100Simulate......96/100Simulate......97/100Simulate......98/100Simulate......99/100Simulate......100/100Simulate......completed!! (100x10 --> 1.698088s)

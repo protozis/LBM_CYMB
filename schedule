@@ -1,0 +1,8 @@
+#! /bin/bash
+num=1
+total=`wc -l $1 | cut -d ' ' -f 1`
+cat $1 | while read line;do
+printf "Processing [$line]\t($num/$total):\n"
+./simulator $line
+num=$((num+1))
+done

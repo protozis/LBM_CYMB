@@ -1,6 +1,5 @@
 #! /bin/bash
 
-dir="./bin"
 pd_dir="./pd_auto"
 collision=1
 lattice_speed=1
@@ -10,27 +9,15 @@ loop=1
 usage() {
 	echo "Usage: speed_test [OPTION]"
 	echo -e "\nOption:"
-	echo -e "\t-c [CONFIG_FILE], configuration file"
-	echo -e "\t-k #, pd file dir (default pd_auto)"
+	echo -e "\t-i [EXP_DIR], experiments dir"
+	echo -e "\t-k {PD_DIR}, pd file dir (default pd_auto)"
 	echo -e "\t-h , Print this help page"
 }
 
-while getopts ":i:b:o:n:t:k:h" o;do
+while getopts ":i:k:h" o;do
 	case $o in
 		i)
-			input=$OPTARG
-			;;
-		b)
-			bc="$OPTARG"
-			;;
-		o)
-			output=$OPTARG
-			;;
-		n)
-			loop=$OPTARG
-			;;
-		t)
-			skip_ts=$OPTARG
+			exp=$OPTARG
 			;;
 		k)
 			pd_dir_read=$OPTARG
@@ -44,12 +31,12 @@ while getopts ":i:b:o:n:t:k:h" o;do
 	esac
 done
 shift $((OPTIND-1))
-if [ -z "$input" ] || [ -z "$output" ];then
+if [ -z "$exp" ] ;then
 	usage
 	exit
 fi
-x=`head -n 1 $input | cut -d ' ' -f 1`
-y=`head -n 1 $input | cut -d ' ' -f 2`
+x=`head -n 1 $exp/a.nd | cut -d ' ' -f 1`
+y=`head -n 1 $exp/a.nd | cut -d ' ' -f 2`
 
 if [ -z "$pd_dir_read" ];then
 	mkdir -p $pd_dir 2> /dev/null
@@ -68,7 +55,7 @@ ls $pd_dir | grep .pd | while read file;do
 	num=$((num+1))
 	printf "\rWorking on...($num/$pdFileNum)"
 	info=`cat $pd_dir/$file | sed 's/ /\//g'`
-	Time=`{ time -p $dir/launcher ; }  2>&1 > /dev/null`
+	Time=`{ time -p ./simulator $exp; }  2>&1 > /dev/null`
 	if [ "$?" -eq "0" ];then
 		realTime=`echo $Time | cut -d ' ' -f 2`
 		printf "%-50s\t" "$file[$info]" >> .speed_test_rst

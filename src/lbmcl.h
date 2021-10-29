@@ -28,10 +28,14 @@ extern char OUTPUT_DIR[80];
 extern char PROGRAM_FILE[80];
 extern double REFUEL_RTO;
 extern double EAT_RTO;
+extern char LOG_FILE[80];
+extern char DEBUG_FILE[80];
+extern int IS_LOG_PRINT;
+extern int IS_PROGRESS_PRINT;
 
 void update_config(char* filename);
 void set_parameters(struct BC *bc, struct ND *nd);
-void parameters_print(struct BC *bc,struct ND *nd);
+void print_parameters(FILE *f,struct BC *bc,struct ND *nd);
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName);
 void ND_probe(FILE *f,struct ND *nd, int x, int y);
 double msp_get_acc(double dsp,double vel, double ext,double k, double c, double m);
@@ -53,9 +57,9 @@ double *BCRAD_push(struct BC *bc,double *bcrad);
 void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f);
 void jet_colormap(double num, double min, double max,int *c);
 void list_devices();
-void print_device_name(cl_device_id device);
-void print_kernel_info(cl_kernel kernel, cl_device_id device);
-void check_workgroup(const size_t *gs, const size_t *ls);
+void print_device_name(FILE *f,cl_device_id device);
+void print_kernel_info(FILE *f,cl_kernel kernel, cl_device_id device);
+void check_workgroup(FILE *f,const size_t *gs, const size_t *ls);
 cl_device_id create_device_from_file(size_t * ls, char* file);
 cl_device_id create_device(int sel_plat, int sel_dev);
 
