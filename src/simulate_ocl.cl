@@ -2,7 +2,7 @@
 #define CS_LTTC_2 0.333333
 #define CS_LTTC 0.57735
 #define FCCS 5773.5
-
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics: enable
 __constant double LC[18] = {
 	-1,-1,
 	0,-1,
@@ -217,7 +217,7 @@ void addr_vec(int *ori, int *dst, int vc, int q){
 int addr_idx(int *addr,int nx, int nq){
 	return (addr[0] + addr[1]*nx)*nq;
 }
-__kernel void propagate(int nq, double cf, __global double *nd, __global double *res, int bc_no, int bc_nq, __global double *bcv, __global double *bcpos,__global double *bcpos_p, __global double *bcvel, __global double *bcrad, __global int *bcfc, double refuel_rto, double eat_rto){
+__kernel void propagate(int nq, double cf, __global double *nd, __global double *res, int bc_no, int bc_nq, __global double *bcv, __global double *bcpos,__global double *bcpos_p, __global double *bcvel, __global double *bcrad, __global long *bcfc, double refuel_rto, double eat_rto){
 	int addr[] = {get_global_id(0),get_global_id(1)};
 	int addr_p[2];
 	int addr_f[2];
@@ -262,7 +262,7 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 						res[vc+idx_nd] = nd[8-vc+idx_nd];
 					}
 					for(int i=0;i<bc_nq;i++){
-						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
+						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(long)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
 					}
 				} else {
 					res[vc+idx_nd] = nd[vc+idx_nd_p];

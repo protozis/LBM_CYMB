@@ -282,7 +282,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	double *bcpos = BCPOS_malloc(bc);
 	double *bcvel = BCVEL_malloc(bc);
 	double *bcrad = BCRAD_malloc(bc);
-	int *bcfc = BCFC_malloc(bc);
+	long *bcfc = BCFC_malloc(bc);
 	BCV_def(bc,nd->nq,bcv);
 	BCPOS_push(bc,bcpos);
 	BCVEL_push(bc,bcvel);
@@ -323,7 +323,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	bcpos_p_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcpos[0], &err);
 	bcvel_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(double), &bcvel[0], &err);
 	bcrad_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*sizeof(double), &bcrad[0], &err);
-	bcfc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(int), &bcfc[0], &err);
+	bcfc_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, bc->no*bc->nq*sizeof(long), &bcfc[0], &err);
 	check_err(err, "Couldn't create a buffer");
 
 	err = clSetKernelArg(kernel, 0, sizeof(cl_int), &nd->nq);
@@ -563,24 +563,24 @@ void BCPOS_push(struct BC *bc, double *bcpos){
 		}
 	}
 }
-int *BCFC_malloc(struct BC *bc){
-	return (int *)malloc(bc->no*bc->nq*sizeof(int));
+long *BCFC_malloc(struct BC *bc){
+	return (long *)malloc(bc->no*bc->nq*sizeof(long));
 }
-void BCFC_push(struct BC *bc, int *bcfc){
+void BCFC_push(struct BC *bc, long *bcfc){
 	struct CY *tmp = NULL;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			bcfc[j+i*bc->no] = (int)(tmp->force[j]*FC_OFFSET);
+			bcfc[j+i*bc->no] = (long)(tmp->force[j]*FC_OFFSET);
 		}
 	}
 }
-void BCFC_init(int *bcfc,int nq,int no){
+void BCFC_init(long *bcfc,int nq,int no){
 	for(int i=0;i<no*nq;i++){
 			bcfc[i] = 0;
 	}
 }
-void BCFC_pull(struct BC *bc,int *bcfc, double dt){
+void BCFC_pull(struct BC *bc,long *bcfc, double dt){
 	struct CY *tmp = NULL;
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
