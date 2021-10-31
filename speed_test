@@ -49,11 +49,13 @@ echo '#Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)'
 echo '#'
 printf "Working on..."
 printf '' > .speed_test_rst
+cp $exp/a.pd $exp/b.pd
 pdFileNum=`ls $pd_dir | wc -l`
 num=0
 ls $pd_dir | grep .pd | while read file;do
 	num=$((num+1))
 	printf "\rWorking on...($num/$pdFileNum)"
+	cp $pd_dir/$file $exp/a.pd
 	info=`cat $pd_dir/$file | sed 's/ /\//g'`
 	Time=`{ time -p ./simulator $exp; }  2>&1 > /dev/null`
 	if [ "$?" -eq "0" ];then
@@ -64,5 +66,6 @@ ls $pd_dir | grep .pd | while read file;do
 done
 printf "\rWorking on...completed!\n"
 sort .speed_test_rst -nk 2,2
+mv $exp/b.pd $exp/a.pd
 rm .speed_test_rst
 
