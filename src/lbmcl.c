@@ -227,6 +227,15 @@ void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f){
 		}
 	}
 }
+int check_exist(char *fn){
+	FILE *f;
+	if(f=fopen(fn,"r")){
+		fclose(f);
+		return 1;
+	}else{
+		return 0;
+	}
+}
 void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName) {
 
 	cl_device_id device;
@@ -253,11 +262,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	size_t log_len;
 	if(!(debug_out = fopen(DEBUG_FILE,"w"))){
 		fprintf(stderr,"simulate_ocl: can't open debug file %s\n",DEBUG_FILE);
-		exit(0);
+		exit(1);
 	}
 	if(!(log_out = fopen(LOG_FILE,"w"))){
 		fprintf(stderr,"simulate_ocl: can't open log file %s\n",LOG_FILE);
-		exit(0);
+		exit(1);
 	}
 	FILE *input;
 	char filename[80];
@@ -265,14 +274,14 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		bc = BC_read(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open bc file %s\n",bcFileName);
-		exit(0);
+		exit(1);
 	}
 	fclose(input);
 	if(input = fopen(ndFileName,"r")){
 		nd = ND_read(input);
 	} else {
 		fprintf(stderr,"simulate_ocl: can't open nd file %s\n",ndFileName);
-		exit(0);
+		exit(1);
 	}
 	fclose(input);
 
@@ -341,14 +350,19 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	err |= clSetKernelArg(kernel, 12, sizeof(cl_double), &REFUEL_RTO);
 	err |= clSetKernelArg(kernel, 13, sizeof(cl_double), &EAT_RTO);
 
-	check_err(err, "Couldn;t create a kernel argument");
+	check_err(err, "Couldn't create a kernel argument");
 	FILE *fp[MP4_NUM];
 	char mp4cmd[80];
 	double *out_m = (double *)malloc(nd->size*sizeof(double));	
 	if(IS_MP4){
+		if(check_exist(dirName)){
 		for(int i=0;i<MP4_NUM;i++){
 			sprintf(mp4cmd,"ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p %s/%d.mp4 2> /dev/null",dirName,i);
 			fp[i] = popen(mp4cmd,"w");
+		}
+		}else{
+			fprintf(stderr,"Output directory not exist\n");
+			exit(1);
 		}
 	}
 	err = clEnqueueCopyBuffer(queue,nd_buffer,res_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
@@ -417,17 +431,6 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 		if(IS_FILE_OUTPUT)
 		{
-			/*
-			sprintf(filename,"%s/%.4d",dirName,l);
-			output = fopen(filename,"w");
-			ND_write(nd,output);
-			fclose(output);
-			*/
-			get_ux(out_m,nd);
-			sprintf(filename,"%s/%.4d.ppm",dirName,l);
-			output = fopen(filename,"w");
-			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UX,1,output);
-			fclose(output);
 		}
 
 	}
@@ -440,9 +443,12 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
 		sprintf(filename,"%s/fin.nd",dirName);
-		output = fopen(filename,"w");
-		ND_write(nd,output);
-		fclose(output);
+		if(output = fopen(filename,"w")){
+			ND_write(nd,output);
+			fclose(output);
+		}else{
+			fprintf(stderr,"Can't save final ND\n");
+		}
 	}	
 
 	clReleaseMemObject(nd_buffer);

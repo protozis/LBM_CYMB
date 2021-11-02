@@ -33,6 +33,7 @@ extern char DEBUG_FILE[80];
 extern int IS_LOG_PRINT;
 extern int IS_PROGRESS_PRINT;
 
+int check_exist(char *fn);
 void update_config(char* filename);
 void set_parameters(struct BC *bc, struct ND *nd);
 void print_parameters(FILE *f,struct BC *bc,struct ND *nd);
