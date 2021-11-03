@@ -1,0 +1,40 @@
+
+[Selected device]: NVIDIA GeForce MX150
+[Workgroup info]
+	global_size: 480/270 (total: 129600)
+	local_size: 80/45 (total: 3600)
+	workgroups: 6/6 (total: 36)
+[Kernel info]:
+	CL_KERNEL_WORK_GROUP_SIZE: 8
+[Parameters]: (* config value)
+	<Stratage>
+		1. Similarity for the Reynolds number
+		2. Spectify CL for CT
+	<Dimensionless>
+	 *	Mach number(MA): 0.300000
+		Reynolds number: inf
+		Grid Reynolds number: -nan
+	<Lattice unit>
+	 *	Collision frequency(CF): 0.500000
+		Kinematic viscosity: 0.000000
+	 *	BCV D: 1.000000 Ux: 0.000000 Uy: 0.000000
+	 *	Size nx: 480 ny: 270
+	<Dimensional value>
+	 *	Length(CL): 1.000000 (m/lattice space)
+		Time(CT): 0.001698 (secs/time step)
+	 *	Density(CD): 1.225000kg/m^3
+		Mass: 1.225000kg
+		Force: 424830.396154kg*m/s^2
+		Spring constant: 424830.396154kg/s^2
+		Damping constant: 721.399498kg/s
+		BCV D: 1.225000kg/m^3 Ux: 0.000000m/s Uy: 0.000000m/s
+	<SI unit>
+		Kinematic viscosity: 0.000000m^2/s
+		Size width: 480.000000m height: 270.000000m
+	 *	Speed of sound(CS): 340.000000m/s
+	<Dirty tricks>
+	 *	REFUEL_RTO: 0.500000
+	 *	EAT_RTO: 0.050000
+	<Objects>
+		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
+		0: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
