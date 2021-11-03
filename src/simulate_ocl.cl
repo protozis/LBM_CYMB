@@ -59,15 +59,15 @@ __constant double WA[9] = {
 	0.2222222,
 	0.0555556
 };
-__private double get_dist_int(int *addr, double *b, int nq){
-	__private double tmp = 0;
+double get_dist_int(int *addr, double *b, int nq){
+	double tmp = 0;
 	for(int i=0;i<nq;i++){
 		tmp += pow((b[i] - (double)addr[i]),2);
 	}
 	return sqrt(tmp);
 }
-__private double get_dist_int_global(int *addr, __global double *b, int nq){
-	__private double tmp = 0;
+double get_dist_int_global(int *addr, __global double *b, int nq){
+	double tmp = 0;
 	for(int i=0;i<nq;i++){
 		tmp += pow((b[i] - (double)addr[i]),2);
 	}
@@ -78,7 +78,7 @@ int is_border(int *addr, int nx, int ny){
 }
 int is_inside(int *addr, int bc_no, int bc_nq, __global double *bcpos,__global double *bcrad){
 	double dist;
-	int res = NULL;
+	int res = 0;
 	for(int i=0;i<bc_no;i++){
 		dist = get_dist_int_global(addr,&bcpos[i*bc_nq],bc_nq) - bcrad[i];
 		if(dist <= 0){
@@ -262,7 +262,7 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 						res[vc+idx_nd] = nd[8-vc+idx_nd];
 					}
 					for(int i=0;i<bc_nq;i++){
-						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(long)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
+						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
 					}
 				} else {
 					res[vc+idx_nd] = nd[vc+idx_nd_p];

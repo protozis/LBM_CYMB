@@ -2,8 +2,8 @@
 [Selected device]: NVIDIA GeForce MX150
 [Workgroup info]
 	global_size: 480/270 (total: 129600)
-	local_size: 80/45 (total: 3600)
-	workgroups: 6/6 (total: 36)
+	local_size: 16/9 (total: 144)
+	workgroups: 30/30 (total: 900)
 [Kernel info]:
 	CL_KERNEL_WORK_GROUP_SIZE: 8
 [Parameters]: (* config value)
