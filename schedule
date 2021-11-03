@@ -1,4 +1,12 @@
 #! /bin/bash
+
+usage() {
+	echo "Usage: schedule [EXP_LIST]"
+}
+if [ -z "$1" ];then
+	usage
+	exit
+fi
 num=1
 total=`wc -l $1 | cut -d ' ' -f 1`
 cat $1 | while read line;do
