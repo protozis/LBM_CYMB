@@ -1,63 +1,31 @@
 #! /bin/bash
 
 pd_dir="./pd_auto"
-collision=1
-lattice_speed=1
-skip_ts=200
-loop=1
 
 usage() {
-	echo "Usage: speed_test [OPTION]"
-	echo -e "\nOption:"
-	echo -e "\t-i [EXP_DIR], experiments dir"
-	echo -e "\t-k {PD_DIR}, pd file dir (default pd_auto)"
-	echo -e "\t-h , Print this help page"
+	echo "Usage: speed_test [EXP_DIR]"
 }
 
-while getopts ":i:k:h" o;do
-	case $o in
-		i)
-			exp=$OPTARG
-			;;
-		k)
-			pd_dir_read=$OPTARG
-			;;
-		h)
-			usage
-			;;
-		*)
-			usage
-			;;
-	esac
-done
-shift $((OPTIND-1))
-if [ -z "$exp" ] ;then
+if [ -z "$1" ] ;then
 	usage
 	exit
 fi
-x=`head -n 1 $exp/a.nd | cut -d ' ' -f 1`
-y=`head -n 1 $exp/a.nd | cut -d ' ' -f 2`
+x=`head -n 1 $1/a.nd | cut -d ' ' -f 1`
+y=`head -n 1 $1/a.nd | cut -d ' ' -f 2`
 
-if [ -z "$pd_dir_read" ];then
-	mkdir -p $pd_dir 2> /dev/null
-	rm $pd_dir/* 2> /dev/null
-	./pd_gen_auto -x $x -y $y
-else
-	pd_dir=`echo $pd_dir_read`
-fi
 echo '#Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)'
 echo '#'
 printf "Working on..."
 printf '' > .speed_test_rst
-cp $exp/a.pd $exp/b.pd
+cp $1/a.pd $1/b.pd
 pdFileNum=`ls $pd_dir | wc -l`
 num=0
 ls $pd_dir | grep .pd | while read file;do
 	num=$((num+1))
 	printf "\rWorking on...($num/$pdFileNum)"
-	cp $pd_dir/$file $exp/a.pd
+	cp $pd_dir/$file $1/a.pd
 	info=`cat $pd_dir/$file | sed 's/ /\//g'`
-	Time=`{ time -p ./simulator $exp; }  2>&1 > /dev/null`
+	Time=`{ time -p ./simulator $1; }  2>&1 > /dev/null`
 	if [ "$?" -eq "0" ];then
 		realTime=`echo $Time | cut -d ' ' -f 2`
 		printf "%-50s\t" "$file[$info]" >> .speed_test_rst
@@ -66,6 +34,6 @@ ls $pd_dir | grep .pd | while read file;do
 done
 printf "\rWorking on...completed!\n"
 sort .speed_test_rst -nk 2,2
-mv $exp/b.pd $exp/a.pd
+mv $1/b.pd $1/a.pd
 rm .speed_test_rst
 
