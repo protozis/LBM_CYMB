@@ -1,11 +1,7 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
-## Script dependences
-These dependences are only used by Bash script, has no effect on the binary programs.
-- `time`: Linux built-in one, GNU version also works.
-- `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
-
-## Build from source
+## Dependences and build process
+### C Binaries
 Most of the C program is written in `C99` standard, therefore it should not need any extra lib. However, since some of the environment setups would be nasty for `clang` when you are compiling kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which Opencl driver package you should install. In Archlinux they are:
 
 **Runtime**
@@ -36,6 +32,11 @@ Be advice that the Opencl target version need to be defined in you host program 
 
 > The atomic function support for 64-bits integer is required by the force calculation, need to check the device extension of `cl_khr_int64_atomics` of desire platform.
 
+### Script dependences
+These dependences are only used by Bash script, has no effect on the binary programs.
+- `time`: Linux built-in one, GNU version also works.
+- `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
+
 ## Usage
 Following steps can be altered by your own needs, feel free to play around with it.
 
@@ -61,15 +62,22 @@ example/
 └── plot.p
 ```
 
+To perform an experiment, you will need to tweak these files:
 |Name|Description|
 |-|-|
 |a.bc|Boundary condition file|
 |a.nd|Number Density file|
 |a.pd|Platform/Device file|
-|data|Result videos or ND files|
+|default.conf|Main configuration file|
+
+And following files are used to collect and analyze data.
+|Name|Description|
+|-|-|
 |debug|Used to collect desire parameters|
+|data|Result videos or ND files|
 |log|Running conditions and status|
 |plot.p|gnuplot script|
+
 
 #### ND (Number Density) file
 Number density matrix represent particle densities in different velocities and positions. For an D2Q9 ND file with 480x270 in size, is formatted as
@@ -100,6 +108,7 @@ Example:
 Two classes are included in boundary conditions:
 1. BCV: Unified fluid that surround the simulation area.
 2. CY: Cylinder object.
+![BC_file](img/bc.png)
 
 For example:
 ```
@@ -155,7 +164,7 @@ CY {
 
 - **Platform & Device**
 	
-	A platform is an specific OpenCL implementation, e.g. Intel, AMD or Nvida CUDA. A device is the actual processor that perform the calculation.
+	A platform is an specific OpenCL implementation, e.g. Intel, AMD or Nvida CUDA. A device is the actual processor that perform the calculation, like `Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz`, `NVIDIA GeForce MX150`.
 
 - **Work-group & Work-item** 
 
@@ -164,7 +173,14 @@ CY {
 Use the script `speed_test` to choose the best environment setup. If the chosen work-group exceed the max allowed work-group size for the device, the result will not be printed. Example: 
 
 ```shell
-$> ./speed_test -i exp_sets/example
+$> clinfo -l
+Platform #0: Intel(R) OpenCL HD Graphics
+ `-- Device #0: Intel(R) UHD Graphics 620 [0x3ea0]
+Platform #1: Intel(R) OpenCL
+ `-- Device #0: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
+Platform #2: NVIDIA CUDA
+ `-- Device #0: NVIDIA GeForce MX150
+$> ./speed_test exp_sets/example
 #Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)
 #
 Working on...completed!
@@ -178,48 +194,56 @@ p1d0_20.pd[1/0/96/54]                             	8.60
 p1d0_30.pd[1/0/64/36]                             	8.70
 p2d0_60.pd[2/0/32/18]                             	8.75
 ```
-You can see that Nvidia GPU with 32x18 work-group size is the fastest one. Write the result to your experiment setup with:
+You can see that Nvidia GPU with 16x9 work-group size is the fastest one. Write the result to your experiment setup with:
 ```
-$> cp pd_auto/p2d0_120.pd exp_sets/[EXP_NAME]/a.pd
+$> cp pd_auto/p2d0_120.pd exp_sets/example/a.pd
 ``` 
 
+#### .conf file
+Following parameters are included in a configuration file:
+|Parameter|Description|Default|
+|-|-|-|
+|LOOP|Iteration of `SKP`.|1|
+|SKP|Iteration of fluid propagate by time step.|1|
+|CF|Collision frequency in Lattice unit|1|
+|CS|Speed of sound in SI unit.|340|
+|CL|Dimensional value of length|1|
+|CD|Dimensional value of Density|1|
+|MA|Mach number(Dimensionless)|0.1|
+|IS_MP4|Make mp4 videos or not.|0|
+|IS_SAVE_DATA|Save final ND matrix or not.|0|
+|IS_FILE_OUTPUT|Save ND matrix for every loops or not.|0|
+|ND_FILE|ND filename|NULL|
+|BC_FILE|BC filename|NULL|
+|PD_FILE|PD filename|NULL|
+|OUTPUT_DIR|Output filename|NULL|
+|PROGRAM_FILE|OpenCL source filename|NULL|
+|REFUEL_RTO|Refuel ratio|0.8|
+|EAT_RTO|Eat ratio|0.01|
+|LOG_FILE|Log filename|NULL|
+|DEBUG_FILE|Debug filename|NULL|
+|IS_LOG_PRINT|Print log to stdout or not.|1|
+|IS_PROGRESS_PRINT|Print progress or not|1|
 
-### Reference
-#### Scripts
-|Name|Purpose|
-|---|---|
-|test_run|LBM simulation wrapper (with '-' argument)|
-|scheme_run|LBM simulation wrapper (with configuration file)|
-|speed_test|PD file speed tester|
-|video_maker|Generate mp4 from png|
-|maker_bc|Generate BC file from PNG_BC|
-|plot_obj|Plot object force diagram|
-|run_plot_sp|Plot speed profile for each column|
-|run_plot_sum|Plot flow rate for each cross section|
-|viewer_nd|Image view a ND file|
-|viewer_bc|Image view a BC file|
-|viewer_sp|Plot speed profile|
-|viewer_sum|Plot flow rate|
-|viewer+total|Plot total particles|
-|pd_gen_auto|Auto generating pd files|
-#### Binaries
-|Name|Purpose|
-|---|---|
-|simulator|Opencl LBM simulation with '-' argument|
-|launcher|Opencl LBM simulation with configuration file|
-|nd_gen|Generate initial ND file|
-|nd_get_par|Get macro-scale properties|
-|nd_get_sum|Get total particle|
-|bc_gen_box|Generate BC file with a box boundary|
-|bc_gen_tunnel|Generate BC file with a wind tunnel boundary|
-|bc_gen_field|Generate BC file with a uniform flow|
-|bc2ppm|Convert BC file to ppm image|
-|ppm2bc|Convert PPM image to BC file|
-#### Files
-|Name|.|Purpose|Format|
-|:---:|:---:|---|----|
-|ND|.nd|Number density matrix|[nx] [ny] [nq]\n[m]; addr = q+(x+y*nx)*nq; (double #)number_density|
-|BC|.bc|Boundary matrix|[nx+2] [ny+2]\n[m]; addr = x+y*nx; (char [0-9])Object/ (char '>')input/ (char '#')output/ (char '+')fluid ;|
-|PD|.pd|Platform/Device profile|[Platform] [Device] [Workgroup dimension 1] [workgroup dimension 2]|
-|SVG_BC|.svg|Boundary image|(#000000)fluid/(#ffff09)border/ (#ffff01)obj_1/ (#ffff02)obj_2...|
-|OBJ||Object force|[loop] [Fx] [Fy]|
+
+### Perform an experiment
+Run `simulator` with desire experiment setup:
+```shell
+$> ./simulator exp_sets/1920x1080
+``` 
+If multiple experiments are going to be launched at once, use `schedule` plus a plain text list file of experiment setups directory name, like:
+```shell
+$> cat exp_grp1
+exp_sets/480x270_skp10
+exp_sets/480x270_skp20
+exp_sets/480x270_skp30
+exp_sets/480x270_skp40
+exp_sets/480x270_skp50
+```
+And launch is with:
+```shell
+$> ./schedule exp_grp1
+```
+
+## What's the physics of this LBM simulation
+
