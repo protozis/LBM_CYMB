@@ -1,7 +1,7 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
 ## Script dependences
-These dependences are only used by Bash script, has no effect on the main simulation program.
+These dependences are only used by Bash script, has no effect on the binary programs.
 - `time`: Linux built-in one, GNU version also works.
 - `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
 
@@ -34,7 +34,7 @@ Be advice that the Opencl target version need to be defined in you host program 
 ```
 300 stands for Ver. 3.0.0
 
-The atomic function support for 64-bits integer is required by the force calculation, need to check the device extension of `cl_khr_int64_atomics` of desire platform.
+> The atomic function support for 64-bits integer is required by the force calculation, need to check the device extension of `cl_khr_int64_atomics` of desire platform.
 
 ## Usage
 Following steps can be altered by your own needs, feel free to play around with it.
@@ -97,7 +97,7 @@ Example:
 ```  
 
 #### BC (Boundary Condition) file
-Boundary condition consist two data types:
+Two classes are included in boundary conditions:
 1. BCV: Unified fluid that surround the simulation area.
 2. CY: Cylinder object.
 
@@ -153,8 +153,13 @@ CY {
 
 #### PD (Platform/Device) file
 
-> **Work-group & Work-item** 
-> A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check *Max work group size* for the value. For multi-dimension work-group, the total amount of work-item cannot exceed *Max work group size* too, and the work-item in each dimension will have their own limitation. Check *Max work item sizes* for the value. However, I will recommend to choose the work-group size with automatic tools `speed_test`.
+- **Platform & Device**
+	
+	A platform is an specific OpenCL implementation, e.g. Intel, AMD or Nvida CUDA. A device is the actual processor that perform the calculation.
+
+- **Work-group & Work-item** 
+
+	A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check *Max work group size* for the value. For multi-dimension work-group, the total amount of work-item cannot exceed *Max work group size* too, and the work-item in each dimension will have their own limitation. Check *Max work item sizes* for the value.
 
 Use the script `speed_test` to choose the best environment setup. If the chosen work-group exceed the max allowed work-group size for the device, the result will not be printed. Example: 
 
