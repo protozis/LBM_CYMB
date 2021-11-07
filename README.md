@@ -88,6 +88,7 @@ Number density matrix represent particle densities in different velocities and p
 [m2q0] [m2q1] [m2q2] ...
 ...
 ```
+![ND](img/nd.png)
 
 Use `nd_gen` to make an initial ND file with following options:
 ```
