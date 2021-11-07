@@ -109,7 +109,8 @@ Two classes are included in boundary conditions:
 1. BCV: Unified fluid that surround the simulation area.
 2. CY: Cylinder object.
 
-![BC_file](img/bc.png)
+![BC](img/bc.png)
+![BC2](img/bc-2.png)
 
 For example:
 ```
