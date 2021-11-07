@@ -1,8 +1,8 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
-## Dependences and build process
-### C Binaries
-Most of the C program is written in `C99` standard, therefore it should not need any extra lib. However, since some of the environment setups would be nasty for `clang` when you are compiling kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which Opencl driver package you should install. In Archlinux they are:
+## Dependences and Build process
+### C binaries
+All C programs are written in `C99` standard, therefore it should not need any extra libs. However, since some of the environment setups would be nasty for `clang` when you are compiling kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you should install. In Archlinux they are:
 
 **Runtime**
 - Intel GPU: `intel-compute-runtime`
@@ -32,7 +32,7 @@ Be advice that the Opencl target version need to be defined in you host program 
 
 > The atomic function support for 64-bits integer is required by the force calculation, need to check the device extension of `cl_khr_int64_atomics` of desire platform.
 
-### Script dependences
+### Script
 These dependences are only used by Bash script, has no effect on the binary programs.
 - `time`: Linux built-in one, GNU version also works.
 - `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.

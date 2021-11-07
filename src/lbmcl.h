@@ -32,6 +32,9 @@ extern char LOG_FILE[80];
 extern char DEBUG_FILE[80];
 extern int IS_LOG_PRINT;
 extern int IS_PROGRESS_PRINT;
+extern double PL_MAX_D;
+extern double PL_MAX_UX;
+extern double PL_MAX_UY;
 
 int check_exist(char *fn);
 void update_config(char* filename);

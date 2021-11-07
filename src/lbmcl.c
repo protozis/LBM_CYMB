@@ -5,9 +5,6 @@
 #define PPMAX 255
 #define PI 3.1415926
 
-#define PL_MAX_D 1
-#define PL_MAX_UX 0.2
-#define PL_MAX_UY 0.2
 
 #define MP4_NUM 3
 
@@ -46,6 +43,9 @@ char LOG_FILE[80];
 char DEBUG_FILE[80];
 int IS_LOG_PRINT = 1;
 int IS_PROGRESS_PRINT = 1;
+double PL_MAX_D = 0.5;
+double PL_MAX_UX = 0.1;
+double PL_MAX_UY = 0.1;
 
 double Cspring;
 double Cdamp;
@@ -108,6 +108,12 @@ void update_config(char* filename){
 				IS_LOG_PRINT= atoi(val);
 			}else if(strcmp(par,"IS_PROGRESS_PRINT") == 0){
 				IS_PROGRESS_PRINT = atoi(val);
+			}else if(strcmp(par,"PL_MAX_D") == 0){
+				PL_MAX_D = strtod(val,&ptr);
+			}else if(strcmp(par,"PL_MAX_UX") == 0){
+				PL_MAX_UX = strtod(val,&ptr);
+			}else if(strcmp(par,"PL_MAX_UY") == 0){
+				PL_MAX_UY = strtod(val,&ptr);
 			}
 		}
 
