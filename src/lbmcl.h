@@ -58,7 +58,7 @@ void BCFC_init(long *bcfc,int nq,int no);
 void BCFC_pull(struct BC *bc,long *bcfc,double dt);
 double *BCRAD_malloc(struct BC *bc);
 double *BCRAD_push(struct BC *bc,double *bcrad);
-void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f);
+void nd_ppm_write(double *m, int nx, int ny, double pmax, double pmin, int scale, FILE *f);
 void jet_colormap(double num, double min, double max,int *c);
 void list_devices();
 void print_device_name(FILE *f,cl_device_id device);

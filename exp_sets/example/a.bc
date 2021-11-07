@@ -9,10 +9,10 @@ CY {
 	spring 0.1
 	damp 0
 	mass 1000
-	rad 20
+	rad 30
 	force 0 0
 	acc 0 0
 	vel 0 0
-	dsp 10 0
-	pos 250 135
+	dsp 25 0
+	pos 265 135
 }

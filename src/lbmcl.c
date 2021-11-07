@@ -215,7 +215,7 @@ void jet_colormap(double val, double min, double max,int *c){
 	}
 }
 
-void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f){
+void nd_ppm_write(double *m, int nx, int ny, double pmax, double pmin, int scale, FILE *f){
 	fprintf(f,"P3\n");
 	fprintf(f,"%d %d 255\n",nx*scale,ny*scale);
 	int *v;
@@ -224,7 +224,7 @@ void nd_ppm_write(double *m, int nx, int ny, double pmax, int scale, FILE *f){
 			for(int i=0;i<nx;i++){
 				for(int sx=0;sx<scale;sx++){
 					v=(int *)malloc(3*sizeof(int));
-					jet_colormap(m[i+j*nx],-1*pmax,pmax,v);
+					jet_colormap(m[i+j*nx],pmin,pmax,v);
 					fprintf(f,"%d %d %d\n",v[0],v[1],v[2]);
 					free(v);
 				}
@@ -429,11 +429,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 		if(IS_MP4){
 			get_density(out_m,nd);
-			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_D,1,fp[0]);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_D,0,1,fp[0]);
 			get_ux(out_m,nd);
-			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UX,1,fp[1]);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UX,-1*PL_MAX_UX,1,fp[1]);
 			get_uy(out_m,nd);
-			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UY,1,fp[2]);
+			nd_ppm_write(out_m,nd->nx,nd->ny,PL_MAX_UY,-1*PL_MAX_UX,1,fp[2]);
 		}
 		if(IS_FILE_OUTPUT)
 		{

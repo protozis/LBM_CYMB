@@ -1,8 +1,9 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
+## What's the physics of this LBM simulation
 
 ## Dependences and Build process
 ### C binaries
-All C programs are written in `C99` standard, therefore it should not need any extra libs. However, since some of the environment setups would be nasty for `clang` when you are compiling kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you should install. In Archlinux they are:
+All C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you need to install. In Archlinux they are:
 
 **Runtime**
 - Intel GPU: `intel-compute-runtime`
@@ -16,34 +17,40 @@ All C programs are written in `C99` standard, therefore it should not need any e
 - Headers: `opencl-headers`
 
 **Tools**
-- `clinfo`: good for finding all possible properties of the system.
+- `clinfo`: good for monitoring all possible platform properties of the system.
 
+You can build and install the binaries with: 
 ```shell
-$> cd src
+$> cd LBM_CYMB/src
 $> make
 $> make install
 ```
+`make install` will copy all binaries and `.cl` source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
 
 Be advice that the Opencl target version need to be defined in you host program as 
 ```C
 #define CL_TARGET_OPENCL_VERSION 300
 ```
-300 stands for Ver. 3.0.0
-
-> The atomic function support for 64-bits integer is required by the force calculation, need to check the device extension of `cl_khr_int64_atomics` of desire platform.
+while `300` stands for the version `3.0.0`. Also the atomic function support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
 ### Script
-These dependences are only used by Bash script, has no effect on the binary programs.
+These dependences are only used by shell script.
 - `time`: Linux built-in one, GNU version also works.
 - `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
+- `gnuplot`: Used by `plot.p` for visualize data.
 
 ## Usage
 Following steps can be altered by your own needs, feel free to play around with it.
 
 ### Choose a Resolution
 To decide a good resolution for the simulation, you should consider with:
-1. **The fluid phenomenon you are studying at.** The higher the resolution is, the more accurate simulation you get. However there dose not have a good calculation to tell you what resolution is enough for you, the only approach is performing a brunch of test run.
-2. **The device you are using.** All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
+1. **The fluid phenomenon you are studying at.** 
+
+	The higher the resolution is, the more accurate simulation you get. However there dose not have a good calculation to tell you what resolution is enough for you, the only approach is running a benchmark.
+
+2. **The device you are using.**
+
+	All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
 ### Make an experiment setup
 Inside an experiment setup directory we have:
@@ -227,6 +234,9 @@ Following parameters are included in a configuration file:
 |DEBUG_FILE|Debug filename|NULL|
 |IS_LOG_PRINT|Print log to stdout or not.|1|
 |IS_PROGRESS_PRINT|Print progress or not|1|
+|PL_MAX_D|Maximum density value for the jetcolormap ploting|0.5|
+|PL_MAX_UX|Maximum x velocity value for the jetcolormap ploting|0.1|
+|PL_MAX_DUY|Maximum y velocity value for the jetcolormap ploting|0.1|
 
 
 ### Perform an experiment
@@ -248,5 +258,4 @@ And launch is with:
 $> ./schedule exp_grp1
 ```
 
-## What's the physics of this LBM simulation
 
