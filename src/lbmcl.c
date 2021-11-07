@@ -392,7 +392,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 			fflush(stdout);
 		}
 		BCFC_init(bcfc,bc->no,bc->nq);
-		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
+		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(long), &bcfc[0], 0, NULL, NULL);
 		err = clFinish(queue);
 		check_err(err, "Couldn't write the buffer");
 		for(int s=0;s<SKP;s++){
@@ -403,7 +403,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 			check_err(err, "Couldn't copy buffers");
 			err = clFinish(queue);
 		}
-		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(int), &bcfc[0], 0, NULL, NULL);
+		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(long), &bcfc[0], 0, NULL, NULL);
 		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
 		

@@ -1,5 +1,13 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 ## What's the physics of this LBM simulation
+For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you need:
+- A great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
+- The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
+
+### LBM basic
+The foundation of LBM laid on Boltzmann distribution, which describe the fluid density distribution according to macro-scope parameters: temperature, density and velocity. By applying velocity into Lattice space, the density distribution is constrained into fixed amount of vectors. In this simulation we use D2Q9 (2 dimensions & 9 vectors) lattices. After the calculation of distribution in each grid, the fluid will advect into surrounding grids. To simulate the collision phenomenon between this advection, we use BGKW method with fixed collision frequency.
+
+### 
 
 ## Dependences and Build process
 ### C binaries
@@ -33,7 +41,7 @@ Be advice that the Opencl target version need to be defined in you host program 
 ```
 while `300` stands for the version `3.0.0`. Also the atomic function support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
-### Script
+### Scripts
 These dependences are only used by shell script.
 - `time`: Linux built-in one, GNU version also works.
 - `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
