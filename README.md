@@ -1,13 +1,54 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 ## What's the physics of this LBM simulation
 For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you need:
-- A great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
+- Great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
 - The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
 
-### LBM basic
-The foundation of LBM laid on Boltzmann distribution, which describe the fluid density distribution according to macro-scope parameters: temperature, density and velocity. By applying velocity into Lattice space, the density distribution is constrained into fixed amount of vectors. In this simulation we use D2Q9 (2 dimensions & 9 vectors) lattices. After the calculation of distribution in each grid, the fluid will advect into surrounding grids. To simulate the collision phenomenon between this advection, we use BGKW method with fixed collision frequency.
+Let's take a look at a log file produced by this simulator first.
+```
+[Selected device]: NVIDIA GeForce MX150
+[Workgroup info]
+	global_size: 480/270 (total: 129600)
+	local_size: 16/9 (total: 144)
+	workgroups: 30/30 (total: 900)
+[Kernel info]:
+	CL_KERNEL_WORK_GROUP_SIZE: 8
+[Parameters]: (* config value)
+	<Stratage>
+		1. Similarity for the Reynolds number
+		2. Spectify CL for CT
+	<Dimensionless>
+	 *	Mach number(MA): 0.300000
+		Reynolds number: 2805.923617
+		Grid Reynolds number: 3.464103
+	<Lattice unit>
+	 *	Collision frequency(CF): 0.550000
+		Kinematic viscosity: 5780.000000
+	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
+	 *	Size nx: 480 ny: 270
+	<Dimensional value>
+	 *	Length(CL): 1.000000 (m/lattice space)
+		Time(CT): 0.001698 (secs/time step)
+	 *	Density(CD): 1.225000kg/m^3
+		Mass: 1.225000kg
+		Force: 424830.396154kg*m/s^2
+		Spring constant: 424830.396154kg/s^2
+		Damping constant: 721.399498kg/s
+		BCV D: 0.367500kg/m^3 Ux: 58.889755m/s Uy: 0.000000m/s
+	<SI unit>
+		Kinematic viscosity: 3403827.834069m^2/s
+		Size width: 480.000000m height: 270.000000m
+	 *	Speed of sound(CS): 340.000000m/s
+	<Dirty tricks>
+	 *	REFUEL_RTO: 0.500000
+	 *	EAT_RTO: 0.050000
+	<Objects>
+		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
+		0: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
+		1: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
+```
+Despite the first three sectors about the processors being used by OpenCL program, the remaining sectors define the connection between this simulation and the real-world model.
 
-### 
 
 ## Dependences and Build process
 ### C binaries
