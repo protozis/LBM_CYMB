@@ -6,6 +6,7 @@ For the simplicity of this instruction, I will not cover detail information abou
 
 Let's take a look at a log file produced by this simulator first.
 ```
+
 [Selected device]: NVIDIA GeForce MX150
 [Workgroup info]
 	global_size: 480/270 (total: 129600)
@@ -26,17 +27,18 @@ Let's take a look at a log file produced by this simulator first.
 		Kinematic viscosity: 5780.000000
 	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
 	 *	Size nx: 480 ny: 270
-	<Dimensional value>
+	 *	Speed of sound(Csl): 0.333333
+	<Conversion factors>
 	 *	Length(CL): 1.000000 (m/lattice space)
 		Time(CT): 0.001698 (secs/time step)
 	 *	Density(CD): 1.225000kg/m^3
 		Mass: 1.225000kg
-		Force: 424830.396154kg*m/s^2
-		Spring constant: 424830.396154kg/s^2
-		Damping constant: 721.399498kg/s
-		BCV D: 0.367500kg/m^3 Ux: 58.889755m/s Uy: 0.000000m/s
+		Force: 1274490.000000kg*m/s^2
+		Spring constant: 1274490.000000kg/s^2
+		Damping constant: 1249.500000kg/s
+		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
 	<SI unit>
-		Kinematic viscosity: 3403827.834069m^2/s
+		Kinematic viscosity: 5895600.000000m^2/s
 		Size width: 480.000000m height: 270.000000m
 	 *	Speed of sound(CS): 340.000000m/s
 	<Dirty tricks>
@@ -44,11 +46,32 @@ Let's take a look at a log file produced by this simulator first.
 	 *	EAT_RTO: 0.050000
 	<Objects>
 		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
-		0: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
-		1: 42483.039615kg/s^2 0.000000kg/s 1225.000000kg 0.937260Hz 1.066940s
+		0: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+		1: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 ```
-Despite the first three sectors about the processors being used by OpenCL program, the remaining sectors define the connection between this simulation and the real-world model.
+`[Selected device]`,`[Workgroup info]` and `[Kernel info]` sections describe the computing environments adapted by OpenCL program, we will discuss them later. For now we wnat to focus on `[Parameters]`, which connect this Lattice space simulation into a real-world model.
 
+Let's first take a look at the most fundamental connection: unit.
+
+### Conversion factors
+
+```
+*	Length(CL): 1.000000 (m/lattice space)
+	Time(CT): 0.001698 (secs/time step)
+*	Density(CD): 1.225000kg/m^3
+```
+
+`*` indecate that this value is selected by user, and the rest are calculated accordingly. In the Lattice space (indecated with <sup>'</sup>), following parameters are charatized as:
+
+1. Grid spacing(dx) = 1 L<sup>'</sup>
+2. Time step(dt) = 1 T<sup>'</sup>
+3. Weight per grid(dd) = 1 D<sup>'</sup>
+
+Therefore with the defination of conversion factors ([L] = m<sup>1</sup>):
+
+CL = L/L<sup>'<sup>
+
+we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<sup>1</sup>
 
 ## Dependences and Build process
 ### C binaries
