@@ -1,6 +1,6 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 ## What's the physics of this LBM simulation
-For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you need:
+For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you needed:
 - Great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
 - The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
 
@@ -27,7 +27,7 @@ This is a log file produced by this simulator during an experiment, and many use
 		Kinematic viscosity: 5780.000000
 	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
 	 *	Size nx: 480 ny: 270
-	 *	Speed of sound(Csl): 0.333333
+	 	Speed of sound(Csl): 0.333333
 	<Conversion factors>
 	 *	Length(CL): 1.000000 (m/lattice space)
 		Time(CT): 0.001698 (secs/time step)
@@ -36,11 +36,11 @@ This is a log file produced by this simulator during an experiment, and many use
 		Force: 1274490.000000kg*m/s^2
 		Spring constant: 1274490.000000kg/s^2
 		Damping constant: 1249.500000kg/s
-		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
 	<SI unit>
 		Kinematic viscosity: 5895600.000000m^2/s
 		Size width: 480.000000m height: 270.000000m
 	 *	Speed of sound(CS): 340.000000m/s
+	 	BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
 	<Dirty tricks>
 	 *	REFUEL_RTO: 0.500000
 	 *	EAT_RTO: 0.050000
@@ -49,6 +49,7 @@ This is a log file produced by this simulator during an experiment, and many use
 		0: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 		1: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 ```
+**The prefix `*` indecate that this value is selected by user in a configuration file**, and the rest are calculated accordingly.
 `[Selected device]`,`[Workgroup info]` and `[Kernel info]` sections describe the computing environments adapted by OpenCL program, we will discuss them later. For now we wnat to focus on `[Parameters]`, which connect this Lattice space simulation into a real-world model.
 
 Ok, let's take a look at the most fundamental connection: units.
@@ -61,7 +62,7 @@ Ok, let's take a look at the most fundamental connection: units.
 *	Density(CD): 1.225000kg/m^3
 ```
 
-`*` indecate that this value is selected by user, and the rest are calculated accordingly. In the Lattice space (indecated with `'`), following parameters are charatized as:
+In the Lattice space (indecated with `'`), following parameters are charatized as:
 
 1. Grid spacing(dx) = 1 L'
 2. Time step(dt) = 1 T'
@@ -117,7 +118,29 @@ Now we know that if `CL`,`U'`,`Cs` and `MA` are fixed, we get `CT`. Let's go bac
 	..
 	 *	Speed of sound(CS): 340.000000m/s
 ```
-`BCV` define the macro-scopic parameters of the surrounding space, we will discuss them later. 
+`BCV` describe the macro-scopic dynamics of the flow surrounding the box, we will discuss them later. With these parameters being defined, we can calculate the rest conversion factors without trouble.
+
+### Inspecting the example model
+Let's take a look at those parameters being calculated in previous chapter.
+```
+	<Dimensionless>
+	 *	Mach number(MA): 0.300000
+		Reynolds number: 2805.923617
+		..
+	<Conversion factors>
+	 *	Length(CL): 1.000000 (m/lattice space)
+		Time(CT): 0.001698 (secs/time step)
+	 *	Density(CD): 1.225000kg/m^3
+		Mass: 1.225000kg
+		..
+		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
+	<SI unit>
+		..
+		Size width: 480.000000m height: 270.000000m
+	 *	Speed of sound(CS): 340.000000m/s
+
+``` 
+
 
 ## Dependences and Build process
 ### C binaries
