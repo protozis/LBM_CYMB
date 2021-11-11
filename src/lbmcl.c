@@ -53,6 +53,7 @@ double Cmass;
 double Cforce;
 double Cacc;
 double Cvel;
+double Csl;
 
 
 void update_config(char* filename){
@@ -122,7 +123,8 @@ void update_config(char* filename){
 	}
 }
 void set_parameters(struct BC *bc,struct ND *nd){
-	CT = CL*CS_LTTC/CS;
+	Csl = sqrt(pow(bc->ux,2) + pow(bc->uy,2)) / MA;
+	CT = CL*Csl/CS;
 	Cmass = CD/(pow(CL,3));
 	Cspring = Cmass/pow(CT,2);
 	Cdamp = Cmass/CT;
@@ -146,8 +148,9 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
 	fprintf(f,"\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
 	fprintf(f,"\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
+	fprintf(f,"\t *\tSpeed of sound(Csl): %lf\n",Csl);
 
-	fprintf(f,"\t<Dimensional value>\n");
+	fprintf(f,"\t<Conversion factors>\n");
 	fprintf(f,"\t *\tLength(CL): %lf (m/lattice space)\n",CL);
 	fprintf(f,"\t\tTime(CT): %lf (secs/time step)\n",CL*CS_LTTC/CS);
 	fprintf(f,"\t *\tDensity(CD): %lfkg/m^3\n",CD);
