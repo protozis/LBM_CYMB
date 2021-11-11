@@ -4,7 +4,7 @@ For the simplicity of this instruction, I will not cover detail information abou
 - Great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
 - The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
 
-Let's take a look at a log file produced by this simulator first.
+This is a log file produced by this simulator during an experiment, and many useful parameters are recorded:
 ```
 
 [Selected device]: NVIDIA GeForce MX150
@@ -51,9 +51,9 @@ Let's take a look at a log file produced by this simulator first.
 ```
 `[Selected device]`,`[Workgroup info]` and `[Kernel info]` sections describe the computing environments adapted by OpenCL program, we will discuss them later. For now we wnat to focus on `[Parameters]`, which connect this Lattice space simulation into a real-world model.
 
-Let's first take a look at the most fundamental connection: unit.
+Ok, let's take a look at the most fundamental connection: units.
 
-### Conversion factors
+### Conversion factors between Lattice and SI unit
 
 ```
 *	Length(CL): 1.000000 (m/lattice space)
@@ -61,21 +61,63 @@ Let's first take a look at the most fundamental connection: unit.
 *	Density(CD): 1.225000kg/m^3
 ```
 
-`*` indecate that this value is selected by user, and the rest are calculated accordingly. In the Lattice space (indecated with <sup>'</sup>), following parameters are charatized as:
+`*` indecate that this value is selected by user, and the rest are calculated accordingly. In the Lattice space (indecated with `'`), following parameters are charatized as:
 
-1. Grid spacing(dx) = 1 L<sup>'</sup>
-2. Time step(dt) = 1 T<sup>'</sup>
-3. Weight per grid(dd) = 1 D<sup>'</sup>
+1. Grid spacing(dx) = 1 L'
+2. Time step(dt) = 1 T'
+3. Weight per grid(dd) = 1 D'
 
-Therefore with the defination of conversion factors `CL` ([L] = m<sup>1</sup>) :
+Therefore with the defination of conversion factor `CL` ([L] = m<sup>1</sup>):
 
-> CL = L/L<sup>'</sup>
+> CL = L/L'
 
 we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<sup>1</sup>, i.e. the length of a grid spacing in meters.
 
-> With the fact that dx = 1 and dt = 1, for each iteration in simulation particles will travel for exactly 1 grid space.  
+> **[Note]** With the fact that dx = 1 and dt = 1, for each iteration in simulation particles will travel for exactly 1 grid space.  
 > ![dx_dt](img/dx_dt.png)
 
+Here in the `<Conversion factors>` section you can see that only `CL` and `CD` are selected, but we also need `CT` to calculate all others factors like force, Spring constant, etc. And that's how dimensionless quantity joined the table.
+
+### Dimensionless 
+According to Law of Similarity, Reynolds and Mach numbers are the same in both Lattice and SI units. That's why thay are dimensionless values. The connection between these two numbers is the typical velocity of the simulation(`U`). Usually, we choose the velocity of the unified flow surrounding the box for the calculation of Mach numbers. With this relationship, we only need to specify one of these numbers and the other will be fixed accordingly. For this simulator, Mach number can be specified in the configuration file. The definition of Mach number:
+
+> MA = U/Cs = U'/Cs'
+
+While `Cs` is the speed of sound. With the conversion factor of speed equal to:
+
+> CU = CL/CT = U/U' = Cs/Cs'
+
+we get:
+
+> CL/CT = Cs/Cs' = Cs*MA/U'
+
+Organized we have
+
+> CT = CL\*U'/(Cs*MA)
+
+Now we know that if `CL`,`U'`,`Cs` and `MA` are fixed, we get `CT`. Let's go back and take a look at that log file again.
+
+```
+	<Dimensionless>
+	 *	Mach number(MA): 0.300000
+	..
+	.
+	<Lattice unit>
+	.
+	..
+	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
+	..
+	.
+	<Conversion factors>
+	 *	Length(CL): 1.000000 (m/lattice space)
+	 ..
+	 .
+	<SI unit>
+	.
+	..
+	 *	Speed of sound(CS): 340.000000m/s
+```
+`BCV` define the macro-scopic parameters of the surrounding space, we will discuss them later. 
 
 ## Dependences and Build process
 ### C binaries
