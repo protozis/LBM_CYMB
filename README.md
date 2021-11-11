@@ -73,6 +73,9 @@ Therefore with the defination of conversion factors `CL` ([L] = m<sup>1</sup>) :
 
 we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<sup>1</sup>, i.e. the length of a grid spacing in meters.
 
+> With the fact that dx = 1 and dt = 1, for each iteration in simulation particles will travel for exactly 1 grid space.  
+> ![dx_dt](img/dx_dt.png)
+
 
 ## Dependences and Build process
 ### C binaries
