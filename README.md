@@ -67,11 +67,12 @@ Let's first take a look at the most fundamental connection: unit.
 2. Time step(dt) = 1 T<sup>'</sup>
 3. Weight per grid(dd) = 1 D<sup>'</sup>
 
-Therefore with the defination of conversion factors ([L] = m<sup>1</sup>):
+Therefore with the defination of conversion factors `CL` ([L] = m<sup>1</sup>) :
 
-CL = L/L<sup>'<sup>
+> CL = L/L<sup>'</sup>
 
-we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<sup>1</sup>
+we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<sup>1</sup>, i.e. the length of a grid spacing in meters.
+
 
 ## Dependences and Build process
 ### C binaries
