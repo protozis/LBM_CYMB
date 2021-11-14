@@ -160,9 +160,17 @@ Ok, we have finished those processes which are well tested and already been writ
 
 ![tricks](img/tricks.png)
 
-When the cylinder is moving it will release nods that was covered in one side, and eat new nodes in another side. To those being release and need to be refuel, I will call it **refuel** nodes. As for those being eaten, I simply called it **eat** nodes. What will happen if we just ignore these two factors? Let's take a look at a small experience, where we placed and set an oscillating cylinder in a steady zero speed fluid.
+When the cylinder is moving it will release nods that was covered in one side, and eat new nodes in another side. To those being release and need to be refuel, I will call it **refuel** nodes. As for those being eaten, I simply called it **eat** nodes. 
 
+The image below describe what will happened in `refuel` nodes. It may not cause serious problem if the step is small enough and the viscosity is low, but there will be a peak of force when ever the cylinder move across a node. This is cause by the fact that in the moment of that crossing happen, only one side of the cylinder have make contact with fluid, and with the force calculation done by bouncing back algorithm the incremental total force will be highly unbalanced. We defined a ratino named `REFUEL_RTO` and fill the empty slots base on this ratio multiply the density distributions in surrounding nodes. 
 
+![refuel](img/refuel.png)
+
+And this is for `eat` nodes. If we ignore these nodes, the conservation of mass will be breaked (since what being eaten will be gone for ever) and the accuracy will drop significantly for a fluid with high viscosity. The density distributions in these eaten nodes will be pushed to surrounding nodes, after multiplied by a ration we defined named `EAT_RTO`.
+
+![eat](img/eat.png)
+
+What make these trick 
 
 ## Dependences and Build process
 ### C binaries
