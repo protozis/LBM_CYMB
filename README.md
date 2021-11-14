@@ -158,6 +158,12 @@ You may ask: why the particles didn't bouncing like a billiard? This relate to t
 ### Dirty tricks
 Ok, we have finished those processes which are well tested and already been written into the papers. Now I have to show some sloppy and messy tricks I did to make things work, and it all caused by moving boundary.
 
+![tricks](img/tricks.png)
+
+When the cylinder is moving it will release nods that was covered in one side, and eat new nodes in another side. To those being release and need to be refuel, I will call it **refuel** nodes. As for those being eaten, I simply called it **eat** nodes. What will happen if we just ignore these two factors? Let's take a look at a small experience, where we placed and set an oscillating cylinder in a steady zero speed fluid.
+
+
+
 ## Dependences and Build process
 ### C binaries
 All C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you need to install. In Archlinux they are:
