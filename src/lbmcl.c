@@ -123,7 +123,11 @@ void update_config(char* filename){
 	}
 }
 void set_parameters(struct BC *bc,struct ND *nd){
-	Csl = sqrt(pow(bc->ux,2) + pow(bc->uy,2)) / MA;
+	if(sqrt(pow(bc->ux,2) + pow(bc->uy,2)) == 0 ){
+		Csl = 0.1/MA;
+	}else{
+		Csl = sqrt(pow(bc->ux,2) + pow(bc->uy,2)) / MA;
+	}
 	CT = CL*Csl/CS;
 	Cmass = CD/(pow(CL,3));
 	Cspring = Cmass/pow(CT,2);

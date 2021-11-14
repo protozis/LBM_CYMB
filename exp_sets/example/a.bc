@@ -1,18 +1,18 @@
 bc_no 1
 bc_nq 2
 BCV {
-	dnt 1
+	dnt 0.3
 	ux 0.0
 	uy 0.0
 }
 CY {
-	spring 0.1
-	damp 0
+	spring 0.0
+	damp 0.0
 	mass 1000
-	rad 30
+	rad 25
 	force 0 0
 	acc 0 0
 	vel 0 0
-	dsp 0 10
-	pos 240 145
+	dsp 0 0
+	pos 100 135
 }
