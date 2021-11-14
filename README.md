@@ -130,15 +130,19 @@ Let's take a look at those factors we just calculated.
 Following facts can be known with these results:
 
 - With the density is around 1.225kg and the speed of sound is 340 m/s, we know that this fluid probably is Air in room temperature.
-- With Reynolds number equal 106.431 we know that it is a laminar flow since typical borderline between laminar and turbulance is 2300. Which also match the Mach number we defined, that the flow is much slower then the speed of sound and there should be no heavy compression during the simulation.
+- With Reynolds number equal 106.431 we know that it is a laminar flow since typical borderline between laminar and turbulence is 2300. Which also match the Mach number we defined, that the flow is much slower then the speed of sound and there should be no heavy compression during the simulation.
 - The simulation took place in a 480x270 meters area and the fluid speed in x-axis is 102 m/s, which means it take about 4.7 seconds to travel from the left side edge to the right side edge. Divide by the time conversion factor `CT`, we know it took 2771 steps of iterations for this trip.
 
 > [Warning] Keep in mind that I use the diameter of the cylinder for typical length in the calculation of Reynolds number. If multiple cylinders are included, maybe apply the mean distance between them for typical length will produce more accurate Reynolds number.
 
 ### Inspecting the Simulation model
-It is time to discuss about those cylinders being placed in the simulation.
+It is time to discuss about those cylinders being placed in the simulation. This is what a single cylinder looks like:
+
+![BC](img/bc.png)
+
+In a 2D simulation that manipulate 3D calculation of a cylinder, we consider this cylinder is infinite long and the simulation depth is also infinite. All calculation relate to the geometric should consider to be unified by depth, like force, pressure, etc. Each cylinder is consider to be connected with 2 springs and 2 dampers, which simplified the calculation of the mechanical of materials.
+
 ![BC2](img/bc-2.png)
-Each cylinder is consider to be connected with 2 springs and 2 dampers, which simplfied the calculation of the mechanical of matreials.
 
 
 
@@ -258,8 +262,6 @@ Example:
 Two classes are included in boundary conditions:
 1. BCV: Unified fluid that surround the simulation area.
 2. CY: Cylinder object.
-
-![BC](img/bc.png)
 
 For example:
 ```

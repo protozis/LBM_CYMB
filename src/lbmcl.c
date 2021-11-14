@@ -140,12 +140,12 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	
 	fprintf(f,"\t<Dimensionless>\n");
 	fprintf(f,"\t *\tMach number(MA): %lf\n",MA);
-	fprintf(f,"\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*(CF-0.5)));
-	fprintf(f,"\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*(CF-0.5)));
+	fprintf(f,"\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*((1/CF)-0.5)));
+	fprintf(f,"\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*((1/CF)-0.5)));
 	
 	fprintf(f,"\t<Lattice unit>\n");
 	fprintf(f,"\t *\tCollision frequency(CF): %lf\n",CF);
-	fprintf(f,"\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
+	fprintf(f,"\t\tKinematic viscosity: %lf\n",(1/CF)-0.5)/3;
 	fprintf(f,"\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
 	fprintf(f,"\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
 	fprintf(f,"\t\tSpeed of sound(Csl): %lf\n",Csl);
@@ -160,7 +160,7 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t\tDamping constant: %lfkg/s\n",Cdamp);
 
 	fprintf(f,"\t<SI unit>\n");
-	fprintf(f,"\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
+	fprintf(f,"\t\tKinematic viscosity: %lfm^2/s\n",(((1/CF)-0.5)/3)*CL*CL/CT);
 	fprintf(f,"\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
 	fprintf(f,"\t *\tSpeed of sound(CS): %lfm/s\n",CS);
 	fprintf(f,"\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
