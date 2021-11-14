@@ -30,7 +30,7 @@
      inkscape:snap-bbox-midpoints="true"
      inkscape:zoom="1.2810466"
      inkscape:cx="196.32385"
-     inkscape:cy="233.01261"
+     inkscape:cy="233.0126"
      inkscape:window-width="1900"
      inkscape:window-height="1038"
      inkscape:window-x="10"
@@ -44,8 +44,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid824"
-       originx="-70.000006"
-       originy="-28.000002" />
+       originx="-70.000009"
+       originy="-28.000003" />
   </sodipodi:namedview>
   <defs
      id="defs2">
@@ -256,7 +256,7 @@
     <circle
        style="fill:#0010ff;fill-opacity:0.898039;fill-rule:evenodd;stroke:none;stroke-width:0.25;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.898039"
        id="path2229-9-77-65-1"
-       cx="130"
+       cx="140"
        cy="130"
        r="1.5" />
     <circle
@@ -298,24 +298,24 @@
     <text
        xml:space="preserve"
        style="font-size:10px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="90.249023"
+       x="145.24902"
        y="133.64502"
        id="text9629"><tspan
          sodipodi:role="line"
          id="tspan9627"
          style="font-size:10px;stroke-width:0.264583"
-         x="90.249023"
+         x="145.24902"
          y="133.64502">EAT</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:10px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="135.42236"
+       x="90.422356"
        y="133.57422"
        id="text9629-2"><tspan
          sodipodi:role="line"
          id="tspan9627-9"
          style="font-size:10px;stroke-width:0.264583"
-         x="135.42236"
+         x="90.422356"
          y="133.57422">REFUEL</tspan></text>
     <path
        style="fill:none;stroke:#ff0000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
