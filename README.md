@@ -140,12 +140,18 @@ It is time to discuss about those cylinders being placed in the simulation. This
 
 ![BC](img/bc.png)
 
-In a 2D simulation that manipulate 3D calculation of a cylinder, we consider this cylinder is infinite long and the simulation depth is also infinite. All calculation relate to the geometric should consider to be unified by depth, like force, pressure, etc. Each cylinder is consider to be connected with 2 springs and 2 dampers, which simplified the calculation of the mechanical of materials.
+In a 2D simulation that manipulate 3D calculation of a cylinder, we consider this cylinder is infinite long and the simulation depth is also infinite. All calculation relate to the geometric should consider to be unified by depth, like force, pressure, etc. Each cylinder is consider to be a rigid body and is connected with 2 springs and 2 dampers, which simplified the calculation of the mechanical of materials.
 
 ![BC2](img/bc-2.png)
 
+The interaction between the border of the cyliner and fluid around it is a simple bouncing-back model. These Two images indecate the direction after a bouncing was happened.
 
+![intercept](img/intercept.png)
+![intercept2](img/intercept2.png)
 
+You may ask why the particles didn't bouncing like a billiard? 
+
+![bouncing](img/bouncing.png)
 
 ## Dependences and Build process
 ### C binaries
