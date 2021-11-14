@@ -1,6 +1,6 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
-Before you start using this simulator, I highly recommend to read the instruction **[What's the physics of this LBM simulation ?](physics.md)**.
+Before you start using this simulator, I highly recommend to read the instruction I made: **[What's the physics of this LBM simulation ?](physics.md)**.
 
 ## Dependences and Build process
 ### C binaries
@@ -237,7 +237,7 @@ Following parameters are included in a configuration file:
 |PL_MAX_UX|Maximum x velocity value for the jetcolormap ploting|0.1|
 |PL_MAX_DUY|Maximum y velocity value for the jetcolormap ploting|0.1|
 
-> [Warning] The `SKP` vaule should not exceed 10. This is because I need to use atomic function to collect the force applied on the objects from different workgroups RAM, and the value cannot exceed the capability of containing of a `long` variable.
+> [Warning] The `SKP` vaule should not exceed 10 in high resolution ND. This is because I need to use atomic function to collect the force applied on the objects from different workgroups RAM, and the value cannot exceed the capability of containing of a `long` variable.
 
 ### Perform an experiment
 Run `simulator` with desire experiment setup:
