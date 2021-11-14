@@ -155,6 +155,9 @@ The rule of bouncing look like this:
 
 You may ask: why the particles didn't bouncing like a billiard? This relate to the assumption of non-slip condition in fluid dynamics. In this condition, the fluid located at the surface of a solid object is consider to have zero relative velocity with the object. With the rule that bounce the particle right back to where its came from, the fluid faster then the object will be slow down and transfer the momentum to the object, and this is how we collect the shear stress from the fluid to the cylibder surface.
 
+### Dirty tricks
+Ok, we have finished those processes which are well tested and already been written into the papers. Now I have to show some sloppy and messy tricks I did to make things work, and it all caused by moving boundary.
+
 ## Dependences and Build process
 ### C binaries
 All C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you need to install. In Archlinux they are:
@@ -389,6 +392,7 @@ Following parameters are included in a configuration file:
 |PL_MAX_UX|Maximum x velocity value for the jetcolormap ploting|0.1|
 |PL_MAX_DUY|Maximum y velocity value for the jetcolormap ploting|0.1|
 
+> [Warning] The `SKP` vaule should not exceed 10. This is because I need to use atomic function to collect the force applied on the objects from different workgroups RAM, and the value cannot exceed the capability of containing of a `long` variable.
 
 ### Perform an experiment
 Run `simulator` with desire experiment setup:
