@@ -34,20 +34,21 @@ Be advice that the Opencl target version need to be defined in you host program 
 ```
 while `300` stands for the version `3.0.0`. Also the atomic function support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
+> [Note] If you want to make MP4 video in pipeline, `ffmpeg` must be installed. 
+
 ### Scripts
 These dependences are only used by shell script.
 - `time`: Linux built-in one, GNU version also works.
-- `ffmpeg`: used by `video_maker`, pack .png images into .mp4 video.
 - `gnuplot`: Used by `plot.p` for visualize data.
 
-## Usage
+## Start a Simulation Step by Step
 Following steps can be altered by your own needs, feel free to play around with it.
 
 ### Choose a Resolution
 To decide a good resolution for the simulation, you should consider with:
 1. **The fluid phenomenon you are studying at.** 
 
-	The higher the resolution is, the more accurate simulation you get. However there dose not have a good calculation to tell you what resolution is enough for you, the only approach is running a benchmark.
+	The higher the resolution is, the more accurate simulation you get. However there dose not have a good calculation to tell you what resolution is enough for you, the only approach is benchmarking.
 
 2. **The device you are using.**
 
