@@ -162,15 +162,22 @@ Ok, we have finished those processes which are well tested and already been writ
 
 When the cylinder is moving it will release nods that was covered in one side, and eat new nodes in another side. To those being release and need to be refuel, I will call it **refuel** nodes. As for those being eaten, I simply called it **eat** nodes. 
 
-The image below describe what will happened in `refuel` nodes. It may not cause serious problem if the step is small enough and the viscosity is low, but there will be a peak of force when ever the cylinder move across a node. This is cause by the fact that in the moment of that crossing happen, only one side of the cylinder have make contact with fluid, and with the force calculation done by bouncing back algorithm the incremental total force will be highly unbalanced. We defined a ratino named `REFUEL_RTO` and fill the empty slots base on this ratio multiply the density distributions in surrounding nodes. 
-
 ![refuel](img/refuel.png)
 
-And this is for `eat` nodes. If we ignore these nodes, the conservation of mass will be breaked (since what being eaten will be gone for ever) and the accuracy will drop significantly for a fluid with high viscosity. The density distributions in these eaten nodes will be pushed to surrounding nodes, after multiplied by a ration we defined named `EAT_RTO`.
+This image describe what will happened in `refuel` nodes. If we ignore these nodes and do nothing, it may not cause serious problem if the step is small enough and the viscosity is low, but there will be a peak of noise in applied force when ever the cylinder move across a node. This is cause by the fact that in the moment of that crossing happen, only one side of the cylinder have make contact with fluid, the other side will have a vacancy zone. With the force calculation is done by bouncing-back algorithm, the incremental total applied force will be highly unbalanced. To maintain the continuity of fluid , those particles which should advect into the empty slots between the time steps need to be refuel manually. We defined a ratio named `REFUEL_RTO`, and fill the empty slots with the density distributions in surrounding nodes multiplied with this ratio. 
 
 ![eat](img/eat.png)
 
-What make these trick 
+And this is for `eat` nodes. If we ignore these nodes, the conservation of mass will be breaked (since what being eaten will be gone for ever) and the accuracy will drop significantly for a fluid with high viscosity. The density distributions in these eaten nodes will be pushed to surrounding nodes, after multiplied by a ration we defined named `EAT_RTO`.
+
+So, what make these tricks dirty? The reason is simple: we don't know how to choose the values properly before benchmarking. If the result shows that applied force is smooth and no shock wave apeared, then the values can be used.
+
+### That's all! For now.
+The simulation is faaaaar from perfect. Many issuses need to be solved and many details can be improved. What we have now is a simulation that can import some parameters and output a result, thats' all. Following issueses are worth studying in my opinion:
+- Replace BGKW with multiple relaxation time for collision operator.
+- Remove dirty tricks and use interpolating bouncing-back algoritm for moving boundary.
+- Calculate applied force with the calculation of surrounding pressure and shear stress with macroscopic fluid mechanics.
+
 
 ## Dependences and Build process
 ### C binaries
