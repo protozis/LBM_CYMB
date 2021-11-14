@@ -12,7 +12,6 @@ For the simplicity of this instruction, I will not cover detail information abou
 
 This is a log file produced by this simulator during an experiment, and many useful parameters are recorded:
 ```
-
 [Selected device]: NVIDIA GeForce MX150
 [Workgroup info]
 	global_size: 480/270 (total: 129600)
@@ -26,14 +25,14 @@ This is a log file produced by this simulator during an experiment, and many use
 		2. Spectify CL for CT
 	<Dimensionless>
 	 *	Mach number(MA): 0.300000
-		Reynolds number: 2805.923617
-		Grid Reynolds number: 3.464103
+		Reynolds number: 106.431585
+		Grid Reynolds number: 0.131397
 	<Lattice unit>
 	 *	Collision frequency(CF): 0.550000
-		Kinematic viscosity: 5780.000000
+		Kinematic viscosity: 1.318182
 	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
 	 *	Size nx: 480 ny: 270
-	 	Speed of sound(Csl): 0.333333
+		Speed of sound(Csl): 0.333333
 	<Conversion factors>
 	 *	Length(CL): 1.000000 (m/lattice space)
 		Time(CT): 0.001698 (secs/time step)
@@ -43,10 +42,10 @@ This is a log file produced by this simulator during an experiment, and many use
 		Spring constant: 1274490.000000kg/s^2
 		Damping constant: 1249.500000kg/s
 	<SI unit>
-		Kinematic viscosity: 5895600.000000m^2/s
+		Kinematic viscosity: 448.181818m^2/s
 		Size width: 480.000000m height: 270.000000m
 	 *	Speed of sound(CS): 340.000000m/s
-	 	BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
+		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
 	<Dirty tricks>
 	 *	REFUEL_RTO: 0.500000
 	 *	EAT_RTO: 0.050000
@@ -107,45 +106,41 @@ Now we know that if `CL`,`U'`,`Cs` and `MA` are fixed, we get `CT`. Let's go bac
 ```
 	<Dimensionless>
 	 *	Mach number(MA): 0.300000
-	..
-	.
 	<Lattice unit>
-	.
-	..
 	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
-	..
-	.
 	<Conversion factors>
 	 *	Length(CL): 1.000000 (m/lattice space)
-	 ..
-	 .
 	<SI unit>
-	.
-	..
 	 *	Speed of sound(CS): 340.000000m/s
 ```
-`BCV` describe the macro-scopic dynamics of the flow surrounding the box, we will discuss them later. With these parameters being defined, we can calculate the rest conversion factors without trouble.
+`BCV` describe the macro-scopic dynamics of the flow surrounding the box, where typical velocity in Latttice space `U'` came in. We will discuss them later. With these parameters being defined, we can calculate the rest conversion factors without trouble.
 
-### Inspecting the example model
-Let's take a look at those parameters being calculated in previous chapter.
+Let's take a look at those factors we just calculated.
 ```
 	<Dimensionless>
-	 *	Mach number(MA): 0.300000
-		Reynolds number: 2805.923617
-		..
+		Reynolds number: 106.431585
 	<Conversion factors>
-	 *	Length(CL): 1.000000 (m/lattice space)
 		Time(CT): 0.001698 (secs/time step)
 	 *	Density(CD): 1.225000kg/m^3
-		Mass: 1.225000kg
-		..
 		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
 	<SI unit>
-		..
 		Size width: 480.000000m height: 270.000000m
 	 *	Speed of sound(CS): 340.000000m/s
-
 ``` 
+Following facts can be known with these results:
+
+- With the density is around 1.225kg and the speed of sound is 340 m/s, we know that this fluid probably is Air in room temperature.
+- With Reynolds number equal 106.431 we know that it is a laminar flow since typical borderline between laminar and turbulance is 2300. Which also match the Mach number we defined, that the flow is much slower then the speed of sound and there should be no heavy compression during the simulation.
+- The simulation took place in a 480x270 meters area and the fluid speed in x-axis is 102 m/s, which means it take about 4.7 seconds to travel from the left side edge to the right side edge. Divide by the time conversion factor `CT`, we know it took 2771 steps of iterations for this trip.
+
+> [Warning] Keep in mind that I use the diameter of the cylinder for typical length in the calculation of Reynolds number. If multiple cylinders are included, maybe apply the mean distance between them for typical length will produce more accurate Reynolds number.
+
+### Inspecting the Simulation model
+It is time to discuss about those cylinders being placed in the simulation.
+![BC2](img/bc-2.png)
+Each cylinder is consider to be connected with 2 springs and 2 dampers, which simplfied the calculation of the mechanical of matreials.
+
+
 
 
 ## Dependences and Build process
@@ -265,7 +260,6 @@ Two classes are included in boundary conditions:
 2. CY: Cylinder object.
 
 ![BC](img/bc.png)
-![BC2](img/bc-2.png)
 
 For example:
 ```
