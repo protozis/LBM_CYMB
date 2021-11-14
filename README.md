@@ -144,14 +144,16 @@ In a 2D simulation that manipulate 3D calculation of a cylinder, we consider thi
 
 ![BC2](img/bc-2.png)
 
-The interaction between the border of the cyliner and fluid around it is a simple bouncing-back model. These Two images indecate the direction after a bouncing was happened.
+This modeling will ignore the rotation of the cylinder, but it is easy to add another pair of spring and damper for angular movement in future. The interaction between the border of the cyliner and fluid around it is a simple bouncing-back model. These Two images indecate the direction after a bouncing was happened.
 
 ![intercept](img/intercept.png)
 ![intercept2](img/intercept2.png)
 
-You may ask why the particles didn't bouncing like a billiard? 
+The rule of bouncing look like this:
 
 ![bouncing](img/bouncing.png)
+
+You may ask: why the particles didn't bouncing like a billiard? This relate to the assumption of non-slip condition in fluid dynamics. In this condition, the fluid located at the surface of a solid object is consider to have zero relative velocity with the object. With the rule that bounce the particle right back to where its came from, the fluid faster then the object will be slow down and transfer the momentum to the object, and this is how we collect the shear stress from the fluid to the cylibder surface.
 
 ## Dependences and Build process
 ### C binaries
