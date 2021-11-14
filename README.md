@@ -253,7 +253,7 @@ exp_sets/480x270_skp30
 exp_sets/480x270_skp40
 exp_sets/480x270_skp50
 ```
-And launch is with:
+And launch with:
 ```shell
 $> ./schedule exp_grp1
 ```
