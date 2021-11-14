@@ -148,7 +148,7 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t\tKinematic viscosity: %lf\n",CS*CS*(CF-0.5));
 	fprintf(f,"\t *\tBCV D: %lf Ux: %lf Uy: %lf\n",bc->dnt,bc->ux,bc->uy);
 	fprintf(f,"\t *\tSize nx: %d ny: %d\n",nd->nx,nd->ny);
-	fprintf(f,"\t *\tSpeed of sound(Csl): %lf\n",Csl);
+	fprintf(f,"\t\tSpeed of sound(Csl): %lf\n",Csl);
 
 	fprintf(f,"\t<Conversion factors>\n");
 	fprintf(f,"\t *\tLength(CL): %lf (m/lattice space)\n",CL);
@@ -158,12 +158,12 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t\tForce: %lfkg*m/s^2\n",Cforce);
 	fprintf(f,"\t\tSpring constant: %lfkg/s^2\n",Cspring);
 	fprintf(f,"\t\tDamping constant: %lfkg/s\n",Cdamp);
-	fprintf(f,"\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
 
 	fprintf(f,"\t<SI unit>\n");
 	fprintf(f,"\t\tKinematic viscosity: %lfm^2/s\n",CS*CS*(CF-0.5)*CL*CL/CT);
 	fprintf(f,"\t\tSize width: %lfm height: %lfm\n",nd->nx*CL,nd->ny*CL);
 	fprintf(f,"\t *\tSpeed of sound(CS): %lfm/s\n",CS);
+	fprintf(f,"\t\tBCV D: %lfkg/m^3 Ux: %lfm/s Uy: %lfm/s\n",bc->dnt*CD,bc->ux*CL/CT,bc->uy*CL/CS);
 
 	fprintf(f,"\t<Dirty tricks>\n");
 	fprintf(f,"\t *\tREFUEL_RTO: %lf\n",REFUEL_RTO);

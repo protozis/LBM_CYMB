@@ -1,5 +1,11 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
-## What's the physics of this LBM simulation
+
+**Table of contents:**
+- [What's the physics of this LBM simulation ?](#What's-the-physics-of-this-LBM-simulation-?)
+- [Dependences and Build process](#Dependences-and-Build-process)
+- [Usage](#Usage)
+
+## What's the physics of this LBM simulation ?
 For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you needed:
 - Great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
 - The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
