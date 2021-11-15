@@ -1,10 +1,10 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
-Before you start using this simulator, I highly recommend to read the instruction I made: **[What's the physics of this LBM simulation ?](physics.md)**.
+Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation ?](physics.md)**.
 
 ## Dependences and Build process
 ### C binaries
-All C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for which OpenCL driver packages you need to install. In Archlinux they are:
+Most C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are:
 
 **Runtime**
 - Intel GPU: `intel-compute-runtime`
@@ -26,7 +26,7 @@ $> cd LBM_CYMB/src
 $> make
 $> make install
 ```
-`make install` will copy all binaries and `.cl` source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
+`make install` will copy all binaries and `.cl` kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
 
 Be advice that the Opencl target version need to be defined in you host program as 
 ```C
@@ -110,7 +110,7 @@ Otions:
 	-j #, Uy (Default: 0)
 	-h , Print this help page
 Example:
-	nd_gen -x 100 -y 30 -d 0.3 -i 0.1 -j 0 > exp_sets/[EXP_NAME]
+	nd_gen -x 100 -y 30 -d 0.3 -i 0.1 -j 0 > exp_sets/example/a.nd
 
 ```  
 
