@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="50mm"
-   height="51.934814mm"
-   viewBox="0 0 50 51.934814"
+   width="60mm"
+   height="60mm"
+   viewBox="0 0 60 59.999999"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
@@ -33,20 +33,20 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.2810466"
-     inkscape:cx="212.7167"
-     inkscape:cy="44.104563"
+     inkscape:zoom="0.90583674"
+     inkscape:cx="110.94715"
+     inkscape:cy="-16.0073"
      inkscape:window-width="1900"
      inkscape:window-height="1038"
-     inkscape:window-x="10"
+     inkscape:window-x="1930"
      inkscape:window-y="10"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1">
     <inkscape:grid
        type="xygrid"
        id="grid824"
-       originx="-74.999999"
-       originy="-58.065185" />
+       originx="-69.999999"
+       originy="-54.999998" />
   </sodipodi:namedview>
   <defs
      id="defs2">
@@ -195,7 +195,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-75,-58.065186)">
+     transform="translate(-70,-55)">
+    <rect
+       style="fill:#ffffff;fill-opacity:0.898039;fill-rule:evenodd;stroke:none;stroke-width:0.499999;stroke-linejoin:round"
+       id="rect941"
+       width="60"
+       height="60"
+       x="70"
+       y="55" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 75,70 h 50"
