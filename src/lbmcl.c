@@ -1,6 +1,6 @@
 #define KERNEL_FUNC "propagate"
 #define CL_TARGET_OPENCL_VERSION 300
-#define FC_OFFSET 10000
+#define FC_OFFSET 1000
 #define CS_LTTC 0.57735
 #define PPMAX 255
 #define PI 3.1415926
@@ -301,15 +301,11 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	struct ND *res = ND_malloc();
 	ND_def_ND(res, nd);
 	double *bcv = BCV_malloc(nd->nq);
+
 	double *bcpos = BCPOS_malloc(bc);
 	double *bcvel = BCVEL_malloc(bc);
 	double *bcrad = BCRAD_malloc(bc);
 	long *bcfc = BCFC_malloc(bc);
-	BCV_def(bc,nd->nq,bcv);
-	BCPOS_push(bc,bcpos);
-	BCVEL_push(bc,bcvel);
-	BCRAD_push(bc,bcrad);
-	BCFC_push(bc,bcfc);
 
 	set_parameters(bc,nd);
 	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
@@ -317,6 +313,12 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 
 	const size_t global_size[2] = {nd->nx,nd->ny};
 	const size_t local_size[2] = {ls_item[0],ls_item[1]};
+
+	BCV_def(bc,nd->nq,bcv);
+	BCPOS_push(bc,bcpos);
+	BCVEL_push(bc,bcvel);
+	BCRAD_push(bc,bcrad);
+	BCFC_push(bc,bcfc);
 
 //	list_devices();
 
@@ -565,7 +567,7 @@ void BCVEL_push(struct BC *bc, double *bcvel){
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			bcvel[j+i*bc->no] = tmp->vel[j];
+			bcvel[j+i*bc->nq] = tmp->vel[j];
 		}
 	}
 }
@@ -578,7 +580,7 @@ void BCPOS_push(struct BC *bc, double *bcpos){
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			bcpos[j+i*bc->no] = tmp->pos[j];
+			bcpos[j+i*bc->nq] = tmp->pos[j];
 		}
 	}
 }
@@ -590,7 +592,7 @@ void BCFC_push(struct BC *bc, long *bcfc){
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			bcfc[j+i*bc->no] = (long)(tmp->force[j]*FC_OFFSET);
+			bcfc[j+i*bc->nq] = (long)(tmp->force[j]*FC_OFFSET);
 		}
 	}
 }
@@ -604,7 +606,7 @@ void BCFC_pull(struct BC *bc,long *bcfc, double dt){
 	for(int i=0;i<bc->no;i++){
 		tmp = ((struct CY *)bc->m[i]);
 		for(int j=0;j<bc->nq;j++){
-			tmp->force[j] = (double)(bcfc[j+i*bc->no])/(dt*FC_OFFSET);
+			tmp->force[j] = (double)(bcfc[j+i*bc->nq])/(dt*FC_OFFSET);
 		}
 	}
 }

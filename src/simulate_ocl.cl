@@ -1,4 +1,4 @@
-#define FC_OFFSET 10000
+#define FC_OFFSET 1000
 #define CS_LTTC_2 0.333333
 #define CS_LTTC 0.57735
 #define FCCS 5773.5

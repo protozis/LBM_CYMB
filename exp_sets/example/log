@@ -34,8 +34,10 @@
 	 *	Speed of sound(CS): 340.000000m/s
 		BCV D: 0.367500kg/m^3 Ux: 0.000000m/s Uy: 0.000000m/s
 	<Dirty tricks>
-	 *	REFUEL_RTO: 0.000000
-	 *	EAT_RTO: 0.000000
+	 *	REFUEL_RTO: 0.500000
+	 *	EAT_RTO: 0.050000
 	<Objects>
 		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
-		0: 0.000000kg/s^2 0.000000kg/s 1225.000000kg 0.000000Hz infs
+		0: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+		1: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+		2: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
