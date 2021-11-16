@@ -598,7 +598,7 @@ void BCFC_push(struct BC *bc, long *bcfc){
 }
 void BCFC_init(long *bcfc,int nq,int no){
 	for(int i=0;i<no*nq;i++){
-			bcfc[i] = 0;
+		bcfc[i] = 0;
 	}
 }
 void BCFC_pull(struct BC *bc,long *bcfc, double dt){

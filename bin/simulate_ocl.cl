@@ -1,4 +1,4 @@
-#define FC_OFFSET 10000
+#define FC_OFFSET 1000
 #define CS_LTTC_2 0.333333
 #define CS_LTTC 0.57735
 #define FCCS 5773.5
@@ -109,6 +109,7 @@ void solver(double a, double b, double c, double *res){
 	res[0] = (-1*b + sqrt(b*b - 4*a*c))/(2*a);
 	res[1] = (-1*b - sqrt(b*b - 4*a*c))/(2*a);
 }
+/*
 double border_dist(int *addr,int vc,int obj,int bc_nq, __global double *bcpos, __global double *bcrad){
 	double r = bcrad[obj];
 	double addrd[2] = {
@@ -194,6 +195,7 @@ double border_dist(int *addr,int vc,int obj,int bc_nq, __global double *bcpos, _
 	//printf("%lf %lf\n",icp[0],icp[1]);
 	return get_dist_int(addr,icp,bc_nq)/LE[vc];
 }
+*/
 double dot_product(__constant double *a,__global double *b,int nq){
 	double tmp;
 	for(int i=0;i<nq;i++){
@@ -262,7 +264,7 @@ __kernel void propagate(int nq, double cf, __global double *nd, __global double 
 						res[vc+idx_nd] = nd[8-vc+idx_nd];
 					}
 					for(int i=0;i<bc_nq;i++){
-						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_no],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
+						atomic_add(&bcfc[i+(obj_vc_p-1)*bc_nq],(int)(-2*(res[vc+idx_nd])*LV[i+vc*2]*LE[vc]*FCCS));
 					}
 				} else {
 					res[vc+idx_nd] = nd[vc+idx_nd_p];
