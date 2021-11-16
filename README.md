@@ -1,5 +1,7 @@
 # Lattice Boltzmann Method - Cylindrical Moving Boundary
 
+![3cir](img/3cir.gif)
+
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation ?](physics.md)**.
 
 ## Dependences and Build process
@@ -89,7 +91,7 @@ And following files are used to collect and analyze data.
 
 
 #### ND (Number Density) file
-Number density matrix represent particle densities in different velocities and positions. For an D2Q9 ND file with 480x270 in size, is formatted as
+Number density matrix describe particle densities in different velocities and positions. For an D2Q9 ND file with 480x270 in size, is formatted as
 ```
 480 270 9
 [m0q0] [m0q1] [m0q2] ...
@@ -115,7 +117,7 @@ Example:
 ```  
 
 #### BC (Boundary Condition) file
-Two classes are included in boundary conditions:
+Boundary condition include following classes:
 1. BCV: Unified fluid that surround the simulation area.
 2. CY: Cylinder object.
 
@@ -236,8 +238,6 @@ Following parameters are included in a configuration file:
 |PL_MAX_D|Maximum density value for the jetcolormap ploting|0.5|
 |PL_MAX_UX|Maximum x velocity value for the jetcolormap ploting|0.1|
 |PL_MAX_DUY|Maximum y velocity value for the jetcolormap ploting|0.1|
-
-> [Warning] The `SKP` vaule should not exceed 10 in high resolution ND. This is because I need to use atomic function to collect the force applied on the objects from different workgroups RAM, and the value cannot exceed the capability of containing of a `long` variable.
 
 ### Perform an experiment
 Run `simulator` with desire experiment setup:
