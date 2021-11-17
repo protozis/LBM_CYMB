@@ -2,7 +2,10 @@
 name="2c_offset"
 dir="exp_sets"
 mid="240"
+plot="10"
 printf "" > 2c.sch
+cp tmp_plot_2c plot_2c.p
+chmod a+x plot_2c.p
 for i in `seq 40 10 160`;do
 	cp $dir/$name -r $dir/$name-$i
 	sed -i "s/TITLE/offset = $i/" $dir/$name-$i/plot.p
@@ -10,4 +13,6 @@ for i in `seq 40 10 160`;do
 	sed -i "s/C2X/$((mid+i))/" $dir/$name-$i/a.bc
 	printf "create exp_sets/$name-$i\n"
 	printf "exp_sets/$name-$i\n" >> 2c.sch
+	cmd="set title \'offset = $i\';plot \'\< grep 0 $dir\/$name-$i\/debug\' u 2:$plot w lp, plot \'< grep 1 $dir\/$name-$i\/debug\' u 2:$plot w lp"
+	sed -i "s/#PLOT/$cmd\n#PLOT/" plot_2c.p
 done
