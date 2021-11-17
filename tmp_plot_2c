@@ -1,8 +1,0 @@
-#! /usr/bin/gnuplot
-
-set grid
-set multiplot layout NUM, 1
-set tmargin 2
-#PLOT
-unset multiplot
-pause mouse close

@@ -1,0 +1,15 @@
+#! /bin/bash
+
+col="10"
+pl="plot_offset.p"
+echo "#! /usr/bin/gnuplot" > $pl
+chmod a+x $pl
+echo "set grid" >> $pl
+echo "plot \\" >> $pl
+ls | grep 2c_offset- | while read dir;do
+	offset=`echo $dir | sed 's/2c_offset-//'`
+	cut -f $col -d ' ' $dir/debug | tail -n+2 | ./offset > .xoff_$offset
+	echo "'.xoff_$offset' w l, \\" >> $pl
+done
+echo "" >> $pl
+echo "pause mouse close" >> $pl
