@@ -395,6 +395,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		printf("Simulate......");
 	}
 	fflush(stdout);
+	BC_print_syn(debug_out);
 	for(int l=0;l<LOOP;l++){
 		if(IS_PROGRESS_PRINT){
 			printf("\rSimulate......%d/%d",l+1,LOOP);
@@ -422,7 +423,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		BCFC_pull(bc,bcfc,SKP);
 		//ND_probe(debug_out,nd,240,200);
 		BC_move_rk4(bc,SKP);
-		BC_print(debug_out,bc,0,l*SKP);
+		for(int k=0;k<bc->no;k++){
+			BC_print(debug_out,bc,k,l*SKP);
+		}
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
 
@@ -522,6 +525,9 @@ void BC_move_euler(struct BC *bc,double dt){
 			tmp->pos[j] += tmp->vel[j] * dt;
 		}
 	}
+}
+void BC_print_syn(FILE *f){
+	fprintf(f,"#[obj][time][force][acc][vel][dsp][pos]\n");
 }
 void BC_print(FILE *f,struct BC *bc,int obj,int step){
 	struct CY *tmp;
