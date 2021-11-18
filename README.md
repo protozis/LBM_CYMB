@@ -417,30 +417,18 @@ $>./plot_offset.p
 The data represent the amount of offset variations between two cylinders in different axis.
 
 - **X axis**
-
 ![2c_offset_x](img/2c_offset_x.png)
-
 Offset = 40,60,90,160
-
 ![2c_offset_x_2](img/2c_offset_x_2.png)
 
 - **Y axis**
-
 ![2c_offset_y](img/2c_offset_y.png)
-
 offset = 40
-
 ![2c_offset_y_2](img/2c_offset_y_2.png)
-
 offset = 70
-
 ![2c_offset_y_3](img/2c_offset_y_3.png)
-
 offset = 100
-
 ![2c_offset_y_4](img/2c_offset_y_4.png)
-
 offset = 130
-
 ![2c_offset_y_5](img/2c_offset_y_5.png)
 
