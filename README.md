@@ -7,7 +7,7 @@ Before you start using this simulator, it is highly recommended to read the inst
 ## Table of contents
 1. [Dependences and Build process](#Dependences-and-Build-process)
 2. [Start a Simulation Step by Step](#Start-a-Simulation-Step-by-Step)
-3. [Analyze the Results](#Analyze-the-Result)
+3. [Design and Analyze an Experiment](#Design-and-Analyze-an-Experiment)
 
 ## Dependences and Build process
 ### C Binaries
@@ -263,6 +263,11 @@ And launch with:
 $> ./schedule exp_grp1
 ```
 
-## Analyze the Results
-Here I will show you a working example for designing and analyzing an experiments. Today I am curious about what behaviers of 
+## Design and Analyze an Experiment
+Here I will show you a working example for designing and analyzing an experiments. Today I am curious about the behaviors of two cylinders listed alongside the flow direction, 
+with different offsets between them as shown below:
+
+![exp_2c-1](img/exp_2c.gif)
+
+![exp_2c-2](img/exp_2c.png)
 
