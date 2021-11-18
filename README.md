@@ -2,10 +2,15 @@
 
 ![3cir](img/3cir.gif)
 
-Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation ?](physics.md)**.
+Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
+
+## Table of contents
+1. [Dependences and Build process](#Dependences-and-Build-process)
+2. [Start a Simulation Step by Step](#Start-a-Simulation-Step-by-Step)
+3. [Analyze the Results](#Analyze-the-Result)
 
 ## Dependences and Build process
-### C binaries
+### C Binaries
 Most C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are:
 
 **Runtime**
@@ -56,7 +61,7 @@ To decide a good resolution for the simulation, you should consider with:
 
 	All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
-### Make an experiment setup
+### Make an Experiment Setup
 Inside an experiment setup directory we have:
 ```
 example/
@@ -258,4 +263,6 @@ And launch with:
 $> ./schedule exp_grp1
 ```
 
+## Analyze the Results
+Here I will show you a working example for designing and analyzing an experiments. Today I am curious about what behaviers of 
 
