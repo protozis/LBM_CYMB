@@ -300,7 +300,7 @@ Here I will show you a working example for designing and analyzing an experiment
 
 ![exp_2c](img/exp_2c.png)
 
-The value we want to control is **the offset between two cylinders**, and all others need to stay the same.
+The value we want to control is **the initial offset between two cylinders**, and all others need to stay the same.
 
 
 ### Generate and Run a Series of Experiment Setups
@@ -414,7 +414,9 @@ $>./plot_offset.p
 
 ```
 
-![2c_offset](img/2c_offset.png)
+- Offset in X axis
+![2c_offset_x](img/2c_offset_x.png)
 
-![2c_offset_2](img/2c_offset_2.png)
+- Offset in Y axis
+![2c_offset_y](img/2c_offset_y.png)
 
