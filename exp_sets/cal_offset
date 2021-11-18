@@ -1,6 +1,6 @@
 #! /bin/bash
 
-col="9"
+col="10"
 pl="plot_offset.p"
 echo "#! /usr/bin/gnuplot" > $pl
 chmod a+x $pl

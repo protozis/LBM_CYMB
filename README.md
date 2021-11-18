@@ -416,7 +416,12 @@ $>./plot_offset.p
 
 - Offsets in X axis
 ![2c_offset_x](img/2c_offset_x.png)
+![2c_offset_x_2](img/2c_offset_x_2.png)
 
 - Offsets in Y axis
 ![2c_offset_y](img/2c_offset_y.png)
+![2c_offset_y_2](img/2c_offset_y_2.png)
+![2c_offset_y_3](img/2c_offset_y_3.png)
+![2c_offset_y_4](img/2c_offset_y_4.png)
+![2c_offset_y_5](img/2c_offset_y_5.png)
 
