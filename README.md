@@ -414,7 +414,7 @@ $>./plot_offset.p
 
 ```
 
-The data represent the offset changes between two cylinder in different axis.
+The data represent the amount of offset variations between two cylinders in different axis.
 
 - **X axis**
 ![2c_offset_x](img/2c_offset_x.png)
