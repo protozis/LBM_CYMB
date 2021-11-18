@@ -7,8 +7,11 @@
    viewBox="0 0 553.67902 338.44055"
    version="1.1"
    id="svg5"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    sodipodi:docname="exp_2c.svg"
+   inkscape:export-filename="/home/jerry/Projects/LBM_CYMB/img/exp_2c.png"
+   inkscape:export-xdpi="22.02"
+   inkscape:export-ydpi="22.02"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -30,14 +33,15 @@
      inkscape:snap-bbox="true"
      inkscape:snap-bbox-midpoints="true"
      inkscape:zoom="0.45291836"
-     inkscape:cx="1005.7"
-     inkscape:cy="572.95094"
+     inkscape:cx="835.69145"
+     inkscape:cy="800.36499"
      inkscape:window-width="1900"
      inkscape:window-height="1038"
      inkscape:window-x="10"
      inkscape:window-y="10"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1">
+     inkscape:current-layer="layer1"
+     inkscape:snap-grids="true">
     <inkscape:grid
        type="xygrid"
        id="grid824"
@@ -279,13 +283,13 @@
     <circle
        style="fill:#ffffff;fill-opacity:0.998658;fill-rule:evenodd;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="path894"
-       cx="230"
+       cx="210"
        cy="155"
        r="20" />
     <circle
        style="fill:#ffffff;fill-opacity:0.998658;fill-rule:evenodd;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="path894-0"
-       cx="310"
+       cx="330"
        cy="155"
        r="20" />
     <path
@@ -306,19 +310,19 @@
        y="20" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 227,155 h 6"
+       d="m 207,155 h 6"
        id="path2460" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 230,152 v 6"
+       d="m 210,152 v 6"
        id="path2462" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="M 306.99999,155 H 313"
+       d="M 326.99999,155 H 333"
        id="path2464" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 310,152 v 6"
+       d="m 330,152 v 6"
        id="path2466" />
     <path
        style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Mstart);marker-end:url(#Arrow2Mend)"
@@ -352,16 +356,17 @@
          y="542.3938">270</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 230,150 V 95"
+       d="m 210,147.5 v -55"
        id="path20678" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 310,150 V 95"
+       d="m 330,147.5 v -55"
        id="path20680" />
     <path
        style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow2Mstart);marker-end:url(#Arrow2Mend)"
-       d="m 230,99.999998 h 80"
-       id="path20795" />
+       d="M 210,100 H 330"
+       id="path20795"
+       sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:18px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
@@ -375,21 +380,21 @@
          y="96.710449">Offset</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
-       d="m 310,155 14,14"
+       d="m 330,155 14,14"
        id="path25801"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
        style="font-size:12px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;stroke-width:0.264583"
-       x="334.77634"
-       y="-110.32523"
+       x="348.91229"
+       y="-124.47353"
        id="text28606"
        transform="rotate(45.024977)"><tspan
          sodipodi:role="line"
          id="tspan28604"
          style="font-size:12px;stroke-width:0.264583"
-         x="334.77634"
-         y="-110.32523">R</tspan></text>
+         x="348.91229"
+         y="-124.47353">R</tspan></text>
     <path
        style="fill:none;stroke:#0069ff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
        d="M 45,40 H 99.999998"

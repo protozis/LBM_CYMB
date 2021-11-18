@@ -415,3 +415,6 @@ $>./plot_offset.p
 ```
 
 ![2c_offset](img/2c_offset.png)
+
+![2c_offset_2](img/2c_offset_2.png)
+
