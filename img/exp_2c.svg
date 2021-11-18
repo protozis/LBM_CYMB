@@ -2,15 +2,15 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="553.67902mm"
-   height="338.44055mm"
-   viewBox="0 0 553.67902 338.44055"
+   width="565mm"
+   height="349.99997mm"
+   viewBox="0 0 565 349.99997"
    version="1.1"
    id="svg5"
    sodipodi:docname="exp_2c.svg"
    inkscape:export-filename="/home/jerry/Projects/LBM_CYMB/img/exp_2c.png"
-   inkscape:export-xdpi="22.02"
-   inkscape:export-ydpi="22.02"
+   inkscape:export-xdpi="21.58"
+   inkscape:export-ydpi="21.58"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -33,8 +33,8 @@
      inkscape:snap-bbox="true"
      inkscape:snap-bbox-midpoints="true"
      inkscape:zoom="0.45291836"
-     inkscape:cx="835.69145"
-     inkscape:cy="800.36499"
+     inkscape:cx="1027.779"
+     inkscape:cy="648.01966"
      inkscape:window-width="1900"
      inkscape:window-height="1038"
      inkscape:window-x="10"
@@ -45,8 +45,8 @@
     <inkscape:grid
        type="xygrid"
        id="grid824"
-       originx="-0.77533509"
-       originy="8.2250967" />
+       originx="4.9999994"
+       originy="15.000001" />
   </sodipodi:namedview>
   <defs
      id="defs2">
@@ -279,7 +279,14 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-0.77533506,8.2250967)">
+     transform="translate(4.9999995,15)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-linejoin:round"
+       id="rect1014"
+       width="565"
+       height="349.99997"
+       x="-4.9999995"
+       y="-15" />
     <circle
        style="fill:#ffffff;fill-opacity:0.998658;fill-rule:evenodd;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="path894"
