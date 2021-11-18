@@ -267,7 +267,7 @@ $> ./schedule exp_grp1
 Here I will show you a working example for designing and analyzing an experiments. Today I am curious about the behaviors of two cylinders listed alongside the flow direction, 
 with different offsets between them as shown below:
 
-![exp_2c-1](img/exp_2c.gif)
+![2cir-60](img/2cir-60.gif)
 
-![exp_2c-2](img/exp_2c.png)
+![exp_2c](img/exp_2c.png)
 
