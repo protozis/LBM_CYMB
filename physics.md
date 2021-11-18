@@ -1,4 +1,4 @@
-## What's the physics of this LBM simulation ?
+# What's the physics of this LBM simulation ?
 For the simplicity of this instruction, I will not cover detail information about Lattice-Boltzmann Method here. Please checkout following articles if you needed:
 - Great brief instruction by Dan Schroeder: [link](https://physics.weber.edu/schroeder/javacourse/LatticeBoltzmann.pdf)
 - The Lattice Boltzmann Method: [ISBN 978-3-319-44649-3](https://link.springer.com/book/10.1007/978-3-319-44649-3)
@@ -52,7 +52,7 @@ This is a log file produced by this simulator during an experiment, and many use
 
 Ok, let's take a look at the most fundamental connection: units.
 
-### Conversion factors between Lattice and SI unit
+## Conversion factors between Lattice and SI unit
 
 ```
 *	Length(CL): 1.000000 (m/lattice space)
@@ -77,7 +77,7 @@ we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<su
 
 Here in the `<Conversion factors>` section you can see that only `CL` and `CD` are selected, but we also need `CT` to calculate all others factors like force, Spring constant, etc. And that's how dimensionless quantity joined the table.
 
-### Dimensionless 
+## Dimensionless 
 According to Law of Similarity, Reynolds and Mach numbers are the same in both Lattice and SI units. That's why thay are dimensionless values. The connection between these two numbers is the typical velocity of the simulation(`U`). Usually, we choose the velocity of the unified flow surrounding the box for the calculation of Mach numbers. With this relationship, we only need to specify one of these numbers and the other will be fixed accordingly. For this simulator, Mach number can be specified in the configuration file. The definition of Mach number:
 
 > MA = U/Cs = U'/Cs'
@@ -128,7 +128,7 @@ Following facts can be known with these results:
 
 > [Warning] Keep in mind that I use the diameter of the cylinder for typical length in the calculation of Reynolds number. If multiple cylinders are included, maybe apply the mean distance between them for typical length will produce more accurate Reynolds number.
 
-### Inspecting the Simulation model
+## Inspecting the Simulation model
 It is time to discuss about those cylinders being placed in the simulation. This is what a single cylinder looks like:
 
 ![BC](img/bc.png)
@@ -148,7 +148,7 @@ The rule of bouncing look like this:
 
 You may ask: why the particles didn't bouncing like a billiard? This relate to the assumption of non-slip condition in fluid dynamics. In this condition, the fluid located at the surface of a solid object is consider to have zero relative velocity with the object. With the rule that bounce the particle right back to where its came from, the fluid faster then the object will be slow down and transfer the momentum to the object, and this is how we collect the shear stress from the fluid to the cylibder surface.
 
-### Dirty tricks
+## Dirty tricks
 Ok, we have finished those processes which are well tested and already been written into the papers. Now I have to show some sloppy and messy tricks I did to make things work, and it all caused by moving boundary.
 
 ![tricks](img/tricks.png)
@@ -165,7 +165,7 @@ And this is for `eat` nodes. If we ignore these nodes, the conservation of mass 
 
 So, what make these tricks dirty? The reason is simple: we don't know how to choose the values properly before benchmarking. If the result shows that applied force is smooth and no shock wave apeared, then the values can be used.
 
-### That's all! For now.
+## That's all! For now.
 The simulation is faaaaar from perfect. Many issuses need to be solved and many details can be improved. What we have now is a simulation that can import some parameters and output a result, thats' all. Following issueses are worth studying in my opinion:
 - Replace BGKW with multiple relaxation time for collision operator.
 - Remove dirty tricks and use interpolating bouncing-back algoritm for moving boundary.
