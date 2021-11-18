@@ -277,7 +277,7 @@ Usually the file path defined in `DEBUG_FILE` is used to collect all kind of tex
 1 0.019608 8164637.838000 0.000000 2128.069005 0.000000 100.661622 0.000000 1.141411 0.00000 0 301.141411 135.000000
 ...
 ```
-And sure you can replace this output with any format you want by changing the `simulate_ocl` function in `lbmcl.c`.
+And sure you can replace this output with any format you want by changing the `BC_print` function in `lbmcl.c`.
 
 #### IS_MP4 (Recommend)
 If you set `IS_MP4` to `1` in `default.conf`, the macroscopic matrix of density, velocities in x and y axis in every loops will be printed as PPM image and stream to `ffmpeg` with pipeline. Since the resolution of the experiment may be very big (something like 1920x1080), the disk usage will easily exceed 50GB if we save all images. Therefore, we do it in pipeline to minimize the number of saved matrix during the process and compress the output in MP4 format.
@@ -414,9 +414,9 @@ $>./plot_offset.p
 
 ```
 
-- Offset in X axis
+- Offsets in X axis
 ![2c_offset_x](img/2c_offset_x.png)
 
-- Offset in Y axis
+- Offsets in Y axis
 ![2c_offset_y](img/2c_offset_y.png)
 
