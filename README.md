@@ -414,12 +414,14 @@ $>./plot_offset.p
 
 ```
 
-- Offsets in X axis
+The data represent the offset changes between two cylinder in different axis.
+
+- **X axis**
 ![2c_offset_x](img/2c_offset_x.png)
 Offset = 40,60,90,160
 ![2c_offset_x_2](img/2c_offset_x_2.png)
 
-- Offsets in Y axis
+- **Y axis**
 ![2c_offset_y](img/2c_offset_y.png)
 offset = 40
 ![2c_offset_y_2](img/2c_offset_y_2.png)
