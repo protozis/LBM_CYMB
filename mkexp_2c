@@ -9,4 +9,5 @@ for i in `seq 40 10 160`;do
 	sed -i "s/C2X/$((mid+i))/" $dir/$name-$i/a.bc
 	printf "create exp_sets/$name-$i\n"
 	printf "exp_sets/$name-$i\n" >> 2c.sch
+	sed -i "s/TITLE/$i/" $dir/$name-$i/plot.p
 done
