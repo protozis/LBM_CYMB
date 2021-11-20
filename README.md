@@ -5,9 +5,9 @@
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
 
 ## Table of contents
-1. [Dependences and Build process](#Dependences-and-Build-process)
-2. [Start a Simulation Step by Step](#Start-a-Simulation-Step-by-Step)
-3. [Design and Analyze an Experiment](#Design-and-Analyze-an-Experiment)
+1. [Dependences and Build process](#dependences-and-build-process)
+2. [Start a Simulation Step by Step](#start-a-simulation-step-by-step)
+3. [Design and Analyze an Experiment](#design-and-analyze-an-experiment)
 
 ## Dependences and Build process
 ### C Binaries
