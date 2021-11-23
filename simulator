@@ -1,6 +1,5 @@
 #! /bin/bash
 
-dir="/home/jerry/Projects/LBM_CYMB/bin"
 if [ -z "$1" ];then
 	echo "Missing experiment dir"
 	exit
@@ -13,5 +12,5 @@ if [ -d "$1/$output" ];then
 fi
 echo "" > $1/log
 echo "" > $1/debug
-(cd $1 && (time -p $dir/launcher $conf) |& tee -a ./log)
+(cd $1 && (time -p ../../bin/launcher $conf) |& tee -a ./log)
 #cd $1 && ($dir/launcher $conf)

@@ -1,6 +1,7 @@
 #! /bin/bash
 
 pd_dir="./pd_auto"
+dir="../../bin"
 
 usage() {
 	echo "Usage: speed_test [EXP_DIR]"
@@ -25,7 +26,8 @@ ls $pd_dir | grep .pd | while read file;do
 	printf "\rWorking on...($num/$pdFileNum)"
 	cp $pd_dir/$file $1/a.pd
 	info=`cat $pd_dir/$file | sed 's/ /\//g'`
-	Time=`{ time -p ./simulator $1; }  2>&1 > /dev/null`
+	conf=`ls $1 | grep '.conf'`
+	Time=`{ (cd $1 && (time -p $dir/launcher $conf)); }  2>&1 > /dev/null`
 	if [ "$?" -eq "0" ];then
 		realTime=`echo $Time | cut -d ' ' -f 2`
 		printf "%-50s\t" "$file[$info]" >> .speed_test_rst
