@@ -2,14 +2,8 @@
 
 ![3cir](img/3cir.gif)
 
-<a href="https://github.com/protozis/LBM_CYMB">
-	<img width="10%" src="img/GitHub-Mark.png">
-</a>
-
-
-<a href="https://protozis.com:3000/Jerry/LBM_CYMB">
-	<img width="10%" src="img/gitea.png">
-</a>
+[![github](img/github.png)](https://github.com/protozis/LBM_CYMB)
+[![github](img/gitea.png)](https://protozis.com:3000/Jerry/LBM_CYMB")
 
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
 
