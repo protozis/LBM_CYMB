@@ -1,4 +1,4 @@
-# Lattice Boltzmann Method - Cylindrical Moving Boundary
+# LBM Simulator - Cylindrical Moving Boundary
 
 ![3cir](img/3cir.gif)
 
