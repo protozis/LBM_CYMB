@@ -9,7 +9,7 @@ Before you start using this simulator, it is highly recommended to read the inst
 
 A high resolution version of above 3 cylinders example:
 
-#- Video: <a href="../../_static/videos/3cir_1920x1080.mp4">3cir_1080p.mp4</a>
+<!-- Video: <a href="../../_static/videos/3cir_1920x1080.mp4">3cir_1080p.mp4</a> -->
 
 - Video: [3cir_1080p.mp4](img/3cir_1920x1080.mp4)
 - Device: NVIDIA GeForce GTX 660
