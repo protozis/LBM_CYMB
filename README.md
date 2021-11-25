@@ -9,9 +9,12 @@ Before you start using this simulator, it is highly recommended to read the inst
 
 A high resolution version of above 3 cylinders example:
 
-- Video: [3cir_1920x1080.mp4](img/3cir_1920x1080.mp4)
+#- Video: <a href="../../_static/videos/3cir_1920x1080.mp4">3cir_1080p.mp4</a>
+
+- Video: [3cir_1080p.mp4](img/3cir_1920x1080.mp4)
 - Device: NVIDIA GeForce GTX 660
-- Compute time: 5637.89 seconds
+- Resolution: 1920x1080 pixels.
+- Compute time: 5637.89 seconds for 10000x iterations.
 
 ## Table of contents
 1. [Dependences and Build process](#dependences-and-build-process)
