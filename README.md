@@ -66,7 +66,7 @@ To decide a good resolution for the simulation, you should consider with:
 
 For example this is an experiment in 1920x1080 resolutions, i.e. 1080p.
 
-![](img/3cir_1920x1080.mp4)
+[3cir](img/3cir_1920x1080.mp4)
 
 ### Make an Experiment Setup
 Inside an experiment setup directory we have:
