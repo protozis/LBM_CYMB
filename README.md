@@ -7,9 +7,9 @@
 
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
 
-A high resolution version of 3 cylinders example:
+A high resolution version of above 3 cylinders example:
 
-- Video: [3cir_1080p](img/3cir_1920x1080.mp4)
+- Video: [3cir_1920x1080.mp4](img/3cir_1920x1080.mp4)
 - Device: NVIDIA GeForce GTX 660
 - Compute time: 5637.89 seconds
 
