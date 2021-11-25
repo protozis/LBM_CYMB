@@ -7,6 +7,12 @@
 
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
 
+A high resolution version of 3 cylinders example:
+
+- Video: [3cir_1080p](img/3cir_1920x1080.mp4)
+- Device: NVIDIA GeForce GTX 660
+- Compute time: 5637.89 seconds
+
 ## Table of contents
 1. [Dependences and Build process](#dependences-and-build-process)
 2. [Start a Simulation Step by Step](#start-a-simulation-step-by-step)
@@ -64,9 +70,8 @@ To decide a good resolution for the simulation, you should consider with:
 
 	All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
-For example this is an experiment in 1920x1080 resolutions, i.e. 1080p.
 
-[3cir](img/3cir_1920x1080.mp4)
+ 
 
 ### Make an Experiment Setup
 Inside an experiment setup directory we have:
