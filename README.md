@@ -64,6 +64,10 @@ To decide a good resolution for the simulation, you should consider with:
 
 	All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
+For example this is an experiment in 1920x1080 resolutions, i.e. 1080p.
+
+![3cir](img/3cir_1920x1080.mp4)
+
 ### Make an Experiment Setup
 Inside an experiment setup directory we have:
 ```
