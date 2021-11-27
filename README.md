@@ -199,7 +199,7 @@ CY {
 
 - **Work-group & Work-item** 
 
-	A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check *Max work group size* for the value. For multi-dimension work-group, the total amount of work-item cannot exceed *Max work group size* too, and the work-item in each dimension will have their own limitation. Check *Max work item sizes* for the value.
+	A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check `Max work group size` for the value (use `clinfo`). For multi-dimension work-group, the total amount of work-item cannot exceed Max work group size too, and the work-item in each dimension will have their own limitation. Check `Max work item sizes` for the value.
 
 Use the script `speed_test` to choose the best environment setup. If the chosen work-group exceed the max allowed work-group size for the device, the result will not be printed. Example: 
 
