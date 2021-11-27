@@ -23,7 +23,7 @@ A high resolution version of above 3 cylinders example:
 
 ## Dependences and Build process
 ### C Binaries
-Most C programs are written in `C99` standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for `clang` when you are compiling OpenCL kernel program, I will recommend you to use `glibc` instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are:
+Most C programs are written in C99 standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for clang when you are compiling OpenCL kernel program, I will recommend you to use glibc instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are:
 
 **Runtime**
 - Intel GPU: `intel-compute-runtime`
@@ -45,13 +45,13 @@ $> cd LBM_CYMB/src
 $> make
 $> make install
 ```
-`make install` will copy all binaries and `.cl` kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
+`make install` will copy all binaries and OpenCL kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
 
 Be advice that the Opencl target version need to be defined in you host program as 
 ```C
 #define CL_TARGET_OPENCL_VERSION 300
 ```
-while `300` stands for the version `3.0.0`. Also the atomic function support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
+while `300` stands for the version 3.0.0. Also the atomic function support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
 > [Note] If you want to make MP4 video in pipeline, `ffmpeg` must be installed. 
 
@@ -71,7 +71,7 @@ To decide a good resolution for the simulation, you should consider with:
 
 2. **The device you are using.**
 
-	All devices will have their own `preferred work group size multiple` affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for `128` multiple, while GPU will go for `32` multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
+	All devices will have their own preferred work-group-size-multiple affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for 128 multiple, while GPU will go for 32 multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
 
  
