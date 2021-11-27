@@ -433,7 +433,7 @@ The data represent the amount of offset variations between two cylinders in diff
 
 - **X axis**
 ![2c_offset_x](img/2c_offset_x.png)
-Separations = 40,60,90,160
+Initial separations = 40,60,90,160
 ![2c_offset_x_2](img/2c_offset_x_2.png)
 
 - **Y axis**
