@@ -309,13 +309,13 @@ Sometime we want to inspect a phenomenon where the fluid is in its steady state,
 With this option set to `1` the program will saved ND matrix in every iterations. As we mention before the disk usage will be massive, it is really not a good idea unless you are running a small test with a small number of iterations.
 
 ## Design and Analyze an Experiment
-Here I will show you a working example for designing and analyzing an experiments. Let's say, today I am curious about the behaviors of two cylinders listed alongside the flow direction, with different offsets between them as shown below:
+Here I will show you a working example for designing and analyzing an experiments. Let's say, today I am curious about the behaviors of two cylinders listed alongside the flow direction, with different separations between them as shown below:
 
 ![2cir-60](img/2cir-60.gif)
 
 ![exp_2c](img/exp_2c.png)
 
-The value we want to control is **the initial offset between two cylinders**, and all others need to stay the same.
+The value we want to control is **the initial separations between two cylinders**, and all others need to stay the same.
 
 
 ### Generate and Run a Series of Experiment Setups
@@ -335,7 +335,7 @@ First, I will need to generate all experiment setups. Creating a template setup 
 └── plot.p
 
 ```
-Tweak the parameters in this template to fit the fluid environments, like `BCV`, `LOOP` and `a.nd`, etc. Benchmarking with `speed_test` to select the best PD configuration, check the speed of fluid will not exceed the 0.3x of speed of sound by inspecting the MP4 videos. Next, change the value we want to control (offset in this example) with  macros like `C1X` and `C2X`:
+Tweak the parameters in this template to fit the fluid environments, like `BCV`, `LOOP` and `a.nd`, etc. Benchmarking with `speed_test` to select the best PD configuration, check the speed of fluid will not exceed the 0.3x of speed of sound by inspecting the MP4 videos. Next, change the value we want to control (separation in this example) with  macros like `C1X` and `C2X`:
 ```
 $> cat a.bc
 bc_no 2
@@ -433,7 +433,7 @@ The data represent the amount of offset variations between two cylinders in diff
 
 - **X axis**
 ![2c_offset_x](img/2c_offset_x.png)
-Offset = 40,60,90,160
+Separations = 40,60,90,160
 ![2c_offset_x_2](img/2c_offset_x_2.png)
 
 - **Y axis**
