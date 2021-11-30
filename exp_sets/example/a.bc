@@ -2,7 +2,7 @@ bc_no 3
 bc_nq 2
 BCV {
 	dnt 0.3
-	ux 0.0
+	ux 0.1
 	uy 0.0
 }
 CY {

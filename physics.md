@@ -78,7 +78,7 @@ we can easily set the Lattice length in SI unit since [CL] = m<sup>1</sup>/dx<su
 Here in the `<Conversion factors>` section you can see that only `CL` and `CD` are selected, but we also need `CT` to calculate all others factors like force, Spring constant, etc. And that's how dimensionless quantity joined the table.
 
 ## Dimensionless 
-According to Law of Similarity, Reynolds and Mach numbers are the same in both Lattice and SI units. That's why thay are dimensionless values. The connection between these two numbers is the typical velocity of the simulation(`U`). Usually, we choose the velocity of the unified flow surrounding the box for the calculation of Mach numbers. With this relationship, we only need to specify one of these numbers and the other will be fixed accordingly. For this simulator, Mach number can be specified in the configuration file. The definition of Mach number:
+According to Law of Similarity, Reynolds and Mach numbers are the same in both Lattice and SI units. That's why thay are dimensionless values. The connection between these two numbers is the typical velocity of the simulation (`U`). Usually, we choose the velocity of the unified flow surrounding the box for the calculation of Mach numbers. With this relationship, we only need to specify one of these numbers and the other will be fixed accordingly. For this simulator, Mach number can be specified in the configuration file. The definition of Mach number:
 
 > MA = U/Cs = U'/Cs'
 
@@ -106,7 +106,7 @@ Now we know that if `CL`,`U'`,`Cs` and `MA` are fixed, we get `CT`. Let's go bac
 	<SI unit>
 	 *	Speed of sound(CS): 340.000000m/s
 ```
-`BCV` describe the macro-scopic dynamics of the flow surrounding the box, where typical velocity in Latttice space `U'` came in. We will discuss them later. With these parameters being defined, we can calculate the rest conversion factors without trouble.
+`BCV` describe the macroscopic dynamics of the flow surrounding the box, where typical velocity in Lattice space `U'` came in. We will discuss them later. With these parameters being defined, we can calculate the rest conversion factors without trouble.
 
 Let's take a look at those factors we just calculated.
 ```
@@ -126,18 +126,18 @@ Following facts can be known with these results:
 - With Reynolds number equal 106.431 we know that it is a laminar flow since typical borderline between laminar and turbulence is 2300. Which also match the Mach number we defined, that the flow is much slower then the speed of sound and there should be no heavy compression during the simulation.
 - The simulation took place in a 480x270 meters area and the fluid speed in x-axis is 102 m/s, which means it take about 4.7 seconds to travel from the left side edge to the right side edge. Divide by the time conversion factor `CT`, we know it took 2771 steps of iterations for this trip.
 
-> [Warning] Keep in mind that I use the diameter of the cylinder for typical length in the calculation of Reynolds number. If multiple cylinders are included, maybe apply the mean distance between them for typical length will produce more accurate Reynolds number.
+> [Warning] Keep in mind that I use the diameter of the cylinder for typical length in the calculation of Reynolds number. If multiple cylinders are included, using the mean distance between them as the length in Reynolds number might be more appropriate.
 
 ## Inspecting the Simulation model
-It is time to discuss about those cylinders being placed in the simulation. This is what a single cylinder looks like:
+It is time to discuss those cylinders being placed in the simulation. This is what a single cylinder looks like:
 
 ![BC](img/bc.png)
 
-In a 2D simulation that manipulate 3D calculation of a cylinder, we consider this cylinder is infinite long and the simulation depth is also infinite. All calculation relate to the geometric should consider to be unified by depth, like force, pressure, etc. Each cylinder is consider to be a rigid body and is connected with 2 springs and 2 dampers, which simplified the calculation of the mechanical of materials.
+In a 2D simulation this cylinder is infinite long and all fluid properties are uniform in the third direction. All physical quantities shall be considered in unit length, like force, pressure, etc. Each cylinder is considered to be a rigid body and is connected with 2 springs and 2 dampers, which simplified the calculation of the mechanical of materials.
 
 ![BC2](img/bc-2.png)
 
-This modeling will ignore the rotation of the cylinder, but it is easy to add another pair of spring and damper for angular movement in future. The interaction between the border of the cyliner and fluid around it is a simple bouncing-back model. These Two images indecate the direction after a bouncing was happened.
+This modeling will ignore the rotation of the cylinder, but it is easy to add another pair of spring and damper for angular movement in future. The interaction between the border of the cylinder and fluid around it is a simple bouncing-back model. These two images indicates the direction after a bouncing happens.
 
 ![intercept](img/intercept.png)
 ![intercept2](img/intercept2.png)
@@ -146,27 +146,27 @@ The rule of bouncing look like this:
 
 ![bouncing](img/bouncing.png)
 
-You may ask: why the particles didn't bouncing like a billiard? This relate to the assumption of non-slip condition in fluid dynamics. In this condition, the fluid located at the surface of a solid object is consider to have zero relative velocity with the object. With the rule that bounce the particle right back to where its came from, the fluid faster then the object will be slow down and transfer the momentum to the object, and this is how we collect the shear stress from the fluid to the cylibder surface.
+You may ask: why the particles didn't bouncing like a billiard? This relate to the assumption of non-slip condition in fluid dynamics. In this condition, the fluid located at the surface of a solid object is considered to have zero relative velocity with the object. With the rule that bounce the particle right back to where its came from, the fluid faster then the object will be slow down and transfer the momentum to the object, and this is also how we collect the shear stress from the fluid to the cylinder surface.
 
 ## Dirty tricks
-Ok, we have finished those processes which are well tested and already been written into the papers. Now I have to show some sloppy and messy tricks I did to make things work, and it all caused by moving boundary.
+OK, we have finished those processes which are well tested and already been written into the papers. Now I have to show some tricks to accommodate moving boundary.
 
 ![tricks](img/tricks.png)
 
-When the cylinder is moving it will release nods that was covered in one side, and eat new nodes in another side. To those being release and need to be refuel, I will call it **refuel** nodes. As for those being eaten, I simply called it **eat** nodes. 
+When the cylinder moves it will release nods that was covered in one side, and eat new nodes in another side. Those being release and needing refuel, will be called **refuel** nodes. Those newly covered nodes will be called **eat** nodes. 
 
 ![refuel](img/refuel.png)
 
-This image describe what will happened in refuel nodes. If we ignore these nodes and do nothing, it may not cause serious problem if the step is small enough and the viscosity is low, but there will be a peak of noise in applied force when ever the cylinder move across a node. This is cause by the fact that in the moment of that crossing happen, only one side of the cylinder have make contact with fluid, the other side will have a vacancy zone. With the force calculation is done by bouncing-back algorithm, the incremental total applied force will be highly unbalanced. To maintain the continuity of fluid , those particles which should advect into the empty slots between the time steps need to be refuel manually. We defined a ratio named `REFUEL_RTO`, and fill the empty slots with the density distributions in surrounding nodes multiplied with this ratio. 
+This image describe what happen in refuel nodes. If we ignore these nodes and do nothing, it may not cause serious problem if the step is small enough and the viscosity is low, but there will be a peak of noise in applied force whenever the cylinder moves across a node. This is because in the moment of that crossing happen, only one side of the cylinder is in contact with fluid, the other side will face a vacancy zone. With the force calculation is done by bouncing-back algorithm, the incremental total applied force will be highly unbalanced. To maintain the continuity of fluid , those particles which should advect into the empty slots between the time steps need to be refuel manually. We defined a ratio named `REFUEL_RTO`, and fill the empty slots with the density distributions in surrounding nodes multiplied with this ratio. 
 
 ![eat](img/eat.png)
 
-And this is for eat nodes. If we ignore these nodes, the conservation of mass will be breaked (since what being eaten will be gone for ever) and the accuracy will drop significantly for a fluid with high viscosity. The density distributions in these eaten nodes will be pushed to surrounding nodes, after multiplied by a ration we defined named `EAT_RTO`.
+And this is for eat nodes. If we ignore these nodes, the conservation of mass will be broken (since what being eaten will be gone for ever) and the accuracy will drop significantly for a fluid with high viscosity. The density distributions in these eaten nodes will be pushed to surrounding nodes, after multiplied by a ration we defined named `EAT_RTO`.
 
-So, what make these tricks dirty? The reason is simple: we don't know how to choose the values properly before benchmarking. If the result shows that applied force is smooth and no shock wave apeared, then the values can be used.
+So, what make these tricks dirty? The reason is simple: we don't know how to choose the values properly before benchmarking. If the result shows that applied force is smooth and no shock wave appears, then the values can be used.
 
 ## That's all! For now.
-The simulation is faaaaar from perfect. Many issuses need to be solved and many details can be improved. What we have now is a simulation that can import some parameters and output a result, thats' all. Following issueses are worth studying in my opinion:
+The simulation is faaaaar from perfect. Many issues need to be solved and many details can be improved. What we have now is a simulation that can import some parameters and output a result, that's all. Following issues are worth studying in my opinion:
 - Replace BGKW with multiple relaxation time for collision operator.
-- Remove dirty tricks and use interpolating bouncing-back algoritm for moving boundary.
+- Remove dirty tricks and use interpolating bouncing-back algorithm for moving boundary.
 - Calculate applied force with the calculation of surrounding pressure and shear stress with macroscopic fluid mechanics.
