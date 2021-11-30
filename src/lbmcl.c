@@ -225,15 +225,13 @@ void jet_colormap(double val, double min, double max,int *c){
 void nd_ppm_write(double *m, int nx, int ny, double pmax, double pmin, int scale, FILE *f){
 	fprintf(f,"P3\n");
 	fprintf(f,"%d %d 255\n",nx*scale,ny*scale);
-	int *v;
+	int v[3];
 	for(int j=0;j<ny;j++){
 		for(int sy=0;sy<scale;sy++){
 			for(int i=0;i<nx;i++){
 				for(int sx=0;sx<scale;sx++){
-					v=(int *)malloc(3*sizeof(int));
-					jet_colormap(m[i+j*nx],pmin,pmax,v);
+					jet_colormap(m[i+j*nx],pmin,pmax,&v[0]);
 					fprintf(f,"%d %d %d\n",v[0],v[1],v[2]);
-					free(v);
 				}
 				int nx,ny;
 			}

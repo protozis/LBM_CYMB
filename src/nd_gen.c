@@ -26,7 +26,6 @@ void main(int argc, char *argv[]) {
 	double ux=0.12;
 	double uy=0;
 	double *p;
-	FILE *pat;
 	if (argc < 2){
 		print_usage();
 		exit(0);

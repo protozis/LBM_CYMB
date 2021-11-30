@@ -5,6 +5,8 @@
 [![github](img/github.png)](https://github.com/protozis/LBM_CYMB)
 [![github](img/gitea.png)](https://protozis.com:3000/Jerry/LBM_CYMB)
 
+This porject aims to simulate multiple cylindrical moving objects in an unified flow. The fluid behavior and the interaction between cylindrical solid object are described by Lattice-Boltzmann Method (LBM) and modified bouncing-back rule. The programs are written in C and OpenCL for CPU/GPU offloading support, with improved processing speed and memory management.
+
 Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
 
 A high resolution version of above 3 cylinders example:
