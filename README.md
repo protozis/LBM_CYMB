@@ -25,17 +25,17 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 
 **Runtime**
 
-1. OpenCL
+- OpenCL (C library)
 	- Intel GPU: `intel-compute-runtime`
 	- Intel CPU: `intel-opencl-runtime<sup>AUR</sup>`
 	- Nvidia GPU: `opencl-nvidia`
 	- AMD GPU: `opencl-mesa`
 	- AMD CPU: Not supported anymore.
 
-2. Tools
+- Tools (shell script)
 	- time: Linux built-in, GNU version also works.
-	- gnuplot: For data analysis.
-	- ffmpeg: For MP4 videos generating.
+	- gnuplot: For data analysis and visualization.
+	- ffmpeg: For MP4 video generation.
 
 **Development**
 - ICD loader: `ocl-icd`
@@ -43,28 +43,20 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 
 
 > Be advice that the Opencl target version need to be defined in you host program as 
-> ```#define CL_TARGET_OPENCL_VERSION 300```
+> ```#define CL_TARGET_OPENCL_VERSION 300```.
 > while `300` stands for the version 3.0.0. Additionally, C11 Atomic operations support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
 **Optional**
 - `clinfo`: good for monitoring all possible platform properties of the system.
 
 ### Build processes
-You can build and install with: 
+You can build and install them with: 
 ```shell
 $> cd LBM_CYMB/src
 $> make
 $> make install
 ```
 `make install` will copy all binaries and OpenCL kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
-
-
-> [Note] If you want to make MP4 video in pipeline, `ffmpeg` must be installed. 
-
-### Scripts
-These dependences are only used by shell script.
-- `time`: Linux built-in one, GNU version also works.
-- `gnuplot`: Used by `plot.p` for visualize data.
 
 ## Start a Simulation Step by Step
 Following steps can be altered by your own needs, feel free to play around with it.
