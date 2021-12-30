@@ -18,30 +18,41 @@ A high resolution version of above 3 cylinders example:
 - Resolution: 1920x1080 pixels.
 - Compute time: 5637.89 seconds for 10000x iterations.
 
-## Table of contents
-1. [Dependences and Build process](#dependences-and-build-process)
-2. [Start a Simulation Step by Step](#start-a-simulation-step-by-step)
-3. [Design and Analyze an Experiment](#design-and-analyze-an-experiment)
+## Build from source
+### Dependences
 
-## Dependences and Build process
-### C Binaries
-Most C programs are written in C99 standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for clang when you are compiling OpenCL kernel program, I will recommend you to use glibc instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are:
+Most C programs are written in C99 standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for clang when you are compiling OpenCL kernel program, I will recommend you to use glibc instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are
 
 **Runtime**
-- Intel GPU: `intel-compute-runtime`
-- Intel CPU: `intel-opencl-runtime<sup>AUR</sup>`
-- Nvidia GPU: `opencl-nvidia`
-- AMD GPU: `opencl-mesa`
-- AMD CPU: Not supported anymore.
+
+1. OpenCL
+	- Intel GPU: `intel-compute-runtime`
+	- Intel CPU: `intel-opencl-runtime<sup>AUR</sup>`
+	- Nvidia GPU: `opencl-nvidia`
+	- AMD GPU: `opencl-mesa`
+	- AMD CPU: Not supported anymore.
+
+2. Tools
+	- time: Linux built-in, GNU version also works.
+	- gnuplot: For data analysis.
+	- ffmpeg: For MP4 videos generating.
 
 **Development**
 - ICD loader: `ocl-icd`
 - Headers: `opencl-headers`
 
-**Tools**
+
+> Be advice that the Opencl target version need to be defined in you host program as 
+```C
+#define CL_TARGET_OPENCL_VERSION 300
+```
+> while `300` stands for the version 3.0.0. Additionally, C11 Atomic operations support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
+
+**Optional**
 - `clinfo`: good for monitoring all possible platform properties of the system.
 
-You can build and install the binaries with: 
+### Build processes
+You can build and install with: 
 ```shell
 $> cd LBM_CYMB/src
 $> make
@@ -49,11 +60,6 @@ $> make install
 ```
 `make install` will copy all binaries and OpenCL kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
 
-Be advice that the Opencl target version need to be defined in you host program as 
-```C
-#define CL_TARGET_OPENCL_VERSION 300
-```
-while `300` stands for the version 3.0.0. Additionally, C11 Atomic operations support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
 > [Note] If you want to make MP4 video in pipeline, `ffmpeg` must be installed. 
 
