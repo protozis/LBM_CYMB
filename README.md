@@ -43,9 +43,7 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 
 
 > Be advice that the Opencl target version need to be defined in you host program as 
-```C
-#define CL_TARGET_OPENCL_VERSION 300
-```
+> ```#define CL_TARGET_OPENCL_VERSION 300```
 > while `300` stands for the version 3.0.0. Additionally, C11 Atomic operations support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
 **Optional**
