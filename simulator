@@ -11,6 +11,6 @@ if [ -d "$1/$output" ];then
 	rm -rf $1/$output/* 2> /dev/null
 fi
 echo "" > $1/log
-echo "" > $1/debug
-(cd $1 && (time -p ../../bin/launcher $conf) |& tee -a ./log)
-#cd $1 && ($dir/launcher $conf)
+echo "" > $1/data
+path=`pwd`
+(cd $1 && (time -p $path/bin/launcher $conf) |& tee -a ./log)

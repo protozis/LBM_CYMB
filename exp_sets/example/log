@@ -41,50 +41,8 @@
 		0: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 		1: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 		2: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
-
-[Selected device]: NVIDIA GeForce MX150
-[Workgroup info]
-	global_size: 480/270 (total: 129600)
-	local_size: 16/9 (total: 144)
-	workgroups: 30/30 (total: 900)
-[Kernel info]:
-	CL_KERNEL_WORK_GROUP_SIZE: 8
-[Parameters]: (* config value)
-	<Stratage>
-		1. Similarity for the Reynolds number
-		2. Spectify CL for CT
-	<Dimensionless>
-	 *	Mach number(MA): 0.300000
-		Reynolds number: 106.431585
-		Grid Reynolds number: 0.131397
-	<Lattice unit>
-	 *	Collision frequency(CF): 0.550000
-		Kinematic viscosity: 1.318182
-	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
-	 *	Size nx: 480 ny: 270
-		Speed of sound(Csl): 0.333333
-	<Conversion factors>
-	 *	Length(CL): 1.000000 (m/lattice space)
-		Time(CT): 0.001698 (secs/time step)
-	 *	Density(CD): 1.225000kg/m^3
-		Mass: 1.225000kg
-		Force: 1274490.000000kg*m/s^2
-		Spring constant: 1274490.000000kg/s^2
-		Damping constant: 1249.500000kg/s
-	<SI unit>
-		Kinematic viscosity: 448.181818m^2/s
-		Size width: 480.000000m height: 270.000000m
-	 *	Speed of sound(CS): 340.000000m/s
-		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
-	<Dirty tricks>
-	 *	REFUEL_RTO: 0.500000
-	 *	EAT_RTO: 0.050000
-	<Objects>
-		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
-		0: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
-		1: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
-		2: 127449.000000kg/s^2 0.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
-Simulate......Simulate......1/50Simulate......2/50Simulate......3/50Simulate......4/50Simulate......5/50Simulate......6/50Simulate......7/50Simulate......8/50Simulate......9/50Simulate......10/50Simulate......11/50Simulate......12/50Simulate......13/50Simulate......14/50Simulate......15/50Simulate......16/50Simulate......17/50Simulate......18/50Simulate......19/50Simulate......20/50Simulate......21/50Simulate......22/50Simulate......23/50Simulate......24/50Simulate......25/50Simulate......26/50Simulate......27/50Simulate......28/50Simulate......29/50Simulate......30/50Simulate......31/50Simulate......32/50Simulate......33/50Simulate......34/50Simulate......35/50Simulate......36/50Simulate......37/50Simulate......38/50Simulate......39/50Simulate......40/50Simulate......41/50Simulate......42/50Simulate......43/50Simulate......44/50Simulate......45/50Simulate......46/50Simulate......47/50Simulate......48/50Simulate......49/50Simulate......50/50Simulate......completed!! (50x10 --> 0.490196s)
-real 29.18
-user 28.56
-sys 0.18
+Simulate......completed!! (10x10 --> 0.098039s)
+Simulate......completed!! (10x10 --> 0.098039s)
+real 6.02
+user 5.84
+sys 0.08

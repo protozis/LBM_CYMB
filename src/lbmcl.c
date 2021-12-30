@@ -5,6 +5,7 @@
 #define PPMAX 255
 #define PI 3.1415926
 
+#define FFMPEG_CMD "ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p"
 
 #define MP4_NUM 3
 
@@ -34,18 +35,21 @@ int IS_SAVE_DATA = 0;
 int IS_FILE_OUTPUT = 0;
 char ND_FILE[80];
 char BC_FILE[80];
-char PD_FILE[80];
 char OUTPUT_DIR[80];
 char PROGRAM_FILE[80];
 double REFUEL_RTO = 0.8;
 double EAT_RTO = 0.01;
 char LOG_FILE[80];
-char DEBUG_FILE[80];
-int IS_LOG_PRINT = 1;
+char DATA_FILE[80];
+int IS_PAR_PRINT = 1;
 int IS_PROGRESS_PRINT = 1;
 double PL_MAX_D = 0.5;
 double PL_MAX_UX = 0.1;
 double PL_MAX_UY = 0.1;
+int PLATFORM = 0;
+int DEVICE = 0;
+int WORK_ITEM_0 = 1;
+int WORK_ITEM_1 = 1;
 
 double Cspring;
 double Cdamp;
@@ -73,49 +77,55 @@ void update_config(char* filename){
 				CS = strtod(val,&ptr);
 			}else if(strcmp(par,"CL") == 0){
 				CL = strtod(val,&ptr);
-			/*
-			}else if(strcmp(par,"CT") == 0){
-				CT = strtod(val,&ptr);
-			*/
-			}else if(strcmp(par,"CD") == 0){
-				CD = strtod(val,&ptr);
-			}else if(strcmp(par,"MA") == 0){
-				MA = strtod(val,&ptr);
-			}else if(strcmp(par,"IS_MP4") == 0){
-				IS_MP4 = atoi(val);
-			}else if(strcmp(par,"IS_SAVE_DATA") == 0){
-				IS_SAVE_DATA = atoi(val);
-			}else if(strcmp(par,"IS_FILE_OUTPUT") == 0){
-				IS_FILE_OUTPUT = atoi(val);
-			}else if(strcmp(par,"ND_FILE") == 0){
-				 memcpy(ND_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"BC_FILE") == 0){
-				 memcpy(BC_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"PD_FILE") == 0){
-				 memcpy(PD_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"OUTPUT_DIR") == 0){
-				 memcpy(OUTPUT_DIR,val,strlen(val)+1);
-			}else if(strcmp(par,"PROGRAM_FILE") == 0){
-				 memcpy(PROGRAM_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"REFUEL_RTO") == 0){
-				REFUEL_RTO = strtod(val,&ptr);
-			}else if(strcmp(par,"EAT_RTO") == 0){
-				EAT_RTO = strtod(val,&ptr);
-			}else if(strcmp(par,"LOG_FILE") == 0){
-				 memcpy(LOG_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"DEBUG_FILE") == 0){
-				 memcpy(DEBUG_FILE,val,strlen(val)+1);
-			}else if(strcmp(par,"IS_LOG_PRINT") == 0){
-				IS_LOG_PRINT= atoi(val);
-			}else if(strcmp(par,"IS_PROGRESS_PRINT") == 0){
-				IS_PROGRESS_PRINT = atoi(val);
-			}else if(strcmp(par,"PL_MAX_D") == 0){
-				PL_MAX_D = strtod(val,&ptr);
-			}else if(strcmp(par,"PL_MAX_UX") == 0){
-				PL_MAX_UX = strtod(val,&ptr);
-			}else if(strcmp(par,"PL_MAX_UY") == 0){
-				PL_MAX_UY = strtod(val,&ptr);
-			}
+				/*
+				   }else if(strcmp(par,"CT") == 0){
+				   CT = strtod(val,&ptr);
+				   */
+		}else if(strcmp(par,"CD") == 0){
+			CD = strtod(val,&ptr);
+		}else if(strcmp(par,"MA") == 0){
+			MA = strtod(val,&ptr);
+		}else if(strcmp(par,"IS_MP4") == 0){
+			IS_MP4 = atoi(val);
+		}else if(strcmp(par,"IS_SAVE_DATA") == 0){
+			IS_SAVE_DATA = atoi(val);
+		}else if(strcmp(par,"IS_FILE_OUTPUT") == 0){
+			IS_FILE_OUTPUT = atoi(val);
+		}else if(strcmp(par,"ND_FILE") == 0){
+			memcpy(ND_FILE,val,strlen(val)+1);
+		}else if(strcmp(par,"BC_FILE") == 0){
+			memcpy(BC_FILE,val,strlen(val)+1);
+		}else if(strcmp(par,"OUTPUT_DIR") == 0){
+			memcpy(OUTPUT_DIR,val,strlen(val)+1);
+		}else if(strcmp(par,"PROGRAM_FILE") == 0){
+			memcpy(PROGRAM_FILE,val,strlen(val)+1);
+		}else if(strcmp(par,"REFUEL_RTO") == 0){
+			REFUEL_RTO = strtod(val,&ptr);
+		}else if(strcmp(par,"EAT_RTO") == 0){
+			EAT_RTO = strtod(val,&ptr);
+		}else if(strcmp(par,"LOG_FILE") == 0){
+			memcpy(LOG_FILE,val,strlen(val)+1);
+		}else if(strcmp(par,"DATA_FILE") == 0){
+			memcpy(DATA_FILE,val,strlen(val)+1);
+		}else if(strcmp(par,"IS_PAR_PRINT") == 0){
+			IS_PAR_PRINT= atoi(val);
+		}else if(strcmp(par,"IS_PROGRESS_PRINT") == 0){
+			IS_PROGRESS_PRINT = atoi(val);
+		}else if(strcmp(par,"PL_MAX_D") == 0){
+			PL_MAX_D = strtod(val,&ptr);
+		}else if(strcmp(par,"PL_MAX_UX") == 0){
+			PL_MAX_UX = strtod(val,&ptr);
+		}else if(strcmp(par,"PL_MAX_UY") == 0){
+			PL_MAX_UY = strtod(val,&ptr);
+		}else if(strcmp(par,"PLATFORM") == 0){
+			PLATFORM = atoi(val);
+		}else if(strcmp(par,"DEVICE") == 0){
+			DEVICE = atoi(val);
+		}else if(strcmp(par,"WORK_ITEM_0") == 0){
+			WORK_ITEM_0 = atoi(val);
+		}else if(strcmp(par,"WORK_ITEM_1") == 0){
+			WORK_ITEM_1 = atoi(val);
+		}
 		}
 
 	}else{
@@ -141,12 +151,12 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t<Stratage>\n");
 	fprintf(f,"\t\t1. Similarity for the Reynolds number\n");
 	fprintf(f,"\t\t2. Spectify CL for CT\n");
-	
+
 	fprintf(f,"\t<Dimensionless>\n");
 	fprintf(f,"\t *\tMach number(MA): %lf\n",MA);
 	fprintf(f,"\t\tReynolds number: %lf\n",nd->ny*MA/(CS_LTTC*((1/CF)-0.5)));
 	fprintf(f,"\t\tGrid Reynolds number: %lf\n",bc->ux/(CS_LTTC*((1/CF)-0.5)));
-	
+
 	fprintf(f,"\t<Lattice unit>\n");
 	fprintf(f,"\t *\tCollision frequency(CF): %lf\n",CF);
 	fprintf(f,"\t\tKinematic viscosity: %lf\n",(1/CF)-0.5)/3;
@@ -172,7 +182,7 @@ void print_parameters(FILE *f,struct BC *bc,struct ND *nd){
 	fprintf(f,"\t<Dirty tricks>\n");
 	fprintf(f,"\t *\tREFUEL_RTO: %lf\n",REFUEL_RTO);
 	fprintf(f,"\t *\tEAT_RTO: %lf\n",EAT_RTO);
-	
+
 	fprintf(f,"\t<Objects>\n");
 	fprintf(f,"\t\t[spring] [damping] [mass] [Nau_freq] [Nau_cyc]\n");
 	struct CY *tmp = NULL;
@@ -247,7 +257,7 @@ int check_exist(char *fn){
 		return 0;
 	}
 }
-void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* dirName, char* programFileName) {
+void simulate_ocl(char* ndFileName, char* bcFileName, char* dirName, char* programFileName) {
 
 	cl_device_id device;
 	cl_context context;
@@ -267,15 +277,15 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	struct BC *bc = NULL;
 	struct ND *nd = NULL;
 	FILE *output;
-	FILE *debug_out;
+	FILE *data_out;
 	FILE *log_out;
 	char *log_line;
 	size_t log_len;
-	if(!(debug_out = fopen(DEBUG_FILE,"w"))){
-		fprintf(stderr,"simulate_ocl: can't open debug file %s\n",DEBUG_FILE);
+	if(!(data_out = fopen(DATA_FILE,"w+"))){
+		fprintf(stderr,"simulate_ocl: can't open data file %s\n",DATA_FILE);
 		exit(1);
 	}
-	if(!(log_out = fopen(LOG_FILE,"w"))){
+	if(!(log_out = fopen(LOG_FILE,"w+"))){
 		fprintf(stderr,"simulate_ocl: can't open log file %s\n",LOG_FILE);
 		exit(1);
 	}
@@ -306,11 +316,10 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	long *bcfc = BCFC_malloc(bc);
 
 	set_parameters(bc,nd);
-	size_t *ls_item = (size_t *)malloc(2*sizeof(size_t));
-	device = create_device_from_file(ls_item, pdFileName); 
+	device = create_device(PLATFORM,DEVICE); 
 
 	const size_t global_size[2] = {nd->nx,nd->ny};
-	const size_t local_size[2] = {ls_item[0],ls_item[1]};
+	const size_t local_size[2] = {WORK_ITEM_0,WORK_ITEM_1};
 
 	BCV_def(bc,nd->nq,bcv);
 	BCPOS_push(bc,bcpos);
@@ -318,7 +327,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	BCRAD_push(bc,bcrad);
 	BCFC_push(bc,bcfc);
 
-//	list_devices();
+	//	list_devices();
 
 	fprintf(log_out,"\n[Selected device]: ");
 	print_device_name(log_out,device);
@@ -337,7 +346,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	check_err(err, "Couldn't create a kernel");
 
 	print_kernel_info(log_out,kernel, device);
-	
+
 	nd_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, nd->nq*nd->size*sizeof(double), &nd->m[0], &err);
 	res_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, res->nq*res->size*sizeof(double), &res->m[0], &err);
 	bcv_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 9*sizeof(double), &bcv[0], &err);
@@ -369,31 +378,26 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	double *out_m = (double *)malloc(nd->size*sizeof(double));	
 	if(IS_MP4){
 		if(check_exist(dirName)){
-		for(int i=0;i<MP4_NUM;i++){
-			sprintf(mp4cmd,"ffmpeg -y -i - -c:v libx264 -pix_fmt yuv420p %s/%d.mp4 2> /dev/null",dirName,i);
-			fp[i] = popen(mp4cmd,"w");
-		}
+			for(int i=0;i<MP4_NUM;i++){
+				sprintf(mp4cmd,"%s %s/%d.mp4 2> /dev/null",FFMPEG_CMD,dirName,i);
+				fp[i] = popen(mp4cmd,"w");
+			}
 		}else{
 			fprintf(stderr,"Output directory not exist\n");
 			exit(1);
 		}
 	}
 	err = clEnqueueCopyBuffer(queue,nd_buffer,res_buffer,0,0,nd->nq*nd->size*sizeof(double),0,NULL,NULL);
-	check_err(err, "Couldn't copy buffers");
-	
+	check_err(err, "Couldn't copy buffers");	
 	print_parameters(log_out,bc,nd);
-	fclose(log_out);
-	log_out = fopen(LOG_FILE,"rw");
-	if(IS_LOG_PRINT){
-		while(getline(&log_line,&log_len,log_out) != EOF){
-			printf("%s",log_line);
-		}
+	if(IS_PAR_PRINT){
+		print_parameters(stdout,bc,nd);
 	}
 	if(IS_PROGRESS_PRINT){
 		printf("Simulate......");
 	}
 	fflush(stdout);
-	BC_print_syn(debug_out);
+	BC_print_syn(data_out);
 	for(int l=0;l<LOOP;l++){
 		if(IS_PROGRESS_PRINT){
 			printf("\rSimulate......%d/%d",l+1,LOOP);
@@ -402,7 +406,6 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		BCFC_init(bcfc,bc->no,bc->nq);
 		err = clEnqueueWriteBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(long), &bcfc[0], 0, NULL, NULL);
 		err = clFinish(queue);
-		check_err(err, "Couldn't write the buffer");
 		for(int s=0;s<SKP;s++){
 			err = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, &global_size[0], &local_size[0], 0, NULL,NULL);
 			check_err(err, "Couldn't enqueue the kernel");
@@ -412,29 +415,25 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 			err = clFinish(queue);
 		}
 		err = clEnqueueReadBuffer(queue, bcfc_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(long), &bcfc[0], 0, NULL, NULL);
-		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
-		
 		err = clEnqueueCopyBuffer(queue,bcpos_buffer,bcpos_p_buffer,0,0,bc->no*bc->nq*sizeof(double),0,NULL,NULL);
-		check_err(err, "Couldn't copy buffers");
-		
+		err = clFinish(queue);
+
 		BCFC_pull(bc,bcfc,SKP);
-		//ND_probe(debug_out,nd,240,200);
+		//ND_probe(data_out,nd,240,200);
 		BC_move_rk4(bc,SKP);
 		for(int k=0;k<bc->no;k++){
-			BC_print(debug_out,bc,k,l*SKP);
+			BC_print(data_out,bc,k,l*SKP);
 		}
 		BCPOS_push(bc,bcpos);
 		BCVEL_push(bc,bcvel);
 
 		err = clEnqueueWriteBuffer(queue, bcpos_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcpos[0], 0, NULL, NULL);
 		err = clEnqueueWriteBuffer(queue, bcvel_buffer, CL_TRUE, 0, bc->no*bc->nq*sizeof(double), &bcvel[0], 0, NULL, NULL);
-		check_err(err, "Couldn't write the buffer");
 		err = clFinish(queue);
 
 		if(IS_MP4 || IS_FILE_OUTPUT){
 			err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
-			check_err(err, "Couldn't read the buffer");
 			err = clFinish(queue);
 		}
 		if(IS_MP4){
@@ -447,7 +446,16 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 		}
 		if(IS_FILE_OUTPUT)
 		{
+			sprintf(filename,"%s/%d.nd",dirName,l);
+			if(output = fopen(filename,"w+")){
+				ND_write(nd,output);
+				fclose(output);
+			}else{
+				fprintf(stderr,"Can't open file %s\n",filename);
+			}
+
 		}
+		check_err(err, "Failure in propagate");
 
 	}
 	fprintf(log_out,"\rSimulate......completed!! (%dx%d --> %lfs)\n",LOOP,SKP,LOOP*SKP*CT);
@@ -456,10 +464,9 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	}
 	if(IS_SAVE_DATA){
 		err = clEnqueueReadBuffer(queue, res_buffer, CL_TRUE, 0, nd->nq*nd->size*sizeof(double), &nd->m[0], 0, NULL, NULL);
-		check_err(err, "Couldn't read the buffer");
 		err = clFinish(queue);
 		sprintf(filename,"%s/fin.nd",dirName);
-		if(output = fopen(filename,"w")){
+		if(output = fopen(filename,"w+")){
 			ND_write(nd,output);
 			fclose(output);
 		}else{
@@ -480,7 +487,7 @@ void simulate_ocl(char* ndFileName, char* bcFileName, char* pdFileName, char* di
 	clReleaseContext(context);
 
 	fclose(log_out);
-	fclose(debug_out);
+	fclose(data_out);
 
 	ND_free(nd);
 	ND_free(res);
@@ -561,7 +568,7 @@ void BCV_def(struct BC *bc,int nq,double *bcv){
 		v2 = bc->ux*bc->ux + bc->uy*bc->uy;
 		bcv[vc] = W[vc]*bc->dnt*(1 + v1/(cs2) + (v1*v1)/(cs2*cs2*2) - v2/(2*cs2));
 	}
-	
+
 }
 double *BCVEL_malloc(struct BC *bc){
 	return (double *)malloc(bc->no*bc->nq*sizeof(double));
@@ -705,24 +712,6 @@ void check_workgroup(FILE *f,const size_t *gs,const size_t *ls){
 		exit(1);
 	}
 	fprintf(f,"\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
-}
-
-cl_device_id create_device_from_file(size_t *ls, char* file){
-	FILE *f;
-	size_t p, d, l1, l2;
-	cl_device_id device;
-	f = fopen(file, "r");
-	if (f) {
-		fscanf(f,"%d %d %d %d",&p,&d,&l1,&l2);
-		ls[0] = l1;
-		ls[1] = l2;
-		device = create_device(p,d);
-	}else{
-		printf("can't open pdFile %s\n",file);
-		exit(1);
-	}
-	fclose(f);
-	return device;
 }
 
 cl_device_id create_device(int sel_plat, int sel_dev) {

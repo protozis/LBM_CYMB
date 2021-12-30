@@ -1,7 +1,7 @@
 #! /bin/bash
 
-pd_dir="./pd_auto"
-dir="../../bin"
+path=`pwd`
+conf=`ls $1 | grep '.conf'`
 
 usage() {
 	echo "Usage: speed_test [EXP_DIR]"
@@ -14,28 +14,52 @@ fi
 x=`head -n 1 $1/a.nd | cut -d ' ' -f 1`
 y=`head -n 1 $1/a.nd | cut -d ' ' -f 2`
 
-echo '#Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)'
+echo '#Syntax: PLATFORM DEVICE WORK_ITEM_0 WORK_ITEM_1 realTime(secs)'
 echo '#'
-printf "Working on..."
+printf "Working on...\n"
 printf '' > .speed_test_rst
-cp $1/a.pd $1/b.pd
-pdFileNum=`ls $pd_dir | wc -l`
 num=0
-ls $pd_dir | grep .pd | while read file;do
-	num=$((num+1))
-	printf "\rWorking on...($num/$pdFileNum)"
-	cp $pd_dir/$file $1/a.pd
-	info=`cat $pd_dir/$file | sed 's/ /\//g'`
-	conf=`ls $1 | grep '.conf'`
-	Time=`{ (cd $1 && (time -p $dir/launcher $conf)); }  2>&1 > /dev/null`
-	if [ "$?" -eq "0" ];then
-		realTime=`echo $Time | cut -d ' ' -f 2`
-		printf "%-50s\t" "$file[$info]" >> .speed_test_rst
-		echo $realTime >> .speed_test_rst
-	fi
+devCount=0
+platCount=0
+
+oriPlat=`cat $1/$conf | grep PLATFORM`
+oriDev=`cat $1/$conf | grep DEVICE`
+oriWi0=`cat $1/$conf | grep WORK_ITEM_0`
+oriWi1=`cat $1/$conf | grep WORK_ITEM_1`
+
+clinfo -l | grep Platform -n | while read -r name;do
+	platLine=`echo $name | cut -d ':' -f 1`
+	numDev=$((platLine-devCount))
+	devCount=$((platLine+1))	
+	for((d=0;d<$numDev;d++));do
+	for((i=1;i<=$y;i++));do
+		if [ $((x%i)) -eq 0 ] && [ $((y%i)) -eq 0 ];then
+			sed -i "s/PLATFORM .*/PLATFORM $platCount/" $1/$conf
+			sed -i "s/DEVICE .*/DEVICE $d/" $1/$conf
+			sed -i "s/WORK_ITEM_0 .*/WORK_ITEM_0 $((x/i))/" $1/$conf
+			sed -i "s/WORK_ITEM_1 .*/WORK_ITEM_1 $((y/i))/" $1/$conf
+			info=`printf "%d/%d/%d/%d" $platCount $d $((x/i)) $((y/i))`
+			printf "\r\t%s..." $info
+			Time=`{ (cd $1 && (time -p $path/bin/launcher $conf)); }  2>&1 > /dev/null`
+			if [ "$?" -eq "0" ];then
+				realTime=`echo $Time | cut -d ' ' -f 2`
+				printf "%s\t" $info >> .speed_test_rst
+				echo $realTime >> .speed_test_rst
+				printf "\r\t%s\t%s\n" $info $realTime
+			else
+				printf "\r\t%s\tN/A\n" $info
+			fi
+		fi
+	done
+	done
+	let platCount=$((platCount+1))
 done
-printf "\rWorking on...completed!\n"
+sed -i "s/PLATFORM .*/$oriPlat/" $1/$conf
+sed -i "s/DEVICE .*/$oriDev/" $1/$conf
+sed -i "s/WORK_ITEM_0 .*/$oriWi0/" $1/$conf
+sed -i "s/WORK_ITEM_1 .*/$oriWi1/" $1/$conf
+printf "completed!\n"
+printf "Results:\n"
 sort .speed_test_rst -nk 2,2
-mv $1/b.pd $1/a.pd
 rm .speed_test_rst
 

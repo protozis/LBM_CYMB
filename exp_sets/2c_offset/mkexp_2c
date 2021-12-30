@@ -1,13 +1,13 @@
 #! /bin/bash
 name="2c_offset"
-dir="exp_sets"
+dir=`pwd`
 mid="240"
 printf "" > 2c.sch
 for i in `seq 40 10 160`;do
-	cp $dir/$name -r $dir/$name-$i
+	rm -r $dir/$name-$i 2> /dev/null
+	cp $dir/tmp -r $dir/$name-$i
 	sed -i "s/C1X/$((mid-i))/" $dir/$name-$i/a.bc
 	sed -i "s/C2X/$((mid+i))/" $dir/$name-$i/a.bc
 	printf "create exp_sets/$name-$i\n"
-	printf "exp_sets/$name-$i\n" >> 2c.sch
-	sed -i "s/TITLE/$i/" $dir/$name-$i/plot.p
+	printf "$dir/$name-$i\n" >> 2c.sch
 done

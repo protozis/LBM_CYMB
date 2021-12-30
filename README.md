@@ -16,7 +16,7 @@ A high resolution version of above 3 cylinders example:
 - Video: [3cir_1080p.mp4](img/3cir_1920x1080.mp4)
 - Device: NVIDIA GeForce GTX 660
 - Resolution: 1920x1080 pixels.
-- Compute time: 5637.89 seconds for 10000x iterations.
+- Compute time: 5637.89 seconds for 10000 iterations.
 
 ## Build from source
 ### Dependences
@@ -25,17 +25,17 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 
 **Runtime**
 
-- OpenCL (C library)
+- OpenCL (For C binary)
 	- Intel GPU: `intel-compute-runtime`
 	- Intel CPU: `intel-opencl-runtime<sup>AUR</sup>`
 	- Nvidia GPU: `opencl-nvidia`
 	- AMD GPU: `opencl-mesa`
 	- AMD CPU: Not supported anymore.
 
-- Tools (shell script)
-	- time: Linux built-in, GNU version also works.
-	- gnuplot: For data analysis and visualization.
-	- ffmpeg: For MP4 video generation.
+- Tools (For shell script)
+	- `time`: Linux built-in, GNU version also works.
+	- `gnuplot`: For data analysis and visualization.
+	- `ffmpeg`: For MP4 video generation.
 
 **Development**
 - ICD loader: `ocl-icd`

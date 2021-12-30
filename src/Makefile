@@ -8,8 +8,6 @@ SRC_DIR:=./
 
 BIN_DIR:=../bin
 
-BUILD_DIR:=../build
-
 SRCS:=$(shell find $(SRC_DIR) -name '*.c')
 
 # Check for 32-bit vs 64-bit
@@ -60,7 +58,7 @@ endif
 
 
 TAR_TOOLS:=nd_gen
-TAR_OCL:=launcher test
+TAR_OCL:=launcher
 
 TARGETS=$(TAR_TOOLS) $(TAR_OCL)
 
