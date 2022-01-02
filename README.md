@@ -152,9 +152,8 @@ $ ./schedule 3c.sch
 Sometime before an experiment, benchmarking is necessary. Choose the experiment setup and all available devices and work items sizes will be tested.
 ```shell
 $ ./speed_test ext_sets/example
-```
-Following results will be printed:
-```
+	...
+	...
 	...
 	2/0/80/60...	N/A
 	2/0/40/30...	N/A
