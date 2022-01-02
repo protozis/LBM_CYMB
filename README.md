@@ -18,7 +18,15 @@ A high resolution simulation result of above 3 cylinders example:
 - Resolution: 1920x1080 pixels.
 - Compute time: 5637.89 seconds for 10000 iterations.
 
-## Build from source
+## Table of contents
+1. [Build from Source](#build-from-source)
+2. [Quick Start](#quick-start)
+3. [Start a Simulation Step by Step](#start-a-simulation-step-by-step)
+4. [Design and Analyze an Experiment](#design-and-analyze-an-experiment)
+5. [Troubleshooting](#trubleshooting)
+
+
+## Build from Source
 ### Dependences
 
 Most C programs are written in ISO C. However, some of the environmental configuration would be nasty for `clang` when you are compiling OpenCL kernel program, `glibc` is recommended instead. As for the The OpenCL driver, it really depend on the platform you have. You should check your OS instruction for the driver packages needed. In Archlinux they are
@@ -56,7 +64,7 @@ $> make install
 ```
 `make install` will copy all binaries and OpenCL kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
 
-## Quick start
+## Quick Start
 Inside the directory there has:
 ```
 ./
@@ -128,7 +136,7 @@ Visulaized data will be generated in `example/output` with MP4 format.
 |output/2.mp4|Speed matrix in y axis|
 |data|Kinetics data of cylinders| 
 
-If anything happen unexpected, please refer to #troubleshooting .
+If anything happen unexpected, please refer to [Troubleshooting](#troubleshooting).
 
 ### schedule
 If multiple simulationis need to be performed, write a list `3c.sch` like this
@@ -185,7 +193,7 @@ DEVICE 0
 WORK_ITES_0 16
 WORK_ITES_1 12
 ```
-However, be advice that the result may not be correct, please refer to #strange-videos-output. 
+However, be advice that the result may not be correct, please refer to [Strange Videos Output](#strange-videos-output). 
 
 ## Start a Simulation Step by Step
 Following steps can be altered by your own needs, feel free to play around with it.
