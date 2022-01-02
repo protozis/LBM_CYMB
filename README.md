@@ -596,9 +596,9 @@ Caused by the lake of the GPU memories in each working group. The force acting o
 4. Reduce `FC_OFFSET` in `lbmcl.c` and `simulate_ocl.cl`
 
 ### Flow/object move too fast
-Even the uniform flow specified in `a.bc` may not exceed 1 Mach, the resultant flow speed of the collision might be. Usually happen in high resolution ND matrix, since the lattice flow speed will be larger compared to a lower resolution one. If the object move too fast, the collided flow speed may also exceed the limitation of Lattice-Boltzmann distribution. Following adjustments that slow cylinder down may resolve the problem. 
+Even the unified flow specified in `a.bc` may not exceed 1 Mach, the resultant flow speed of the collision might be. Usually happen in high resolution ND matrix, since the lattice flow speed will be larger compared to a lower resolution one. If the object move too fast, the collided flow speed may also exceed the limitation of Lattice-Boltzmann distribution. Following adjustments that slow cylinder down may resolve the problem. 
 1. Increase the mass of the cylinder.
 2. Increase the damping ratio of the cylinder.
-3. Reduce the speed of the uniform flow.
+3. Reduce the speed of the unified flow.
 4. Increase the collision frequency.
  
