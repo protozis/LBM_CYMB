@@ -23,7 +23,7 @@ A high resolution simulation result of above 3 cylinders example:
 2. [Quick Start](#quick-start)
 3. [Start a Simulation Step by Step](#start-a-simulation-step-by-step)
 4. [Design and Analyze an Experiment](#design-and-analyze-an-experiment)
-5. [Troubleshooting](#trubleshooting)
+5. [Troubleshooting](#troubleshooting)
 
 
 ## Build from Source
@@ -87,9 +87,6 @@ Three Bash wrapper scripts are written for different procedures:
 To start an example simulation, execute following command
 ```shell
 $ ./simulator exp_sets/example
-```
-`example` directory collect the environmental setup for the simulation. Following message will be printed during progress:
-```
 [Parameters]: (* config value)
 	<Stratage>
 		1. Similarity for the Reynolds number
@@ -127,7 +124,7 @@ $ ./simulator exp_sets/example
 		2: 127449.000000kg/s^2 12495.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 Simulate......3/100
 ```
-Visulaized data will be generated in `example/output` with MP4 format.
+`example` directory collect the environmental setup for the simulation. Visulaized data will be generated in `example/output` with MP4 format.
 
 |File|Describe|
 |-|-|
@@ -559,7 +556,7 @@ The data represent the amount of offset variations between two cylinders in diff
 ## Troubleshooting
 ## Before simulation
 ### Platform no exist
-This is an example that describe 3 cyliders in uniform flow. If you encounter something like this:
+If you encounter something like this:
 ```
 selected platform not exist: p4
 real 0.44
