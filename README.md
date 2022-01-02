@@ -5,7 +5,7 @@
 [![github](img/github.png)](https://github.com/protozis/LBM_CYMB)
 [![github](img/gitea.png)](https://protozis.com:3000/Jerry/LBM_CYMB)
 
-This porject aims to simulate multiple cylindrical moving objects in an unified flow. The fluid behavior and the interaction between cylindrical solid object are described by Lattice-Boltzmann Method (LBM) and modified bouncing-back rule. The programs are written in C and OpenCL for CPU/GPU offloading support, with improved processing speed and memory management.
+This project aims to simulate multiple cylindrical moving objects in an unified flow. The fluid behavior and the interaction between cylindrical solid object are described by Lattice-Boltzmann Method (LBM) and modified bouncing-back rule. The programs are written in C and OpenCL for CPU/GPU offloading support, with improved processing speed and memory management.
 
 Before you start using this simulator, take a look at this note: **[What's the physics of this LBM simulation?](physics.md)**.
 
@@ -29,7 +29,7 @@ A high resolution simulation result of above 3 cylinders example:
 ## Build from Source
 ### Dependences
 
-Most C programs are written in ISO C. However, some of the environmental configuration would be nasty for `clang` when you are compiling OpenCL kernel program, `glibc` is recommended instead. As for the The OpenCL driver, it really depend on the platform you have. You should check your OS instruction for the driver packages needed. In Archlinux they are
+Most C programs are written in ISO C. However some of the environmental configuration would be nasty for `clang` when you are compiling OpenCL kernel program. `glibc` is recommended instead. As for the The OpenCL driver, it really depends on the platform you have. You should check your OS instruction for the driver packages needed. In Archlinux they are
 
 **Runtime**
 - OpenCL (For C binary)
@@ -56,7 +56,7 @@ Most C programs are written in ISO C. However, some of the environmental configu
 
 
 ### Build processes
-The programs can build and install with: 
+The programs can be built and installed with: 
 ```shell
 $> cd LBM_CYMB/src
 $> make
@@ -84,7 +84,7 @@ Inside the directory there has:
 Three Bash wrapper scripts are written for different procedures:
 
 ### Simulator
-To start an example simulation, execute following command
+To start an example simulation:
 ```shell
 $ ./simulator exp_sets/example
 [Parameters]: (* config value)
@@ -124,7 +124,7 @@ $ ./simulator exp_sets/example
 		2: 127449.000000kg/s^2 12495.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
 Simulate......3/100
 ```
-`example` directory collect the environmental setup for the simulation. Visulaized data will be generated in `example/output` with MP4 format.
+`example` directory collect the environmental setups for the simulation. Visulaized data will be generated in `example/output` with MP4 format, while the kinetic parameters like speeds and accelerations of the cylinders will be recorded in `data`.
 
 |File|Describe|
 |-|-|
@@ -136,7 +136,7 @@ Simulate......3/100
 If anything happen unexpected, please refer to [Troubleshooting](#troubleshooting).
 
 ### schedule
-If multiple simulationis need to be performed, write a list `3c.sch` like this
+If multiple simulations need to be performed, write a list `3c.sch` like this
 ```shell
 $ cat 3c.sch
 exp_sets/3c_480p
@@ -149,7 +149,7 @@ $ ./schedule 3c.sch
 ```
 
 ### speed_test
-Sometime before an experiment, benchmarking is necessary. Choose the experiment setup and all available devices and work items sizes will be tested.
+Sometime before an experiment, benchmarking is necessary. Choose the experiment setup and all available devices and working group sizes will be tested.
 ```shell
 $ ./speed_test ext_sets/example
 	...
@@ -182,14 +182,23 @@ Results:
 1/0/100/75	104.41
 
 ```
-`N/A` means that this setup can't be adopted by OpenCL driver. According to the test above, following setup will have the best performance:
+`N/A` means that this setup cannot be adopted by OpenCL driver. According to the test above, following setup will have the best performance:
 ```
 PLATFORM 0
 DEVICE 0
 WORK_ITES_0 16
 WORK_ITES_1 12
 ```
-However, be advice that the result may not be correct, please refer to [Strange Videos Output](#strange-videos-output). 
+Use `clinfo -l` to find out what excetly the devices are:
+```
+Platform #0: Intel(R) OpenCL HD Graphics
+ `-- Device #0: Intel(R) UHD Graphics 620 [0x3ea0]
+Platform #1: Intel(R) OpenCL
+ `-- Device #0: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
+Platform #2: NVIDIA CUDA
+ `-- Device #0: NVIDIA GeForce MX150
+```
+However, be advice that even the experiment setup can be executed, the actual result may not be correct (exceed maximum flow speed in Lattice-Boltzmann assumption for example). please refer to [Strange Video Output](#strange-video-output). 
 
 ## Start a Simulation Step by Step
 Following steps can be altered by your own needs, feel free to play around with it.
@@ -577,7 +586,7 @@ If `NVIDIA CUDA` is the desire one, change the value of `PLATFORM` to `2` in the
 PLATFORM 2
 ..
 ```
-## Strange videos output
+## Strange video output
 If the video crash on the edge of the cylinder, possible reasons are listed below.
 ### Lake in force variable
 Caused by the lake of the GPU memories in each working group. The force acting on the cylinders are collected by `long` variables between working groups, and the force will be calculated at the end of each loop. Therefore, by reducing the force need to be collected in each loop will solve the problem.
