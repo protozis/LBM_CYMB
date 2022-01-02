@@ -7,9 +7,9 @@
 
 This porject aims to simulate multiple cylindrical moving objects in an unified flow. The fluid behavior and the interaction between cylindrical solid object are described by Lattice-Boltzmann Method (LBM) and modified bouncing-back rule. The programs are written in C and OpenCL for CPU/GPU offloading support, with improved processing speed and memory management.
 
-Before you start using this simulator, it is highly recommended to read the instruction I made: **[What's the physics of this LBM simulation?](physics.md)**.
+Before you start using this simulator, take a look at this note: **[What's the physics of this LBM simulation?](physics.md)**.
 
-A high resolution version of above 3 cylinders example:
+A high resolution simulation result of above 3 cylinders example:
 
 <!-- Video: <a href="../../_static/videos/3cir_1920x1080.mp4">3cir_1080p.mp4</a> -->
 
@@ -21,10 +21,9 @@ A high resolution version of above 3 cylinders example:
 ## Build from source
 ### Dependences
 
-Most C programs are written in C99 standard, therefore no extra libs needed. However, since some of the environment setups would be nasty for clang when you are compiling OpenCL kernel program, I will recommend you to use glibc instead. As for the The OpenCL driver, it really dependent on the platform you have. You should check your OS instruction manual for the driver packages you need to install. In Archlinux they are
+Most C programs are written in ISO C. However, some of the environmental configuration would be nasty for `clang` when you are compiling OpenCL kernel program, `glibc` is recommended instead. As for the The OpenCL driver, it really depend on the platform you have. You should check your OS instruction for the driver packages needed. In Archlinux they are
 
 **Runtime**
-
 - OpenCL (For C binary)
 	- Intel GPU: `intel-compute-runtime`
 	- Intel CPU: `intel-opencl-runtime<sup>AUR</sup>`
@@ -36,6 +35,7 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 	- `time`: Linux built-in, GNU version also works.
 	- `gnuplot`: For data analysis and visualization.
 	- `ffmpeg`: For MP4 video generation.
+	- `clinfo`: good for monitoring all possible platform properties of the system.
 
 **Development**
 - ICD loader: `ocl-icd`
@@ -46,17 +46,146 @@ Most C programs are written in C99 standard, therefore no extra libs needed. How
 > ```#define CL_TARGET_OPENCL_VERSION 300```.
 > while `300` stands for the version 3.0.0. Additionally, C11 Atomic operations support for 64-bits integer is required by the force calculation in `simulate_ocl.cl`, you will need to check if the device extension of `cl_khr_int64_atomics` is available for your desire platform.
 
-**Optional**
-- `clinfo`: good for monitoring all possible platform properties of the system.
 
 ### Build processes
-You can build and install them with: 
+The programs can build and install with: 
 ```shell
 $> cd LBM_CYMB/src
 $> make
 $> make install
 ```
 `make install` will copy all binaries and OpenCL kernel source file into `LBM_CYMB/bin`. Clean all binaries with `make clean` if you want a fresh make.
+
+## Quick start
+Inside the directory there has:
+```
+./
+├── bin
+├── exp_sets
+├── img
+├── physics.md
+├── README.bak
+├── README.md
+├── schedule
+├── simulator
+├── speed_test
+└── src
+
+4 directories, 6 files
+```
+Three Bash wrapper scripts are written for different procedures:
+
+### Simulator
+To start an example simulation, execute following command
+```shell
+$ ./simulator exp_sets/example
+```
+`example` directory collect the environmental setup for the simulation. Following message will be printed during progress:
+```
+[Parameters]: (* config value)
+	<Stratage>
+		1. Similarity for the Reynolds number
+		2. Spectify CL for CT
+	<Dimensionless>
+	 *	Mach number(MA): 0.300000
+		Reynolds number: 236.514634
+		Grid Reynolds number: 0.131397
+	<Lattice unit>
+	 *	Collision frequency(CF): 0.550000
+		Kinematic viscosity: 1.318182
+	 *	BCV D: 0.300000 Ux: 0.100000 Uy: 0.000000
+	 *	Size nx: 800 ny: 600
+		Speed of sound(Csl): 0.333333
+	<Conversion factors>
+	 *	Length(CL): 1.000000 (m/lattice space)
+		Time(CT): 0.001698 (secs/time step)
+	 *	Density(CD): 1.225000kg/m^3
+		Mass: 1.225000kg
+		Force: 1274490.000000kg*m/s^2
+		Spring constant: 1274490.000000kg/s^2
+		Damping constant: 1249.500000kg/s
+	<SI unit>
+		Kinematic viscosity: 448.181818m^2/s
+		Size width: 800.000000m height: 600.000000m
+	 *	Speed of sound(CS): 340.000000m/s
+		BCV D: 0.367500kg/m^3 Ux: 102.000000m/s Uy: 0.000000m/s
+	<Dirty tricks>
+	 *	REFUEL_RTO: 0.500000
+	 *	EAT_RTO: 0.050000
+	<Objects>
+		[spring] [damping] [mass] [Nau_freq] [Nau_cyc]
+		0: 127449.000000kg/s^2 12495.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+		1: 127449.000000kg/s^2 12495.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+		2: 127449.000000kg/s^2 12495.000000kg/s 1225.000000kg 1.623380Hz 0.615999s
+Simulate......3/100
+```
+Visulaized data will be generated in `example/output` with MP4 format.
+
+|File|Describe|
+|-|-|
+|output/0.mp4|Density matrix| 
+|output/1.mp4|Speed matrix in x axis| 
+|output/2.mp4|Speed matrix in y axis|
+|data|Kinetics data of cylinders| 
+
+If anything happen unexpected, please refer to #troubleshooting .
+
+### schedule
+If multiple simulationis need to be performed, write a list `3c.sch` like this
+```shell
+$ cat 3c.sch
+exp_sets/3c_480p
+exp_sets/3c_720p
+exp_sets/3c_1080p
+```
+and the sequence can be initiated with:
+```shell
+$ ./schedule 3c.sch
+```
+
+### speed_test
+Sometime before an experiment, benchmarking is necessary. Choose the experiment setup and all available devices and work items sizes will be tested.
+```shell
+$ ./speed_test ext_sets/example
+```
+Following results will be printed:
+```
+	...
+	2/0/80/60...	N/A
+	2/0/40/30...	N/A
+	2/0/32/24...	4.17                                              
+	2/0/20/15...	4.31                                              
+	2/0/16/12...	4.12                                              
+	2/0/8/6...	5.10                                              
+	2/0/4/3...	9.24                                              
+completed!
+Results:
+0/0/16/12	17.74
+0/0/8/6		17.82
+0/0/4/3		22.50
+2/0/16/12	33.20
+2/0/32/24	33.67
+2/0/20/15	35.24
+2/0/8/6		43.44
+2/0/4/3		85.32
+1/0/20/15	95.82
+1/0/8/6		97.87
+1/0/4/3		98.80
+1/0/16/12	98.81
+1/0/32/24	99.74
+1/0/40/30	100.69
+1/0/80/60	103.15
+1/0/100/75	104.41
+
+```
+`N/A` means that this setup can't be adopted by OpenCL driver. According to the test above, following setup will have the best performance:
+```
+PLATFORM 0
+DEVICE 0
+WORK_ITES_0 16
+WORK_ITES_1 12
+```
+However, be advice that the result may not be correct, please refer to #strange-videos-output. 
 
 ## Start a Simulation Step by Step
 Following steps can be altered by your own needs, feel free to play around with it.
@@ -72,23 +201,21 @@ To decide a good resolution for the simulation, you should consider with:
 	All devices will have their own preferred work-group-size-multiple affected by the number of compute units and the size of cache. Check the value with `clinfo`. Most of the case, Intel CPU will go for 128 multiple, while GPU will go for 32 multiple. A simple approach is following the screen resolution, since it is how GPU is designed for. However it may not always be the best one for sure.
 
 
- 
-
 ### Make an Experiment Setup
 Inside an experiment setup directory we have:
 ```
-example/
+.
 ├── a.bc
 ├── a.nd
-├── a.pd
 ├── data
-│   ├── 0.mp4
-│   ├── 1.mp4
-│   └── 2.mp4
-├── debug
 ├── default.conf
 ├── log
-└── plot.p
+└── output
+    ├── 0.mp4
+    ├── 1.mp4
+    └── 2.mp4
+
+1 directory, 8 files
 ```
 
 To perform an experiment, you will need to tweak these files:
@@ -96,16 +223,14 @@ To perform an experiment, you will need to tweak these files:
 |-|-|
 |a.bc|Boundary condition file|
 |a.nd|Number Density file|
-|a.pd|Platform/Device file|
 |default.conf|Main configuration file|
 
 And following files are used to collect and analyze data.
 |Name|Description|
 |-|-|
-|debug|Used to collect desire parameters|
-|data|Result videos or ND files|
+|data|Kinetics data for cylinders|
 |log|Running conditions and status|
-|plot.p|gnuplot script|
+|output/|Result videos or ND files|
 
 
 #### ND (Number Density) file
@@ -189,45 +314,6 @@ CY {
 |dsp|Initial value of displacements of the cylinder, in lattice unit|
 |pos|Initial value of positions of the cylinder, in lattice unit|
 
-#### PD (Platform/Device) file
-
-- **Platform & Device**
-	
-	A platform is an specific OpenCL implementation, e.g. Intel, AMD or Nvida CUDA. A device is the actual processor that perform the calculation, like `Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz`, `NVIDIA GeForce MX150`.
-
-- **Work-group & Work-item** 
-
-	A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check `Max work group size` for the value (use `clinfo`). For multi-dimension work-group, the total amount of work-item cannot exceed Max work group size, and the work-item in each dimension will have their own limitation. Check `Max work item sizes` for the value.
-
-Use the script `speed_test` to choose the best environment setup. If the chosen work-group size exceeds the max allowed work-group size for the device, the result will not be printed. Example: 
-
-```shell
-$> clinfo -l
-Platform #0: Intel(R) OpenCL HD Graphics
- `-- Device #0: Intel(R) UHD Graphics 620 [0x3ea0]
-Platform #1: Intel(R) OpenCL
- `-- Device #0: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
-Platform #2: NVIDIA CUDA
- `-- Device #0: NVIDIA GeForce MX150
-$> ./speed_test exp_sets/example
-#Syntax: pdFileName[platform device localSize1 localSize2] realTime(secs)
-#
-Working on...completed!
-p2d0_120.pd[2/0/16/9]                             	7.90
-p0d0_120.pd[0/0/16/9]                             	8.11
-p1d0_24.pd[1/0/80/45]                             	8.28
-p1d0_40.pd[1/0/48/27]                             	8.43
-p1d0_60.pd[1/0/32/18]                             	8.52
-p1d0_120.pd[1/0/16/9]                             	8.55
-p1d0_20.pd[1/0/96/54]                             	8.60
-p1d0_30.pd[1/0/64/36]                             	8.70
-p2d0_60.pd[2/0/32/18]                             	8.75
-```
-You can see that Nvidia GPU with 16x9 work-group size is the fastest one. Write the result to your experiment setup with:
-```
-$> cp pd_auto/p2d0_120.pd exp_sets/example/a.pd
-``` 
-
 #### .conf file
 Following parameters are included in a configuration file:
 |Parameter|Description|Default|
@@ -244,19 +330,31 @@ Following parameters are included in a configuration file:
 |IS_FILE_OUTPUT|Save ND matrix for every loops or not.|0|
 |ND_FILE|ND filename|NULL|
 |BC_FILE|BC filename|NULL|
-|PD_FILE|PD filename|NULL|
 |OUTPUT_DIR|Output filename|NULL|
 |PROGRAM_FILE|OpenCL source filename|NULL|
 |REFUEL_RTO|Refuel ratio|0.8|
 |EAT_RTO|Eat ratio|0.01|
 |LOG_FILE|Log filename|NULL|
-|DEBUG_FILE|Debug filename|NULL|
-|IS_LOG_PRINT|Print log to stdout or not.|1|
+|DATA_FILE|Data filename|NULL|
+|IS_PAR_PRINT|Print log to stdout or not.|1|
 |IS_PROGRESS_PRINT|Print progress or not|1|
 |PL_MAX_D|Maximum density value for the jetcolormap ploting|0.5|
 |PL_MAX_UX|Maximum x velocity value for the jetcolormap ploting|0.1|
-|PL_MAX_DUY|Maximum y velocity value for the jetcolormap ploting|0.1|
+|PL_MAX_UY|Maximum y velocity value for the jetcolormap ploting|0.1|
+|PLATFORM|Working platform for OpenCL|0|
+|DEVICE|Working device for OpenCL|0|
+|WORK_ITEM_0|Work-group size in dimension 0|1|
+|WORK_ITEM_1|Work-group size in dimension 1|1|
 
+- **Platform & Device**
+	
+	A platform is an specific OpenCL implementation, e.g. Intel, AMD or Nvida CUDA. A device is the actual processor that perform the calculation, like `Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz`, `NVIDIA GeForce MX150`.
+
+- **Work-group & Work-item** 
+
+	A work-group is processed by a single compute unit in the device. For a CPU device it prefer a larger work-group size, while a GPU works opposite. The amount of work-item in a work-group has its limitation, check `Max work group size` for the value (use `clinfo`). For multi-dimension work-group, the total amount of work-item cannot exceed Max work group size, and the work-item in each dimension will have their own limitation. Check `Max work item sizes` for the value.
+
+Use the script `speed_test` to choose the best environment setup. If the chosen work-group size exceeds the max allowed work-group size for the device, the result will not be printed. Example: 
 ### Perform an experiment
 Run `simulator` with desire experiment setup:
 ```shell
@@ -280,8 +378,8 @@ $> ./schedule exp_grp1
 
 There are 4 types of results generated by program.
 
-#### DEBUG_FILE (Recommended)
-Usually the file path defined in `DEBUG_FILE` is used to collect all kind of text-based data. By default, `BC_print` will print all kinetic parameters of all objects in the following format:
+#### DATA_FILE (Recommended)
+Usually the file path defined in `DATA_FILE` is used to collect all kind of text-based data. By default, `BC_print` will print all kinetic parameters of all objects in the following format:
 ```
 #[obj][time][force][acc][vel][dsp][pos]
 0 0.000000 10946785.783500 0.000000 2958.925152 0.000000 58.211965 0.000000 0.000000 0.00000 0 180.000000 135.000000
@@ -317,23 +415,27 @@ The value we want to control is **the initial separations between two cylinders*
 
 
 ### Generate and Run a Series of Experiment Setups
-First, I will need to generate all experiment setups. Creating a template setup like `2c_offset` in directory `exp_sets`:
+First, I will need to generate all experiment setups. Creating a new directory `2c_offset` in `exp_sets`.
 ```
-2c_offset
-├── a.bc
-├── a.nd
-├── a.pd
-├── data
-│   ├── 0.mp4
-│   ├── 1.mp4
-│   └── 2.mp4
-├── debug
-├── default.conf
-├── log
-└── plot.p
+2c_offset/
+├── cal_offset
+├── mkexp_2c
+├── offset
+├── offset.c
+├── plot_offset.p
+└── tmp
+    ├── a.bc
+    ├── a.nd
+    ├── data
+    ├── default.conf
+    ├── log
+    └── output
 
+2 directories, 10 files
 ```
-Tweak the parameters in this template to fit the fluid environments, like `BCV`, `LOOP` and `a.nd`, etc. Benchmark with `speed_test` to select the best PD configuration, and check the speed of fluid not exceeding three tenths of speed of sound by inspecting the MP4 videos. Next, change the value we want to control (separation in this example) with  macros like `C1X` and `C2X`:
+While `tmp` stored the template of the flow condition as usual, `cal_offset`, `mkexp_2c`, `offset` and `plot_offset.p` will be explained later.
+
+Tweak the parameters in this template to fit the fluid environments, like `BCV`, `LOOP` and `a.nd`, etc. Benchmark with `speed_test` to select the best platform & device configuration, and check the speed of fluid not exceeding three tenths of speed of sound by inspecting the MP4 videos. Next, change the value we want to control (separation in this example) with  macros like `C1X` and `C2X`:
 ```
 $> cat a.bc
 bc_no 2
@@ -367,20 +469,20 @@ CY {
 }
 ``` 
 
-And now we can write a small script named `mkexp_2c` in main directory to automatic generate all the experiment setups by replacing the macros we just created:
+And now we can write a small script named `mkexp_2c` to automatic generate all the experiment setups by replacing the macros we just created:
 ```bash
 #! /bin/bash
 name="2c_offset"
-dir="exp_sets"
+dir=`pwd`
 mid="240"
 printf "" > 2c.sch
 for i in `seq 40 10 160`;do
-	cp $dir/$name -r $dir/$name-$i
+	rm -r $dir/$name-$i 2> /dev/null
+	cp $dir/tmp -r $dir/$name-$i
 	sed -i "s/C1X/$((mid-i))/" $dir/$name-$i/a.bc
 	sed -i "s/C2X/$((mid+i))/" $dir/$name-$i/a.bc
 	printf "create exp_sets/$name-$i\n"
-	printf "exp_sets/$name-$i\n" >> 2c.sch
-	sed -i "s/TITLE/$i/" $dir/$name-$i/plot.p
+	printf "$dir/$name-$i\n" >> 2c.sch
 done
 ```
 This script will also generate a schedule file named `2c.sch`, therefore you can start all of the simulations easily with:
@@ -389,11 +491,12 @@ This script will also generate a schedule file named `2c.sch`, therefore you can
 ```
 
 ### Inspect the results
+
 By default, all of the kinetic data are saved in `debug` in each setups directory. Write a small script named `cal_offset` to collect all of them with the desire column and generate a plot script `plot_offfset.p` for Gnuplot as
 ```bash
 #! /bin/bash
 
-col="10"
+col="9"
 pl="plot_offset.p"
 echo "#! /usr/bin/gnuplot" > $pl
 chmod a+x $pl
@@ -401,12 +504,11 @@ echo "set grid" >> $pl
 echo "plot \\" >> $pl
 ls | grep 2c_offset- | while read dir;do
 	offset=`echo $dir | sed 's/2c_offset-//'`
-	cut -f $col -d ' ' $dir/debug | tail -n+2 | ./offset > .xoff_$offset
+	cut -f $col -d ' ' $dir/data | tail -n+2 | ./offset > .xoff_$offset
 	echo "'.xoff_$offset' w l, \\" >> $pl
 done
 echo "" >> $pl
 echo "pause mouse close" >> $pl
-	
 ```
 Here I also wrote a small C program `offset` to calculate the offsets in stream input from debug:
 ```C
@@ -423,8 +525,7 @@ And now we can execute the scripts and generate a chart with the variation of th
 ```shell
 $> cd exp_stes
 $> ./cal_offset
-$>./plot_offset.p
-
+$> ./plot_offset.p
 ```
 
 The data represent the amount of offset variations between two cylinders in different axis.
@@ -447,3 +548,44 @@ The data represent the amount of offset variations between two cylinders in diff
 	separation = 130
 	![2c_offset_y_5](img/2c_offset_y_5.png)
 
+## Troubleshooting
+## Before simulation
+### Platform no exist
+This is an example that describe 3 cyliders in uniform flow. If you encounter something like this:
+```
+selected platform not exist: p4
+real 0.44
+user 0.23
+sys 0.08
+```
+Which means the platform being specifed in `ext_sets/example/default.conf` didn't exist. Check available platform with `clinfo -l`, following information should be shown:
+```
+Platform #0: Intel(R) OpenCL HD Graphics
+ `-- Device #0: Intel(R) UHD Graphics 620 [0x3ea0]
+Platform #1: Intel(R) OpenCL
+ `-- Device #0: Intel(R) Core(TM) i7-8565U CPU @ 1.80GHz
+Platform #2: NVIDIA CUDA
+ `-- Device #0: NVIDIA GeForce MX150
+```
+If `NVIDIA CUDA` is the desire one, change the value of `PLATFORM` to `2` in the configuration file `ext_sets/example/default.conf`:
+```
+..
+PLATFORM 2
+..
+```
+## Strange videos output
+If the video crash on the edge of the cylinder, possible reasons are listed below.
+### Lake in force variable
+Caused by the lake of the GPU memories in each working group. The force acting on the cylinders are collected by `long` variables between working groups, and the force will be calculated at the end of each loop. Therefore, by reducing the force need to be collected in each loop will solve the problem.
+1. Reduce resolution in `a.nd`.
+2. Reduce the size of the cylinder in `a.bc`.
+3. Reduce SKP skip iterations `default.conf`.
+4. Reduce `FC_OFFSET` in `lbmcl.c` and `simulate_ocl.cl`
+
+### Flow/object move too fast
+Even the uniform flow specified in `a.bc` may not exceed 1 Mach, the resultant flow speed of the collision might be. Usually happen in high resolution ND matrix, since the lattice flow speed will be larger compared to a lower resolution one. If the object move too fast, the collided flow speed may also exceed the limitation of Lattice-Boltzmann distribution. Following adjustments that slow cylinder down may resolve the problem. 
+1. Increase the mass of the cylinder.
+2. Increase the damping ratio of the cylinder.
+3. Reduce the speed of the uniform flow.
+4. Increase the collision frequency.
+ 

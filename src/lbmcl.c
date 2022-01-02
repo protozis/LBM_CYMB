@@ -704,11 +704,11 @@ void check_workgroup(FILE *f,const size_t *gs,const size_t *ls){
 	fprintf(f,"\tglobal_size: %d/%d (total: %d)\n",gs[0],gs[1],gs[0]*gs[1]);
 	fprintf(f,"\tlocal_size: %d/%d (total: %d)\n",ls[0],ls[1],ls[0]*ls[1]);
 	if(gs[0] % ls[0] != 0){
-		fprintf(stderr,"D 1 GS not divided perfectly by LS\n");
+		fprintf(stderr,"Dimension 0 global_size(x length) not divided perfectly by local_size\n");
 		exit(1);
 	}
 	if(gs[1] % ls[1] != 0){
-		fprintf(stderr,"D 2 GS not divided perfectly by LS\n");
+		fprintf(stderr,"Dimension 1 global_size(y length) not divided perfectly by local_size\n");
 		exit(1);
 	}
 	fprintf(f,"\tworkgroups: %d/%d (total: %d)\n",gs[0]/ls[0],gs[1]/ls[1],gs[0]*gs[1]/ls[0]/ls[1]);
@@ -734,7 +734,7 @@ cl_device_id create_device(int sel_plat, int sel_dev) {
 	check_err(err,"Couldn't identigy a platform");
 
 	if(sel_plat+1 > platform_count){
-		fprintf(stderr, "selected platform not exist: p%d\n",sel_plat+1);
+		fprintf(stderr, "selected platform not exist: p%d\n",sel_plat);
 		exit(1);
 	}
 

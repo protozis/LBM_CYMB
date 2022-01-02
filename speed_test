@@ -39,15 +39,14 @@ clinfo -l | grep Platform -n | while read -r name;do
 			sed -i "s/WORK_ITEM_0 .*/WORK_ITEM_0 $((x/i))/" $1/$conf
 			sed -i "s/WORK_ITEM_1 .*/WORK_ITEM_1 $((y/i))/" $1/$conf
 			info=`printf "%d/%d/%d/%d" $platCount $d $((x/i)) $((y/i))`
-			printf "\r\t%s..." $info
+			printf "\t%s..." $info
 			Time=`{ (cd $1 && (time -p $path/bin/launcher $conf)); }  2>&1 > /dev/null`
 			if [ "$?" -eq "0" ];then
 				realTime=`echo $Time | cut -d ' ' -f 2`
-				printf "%s\t" $info >> .speed_test_rst
-				echo $realTime >> .speed_test_rst
-				printf "\r\t%s\t%s\n" $info $realTime
+				printf "%s\t%-50s\n" $info $realTime >> .speed_test_rst
+				printf "\t%-50s\n" $realTime
 			else
-				printf "\r\t%s\tN/A\n" $info
+				printf "\tN/A\n"
 			fi
 		fi
 	done
